@@ -1,0 +1,16 @@
+[package]
+name = "obsidian_sync_lib"          
+version = "0.1.0"
+edition = "2021"
+description = "A Rust library for Git sync obsidian using libgit2"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/yourname/my_git_tool"
+keywords = ["git", "libgit2", "vcs"]
+categories = ["development-tools::version-control"]
+
+[lib]
+name = "obsidian_sync_lib"          
+path = "src/lib.rs"           
+
+[dependencies]
+git2 = "0.20.2"
