@@ -3,8 +3,12 @@ use std::path::Path;
 use std::fs;
 use std::panic;
 use std::error::Error;
+use std::usize;
 pub mod tokinezed;
 use tokinezed::Token;
+use tokinezed::TokenStruct;
+pub mod Parser;
+use Parser::*;
 #[derive(Debug)]
 enum Parser_Error {
     ParseError(String),
@@ -60,21 +64,27 @@ fn Count_Syms_b_Str(str:&String,syms: String) -> Result<u64,()>
     Ok(cnt)
 }
 
-fn Splitt_b_Space(str: String,syms:String) -> Result<Vec<String>,()>
+fn Splitt_b_Space(str: String,syms:String) -> Result<TokenStruct,()>
 {
     let mut idx: usize = 0;
+    let mut line: u64 =0;
     if let Ok(cnt)=Count_Syms_b_Str(&str,syms.to_string())
     {
         let safe_cnt: usize= usize::try_from(cnt)
     .map_err(|_| ())?;
-        let mut toks: Vec<String> = vec![String::new();safe_cnt];
+        let mut toks: TokenStruct = TokenStruct::new(safe_cnt);
         'outer:
         for c in str.chars() 
         {
             for ss in syms.chars()
             {
+                if(c=='\n')//todo переделать для произвольных символово переноса
+                {
+                    line+=1;
+                    continue 'outer;
+                }
                 if(c==ss){
-                    if(!toks[idx].is_empty())//чтоб небыло пустыъ токенов
+                    if(!toks.tok_values[idx].is_empty())//чтоб небыло пустыъ токенов
                     {
                         idx+=1;
                     }
@@ -82,7 +92,8 @@ fn Splitt_b_Space(str: String,syms:String) -> Result<Vec<String>,()>
                 }
             }
             
-            toks[idx].push(c);
+            toks.tok_values[idx].push(c);
+            toks.tok_lines_number[idx]=line;
         }
         Ok(toks)
     }
@@ -92,20 +103,20 @@ fn Splitt_b_Space(str: String,syms:String) -> Result<Vec<String>,()>
  
 }
 
-//fn Parse_UserName() надо передовать сылку с массива токена сдвинутую ну типо все токены впереди 
+
 
 fn tokinezed(config: String) -> Result<Vec<String>,Tokinezed_Error>
 {
     if let Ok(mut tokens)=Splitt_b_Space(config,Space_Symbols.to_string())
     {
-        for tok in tokens.to_vec()
+        for tok in tokens.tok_values.to_vec()
         {
             if(tok == Token::as_str( &Token::UserName)) 
             {
                 
             }
         }
-        return Ok(tokens)
+        return Ok(tokens.tok_values)
     }
     else 
     {
