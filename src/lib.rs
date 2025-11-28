@@ -22,7 +22,7 @@ enum Tokinezed_Error {
     Empty(String)
 }
 
-const Space_Symbols: &str = " \t\n";
+const SPACE_SYMBOLS: &str = " \t\n";
 
 ///  `git add .`
 pub fn add_all<P: AsRef<std::path::Path>>(repo_path: P) -> Result<(), git2::Error>
@@ -45,7 +45,7 @@ pub fn last_commit_message<P: AsRef<std::path::Path>>(repo_path: P) -> Result<St
 
 fn Count_Syms_b_Str(str:&String,syms: String) -> Result<u64,()>
 {
-    if(str.is_empty() || syms.is_empty()) 
+    if str.is_empty() || syms.is_empty()
     {
         return Err(())
     }
@@ -54,7 +54,7 @@ fn Count_Syms_b_Str(str:&String,syms: String) -> Result<u64,()>
     {
         for ss in syms.chars()
         {
-            if(c==ss) 
+            if c==ss
             {
                 cnt+=1;
                 break;
@@ -78,13 +78,14 @@ fn Splitt_b_Space(str: String,syms:String) -> Result<TokenStruct,()>
         {
             for ss in syms.chars()
             {
-                if(c=='\n')//todo переделать для произвольных символово переноса
+                if c=='\n'//todo переделать для произвольных символово переноса
                 {
                     line+=1;
                     continue 'outer;
                 }
-                if(c==ss){
-                    if(!toks.tok_values[idx].is_empty())//чтоб небыло пустыъ токенов
+                if c==ss
+                {
+                    if !toks.tok_values[idx].is_empty()//чтоб небыло пустыъ токенов
                     {
                         idx+=1;
                     }
@@ -107,11 +108,11 @@ fn Splitt_b_Space(str: String,syms:String) -> Result<TokenStruct,()>
 
 fn tokinezed(config: String) -> Result<Vec<String>,Tokinezed_Error>
 {
-    if let Ok(mut tokens)=Splitt_b_Space(config,Space_Symbols.to_string())
+    if let Ok(tokens)=Splitt_b_Space(config,SPACE_SYMBOLS.to_string())
     {
         for tok in tokens.tok_values.to_vec()
         {
-            if(tok == Token::as_str( &Token::UserName)) 
+            if tok == Token::as_str( &Token::UserName)
             {
                 
             }
