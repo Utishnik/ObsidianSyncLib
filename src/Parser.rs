@@ -1,10 +1,23 @@
 use crate::tokinezed::{self, *};
+use std::fmt;
 
 pub enum ParserError {
     NotFindInit(String),
     EmptyFile(String),
     NotSearchConfig(String),
     DoubleFind(String)
+}
+
+impl fmt::Display for ParserError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let message = match self {
+            ParserError::NotFindInit(msg) => msg,
+            ParserError::EmptyFile(msg) => msg,
+            ParserError::NotSearchConfig(msg) => msg,
+            ParserError::DoubleFind(msg) => msg,
+        };
+        write!(f, "{}", message)
+    }
 }
 
 //leak tok_val, please drop
@@ -118,7 +131,27 @@ generate_tok_parse!(parse_time_commit, Token::TimeCommit, ParserError);
 generate_tok_parse!(parse_text_commit, Token::TextCommit, ParserError);
 generate_tok_parse!(parse_username, Token::UserName, ParserError);
 
-pub fn parse_set_username(toksref: &TokenStruct,index: usize) // -> Result<String,String>
+pub fn parse_set_username(toksref: &TokenStruct,index: usize) -> Result<String,String>
 {
-   
+   let mut result: String="".to_string();
+   let parse_usrname=parse_username(toksref, index);
+   if let Ok(findres) = parse_usrname
+   {
+        let index_find=findres.index;
+        let parse_str: Result<Token_String,String> = parse_string(toksref,index_find);
+        if let Ok(str_find) = parse_str
+        {
+            result=str_find.tok_val.to_string();
+        }
+        else if let Err(e) = parse_str
+        {
+            return Err(e);
+        }
+   }
+   else if let Err(e) = parse_usrname
+   {
+       let msg_err: String=e.to_string();
+       return Err(msg_err);
+   }
+   Ok(result)
 } 
