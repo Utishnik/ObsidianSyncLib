@@ -10,7 +10,7 @@ use tokinezed::TokenStruct;
 pub mod Parser;
 use Parser::*;
 #[derive(Debug)]
-enum Parser_Error {
+enum Cfg_Error {
     ParseError(String),
     EmptyFile(String),
     NotSearchConfig(String)
@@ -117,15 +117,16 @@ fn tokinezed(config: String) -> Result<Vec<String>,Tokinezed_Error>
                 
             }
         }
-        return Ok(tokens.tok_values)
+        Ok(tokens.tok_values)
     }
     else 
     {
-       return Err(Tokinezed_Error::Empty("Empty config".to_string()));
+        Err(Tokinezed_Error::Empty("Empty config".to_string()))
     }
 }
 
-fn config_parser(config: String) -> Result<String,Parser_Error>
+
+fn config_parser(config: String) -> Result<String,Cfg_Error>
 {
 
     Ok("Ok".to_string())
