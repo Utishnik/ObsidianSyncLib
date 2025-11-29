@@ -1,6 +1,13 @@
 use crate::tokinezed::{self, *};
 
-pub fn parse_string(toks: & TokenStruct,index: usize) -> Result<Token_String, String>
+pub enum ParserError {
+    NotFindInit(String),
+    EmptyFile(String),
+    NotSearchConfig(String),
+    DoubleFind(String)
+}
+
+pub fn parse_string<'a>(toks: &'a TokenStruct,index: usize) -> Result<Token_String<'a>, String>
 {
     //let toks_len:usize=toks.get_size();
     let mut start_index : usize=0;
@@ -34,7 +41,7 @@ pub fn parse_string(toks: & TokenStruct,index: usize) -> Result<Token_String, St
 
     if end_index==0
     {
-       return Err("not find end \"".to_string());
+        return Err("not find end \"".to_string());
     }
 
     let mut tstr = Token_String {
@@ -49,12 +56,76 @@ pub fn parse_string(toks: & TokenStruct,index: usize) -> Result<Token_String, St
     tstr.tok_val=&slice[start_index..end_index];
     
 
-    return Ok(tstr);
+    Ok(tstr)
 }
 
-pub fn parse_username(toksref: &TokenStruct,index:usize) -> Result<String,String>
+pub struct FindTokenResult
 {
-    if(toksref.tok_values.to_vec()[index]==Token::as_str(&Token::SetVal))
+    index: usize,
+    double_find: bool,
+    double_find_index: usize,
+}
+
+pub fn find_token(toks: &TokenStruct,skip_index: usize,token: Token) -> Result<FindTokenResult,ParserError>
+{
+    let mut fndt_res = FindTokenResult
+    {
+        index: 0,
+        double_find: false,
+        double_find_index: 0,
+    };
+    let mut result: Result<FindTokenResult, ParserError>=Err(ParserError::NotFindInit(format!("Not {} Init",token.as_str())));
+    for item in toks.tok_values.to_vec().iter().enumerate().skip(skip_index)
+    {
+            let (i, t): (usize, &String) = item;
+            if(t==token.as_str())
+            {
+                if(!fndt_res.double_find)
+                {
+                    fndt_res.index=i;
+                    fndt_res.double_find=true;
+                }
+                else 
+                {
+                    result=Err(ParserError::DoubleFind(("Double find colon: ".to_owned() + &i.to_string()).to_string()))
+                }
+            }
+    }
+    result   
+       
+}
+
+/*
+pub fn parse_username(toksref: &TokenStruct,index: usize) -> Result<FindTokenResult,Parser_Error>
+{
+    let mut result: Result<FindTokenResult, Parser_Error>=Err(Parser_Error::NotFindInit("Not UserName Init".to_string()));
+    
+    result=find_token(toksref,index,Token::UserName);
+    result
+}*/
+
+macro_rules! generate_tok_parse {
+    ($parse_type: ident , $token: path,$error: ty) => {
+        pub fn $parse_type(toksref: &TokenStruct,index: usize) -> Result<FindTokenResult,$error>
+        {    
+            let result = find_token(toksref,index,Token::UserName);
+            result
+        }
+    };
+}
+
+generate_tok_parse!(parse_email, Token::Email, ParserError);
+generate_tok_parse!(parse_acctok, Token::AccTok, ParserError);
+generate_tok_parse!(parse_remote_rep_addr, Token::RemoteRepAddr, ParserError);
+generate_tok_parse!(parse_set_val, Token::SetVal, ParserError);
+generate_tok_parse!(parse_path_obsidian, Token::PathObsidian, ParserError);
+generate_tok_parse!(parse_time_commit, Token::TimeCommit, ParserError);
+generate_tok_parse!(parse_text_commit, Token::TextCommit, ParserError);
+generate_tok_parse!(parse_username, Token::UserName, ParserError);
+
+fn parse_set_username(toksref: &TokenStruct,index: usize) -> Result<String,String>
+{
+    if toksref.tok_values.to_vec()[index]==Token::as_str(&Token::SetVal)
     {
         if let Ok(result)=parse_string(toksref,index+1) 
         {
