@@ -7,6 +7,7 @@ pub enum ParserError {
     DoubleFind(String)
 }
 
+//leak tok_val, please drop
 pub fn parse_string<'a>(toks: &'a TokenStruct,index: usize) -> Result<Token_String<'a>, String>
 {
     //let toks_len:usize=toks.get_size();
@@ -75,6 +76,7 @@ pub fn find_token(toks: &TokenStruct,skip_index: usize,token: Token) -> Result<F
         double_find_index: 0,
     };
     let mut result: Result<FindTokenResult, ParserError>=Err(ParserError::NotFindInit(format!("Not {} Init",token.as_str())));
+    'leave:
     for item in toks.tok_values.to_vec().iter().enumerate().skip(skip_index)
     {
             let (i, t): (usize, &String) = item;
@@ -87,22 +89,15 @@ pub fn find_token(toks: &TokenStruct,skip_index: usize,token: Token) -> Result<F
                 }
                 else 
                 {
-                    result=Err(ParserError::DoubleFind(("Double find colon: ".to_owned() + &i.to_string()).to_string()))
+                    fndt_res.double_find_index=i;
+                    result=Err(ParserError::DoubleFind(("Double find colon: ".to_owned() + &i.to_string()).to_string()));
+                    break 'leave;
                 }
             }
     }
-    result   
-       
+    result=Ok(fndt_res);
+    result     
 }
-
-/*
-pub fn parse_username(toksref: &TokenStruct,index: usize) -> Result<FindTokenResult,Parser_Error>
-{
-    let mut result: Result<FindTokenResult, Parser_Error>=Err(Parser_Error::NotFindInit("Not UserName Init".to_string()));
-    
-    result=find_token(toksref,index,Token::UserName);
-    result
-}*/
 
 macro_rules! generate_tok_parse {
     ($parse_type: ident , $token: path,$error: ty) => {
@@ -123,20 +118,7 @@ generate_tok_parse!(parse_time_commit, Token::TimeCommit, ParserError);
 generate_tok_parse!(parse_text_commit, Token::TextCommit, ParserError);
 generate_tok_parse!(parse_username, Token::UserName, ParserError);
 
-fn parse_set_username(toksref: &TokenStruct,index: usize) -> Result<String,String>
+pub fn parse_set_username(toksref: &TokenStruct,index: usize) // -> Result<String,String>
 {
-    if toksref.tok_values.to_vec()[index]==Token::as_str(&Token::SetVal)
-    {
-        if let Ok(result)=parse_string(toksref,index+1) 
-        {
-            Ok(result.tok_val.to_string())
-        }
-        else 
-        {
-            Err("Parsing fail".to_string())    
-        }
-    }
-    else {
-        Err(" \'=\' not find".to_string())// надо еще строчку ошибки писать
-    }
+   
 } 
