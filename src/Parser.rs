@@ -1,11 +1,20 @@
 use crate::tokinezed::{self, *};
 use std::fmt;
+use validator::{Validate, ValidationError};
 
 pub enum ParserError {
     NotFindInit(String),
     EmptyFile(String),
     NotSearchConfig(String),
     DoubleFind(String)
+}
+
+#[derive(Debug, Validate)]
+struct SignupData {
+    #[validate(email)]
+    mail: String,
+    #[validate(url)]
+    site: String,
 }
 
 impl fmt::Display for ParserError {
@@ -132,9 +141,11 @@ generate_tok_parse!(parse_time_commit, Token::TimeCommit, ParserError);
 generate_tok_parse!(parse_text_commit, Token::TextCommit, ParserError);
 generate_tok_parse!(parse_username, Token::UserName, ParserError);
 
+//local username repository
+//auto validation
 pub fn parse_set_username(toksref: &TokenStruct,index: usize) -> Result<String,String>
 {
-   let mut result: String="".to_string();
+   let mut username: String="".to_string();
    let parse_usrname=parse_username(toksref, index);
    if let Ok(findres) = parse_usrname
    {
@@ -142,7 +153,7 @@ pub fn parse_set_username(toksref: &TokenStruct,index: usize) -> Result<String,S
         let parse_str: Result<Token_String,String> = parse_string(toksref,index_find);
         if let Ok(str_find) = parse_str
         {
-            result=str_find.tok_val.to_string();
+            username=str_find.tok_val.to_string();
         }
         else if let Err(e) = parse_str
         {
@@ -154,5 +165,77 @@ pub fn parse_set_username(toksref: &TokenStruct,index: usize) -> Result<String,S
        let msg_err: String=e.to_string();
        return Err(msg_err);
    }
-   Ok(result)
+   if !username.chars().any(|c| 
+        c.is_control() ||    
+        c == '<' ||         
+        c == '>' ||
+        c == '"' ||          
+        c == '\\' ||         
+        c == '\0'            
+    )
+    {
+        return Ok(username);
+    }
+    Err(format!("unresolved characters in username\t {}",username))
 } 
+
+//not validation
+fn parse_set_email(toksref: &TokenStruct,index: usize) -> Result<String,String>
+{
+    let mut email: String="".to_string();
+    let parse_email=parse_email(toksref, index);
+    if let Ok(findres) = parse_email
+    {
+        let index_find=findres.index;
+        let parse_str: Result<Token_String,String> = parse_string(toksref,index_find);
+        if let Ok(str_find) = parse_str
+        {
+            email=str_find.tok_val.to_string();
+        }
+        else if let Err(e) = parse_str
+        {
+            return Err(e);
+        }
+    }
+    else if let Err(e) = parse_email
+    {
+       let msg_err: String=e.to_string();
+       return Err(msg_err);
+    }
+    if(email.is_empty())
+    {
+        email="Empty".to_string();
+        return Err("email address is not specified".to_string());
+    }
+    Ok(email)   
+}
+
+pub fn parse_set_acctok(toksref: &TokenStruct,index: usize,encrypt: bool) -> Result<String,String>
+{
+    let mut acctok: String="".to_string();
+    let parse_acctok=parse_acctok(toksref, index);
+    if let Ok(findres) = parse_acctok
+    {
+        let index_find=findres.index;
+        let parse_str: Result<Token_String,String> = parse_string(toksref,index_find);
+        if let Ok(str_find) = parse_str
+        {
+            acctok=str_find.tok_val.to_string();
+        }
+        else if let Err(e) = parse_str
+        {
+            return Err(e);
+        }
+    }
+    else if let Err(e) = parse_acctok
+    {
+       let msg_err: String=e.to_string();
+       return Err(msg_err);
+    }
+    if(acctok.is_empty())
+    {
+        acctok="Empty".to_string();
+        return Err("email address is not specified".to_string());
+    }
+    Ok(acctok)   
+}
