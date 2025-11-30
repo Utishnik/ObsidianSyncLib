@@ -10,11 +10,11 @@
         UserName,
     }
 
-    pub struct Token_String<'a>
+    pub struct Token_String
     {
         pub tok_start : usize,
         pub tok_end : usize,
-        pub tok_val : &'a str,
+        pub tok_val : String,
     }
 
     pub struct TokenStruct
