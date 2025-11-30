@@ -20,8 +20,7 @@ impl fmt::Display for ParserError {
     }
 }
 
-//leak tok_val, please drop
-pub fn parse_string<'a>(toks: &'a TokenStruct,index: usize) -> Result<Token_String<'a>, String>
+pub fn parse_string(toks: & TokenStruct,index: usize) -> Result<Token_String, String>
 {
     //let toks_len:usize=toks.get_size();
     let mut start_index : usize=0;
@@ -33,12 +32,12 @@ pub fn parse_string<'a>(toks: &'a TokenStruct,index: usize) -> Result<Token_Stri
         for item in str.chars().enumerate().skip(index)
         {
             let (i, t): (usize, char) = item;
-            if (t=='\"' && !start_index_find)
+            if t=='\"' && !start_index_find
             {
                 start_index=i;
                 start_index_find=true;
             }
-            else if(t=='\"')
+            else if t=='\"'
             {
                 end_index=i;
             }
@@ -61,13 +60,12 @@ pub fn parse_string<'a>(toks: &'a TokenStruct,index: usize) -> Result<Token_Stri
     let mut tstr = Token_String {
         tok_start: start_index,
         tok_end: end_index,
-        tok_val: Box::leak(Box::new(String::new())) 
+        tok_val: "".to_string()
     };
-    let slice: &str = toks.tok_values[start_index].as_str();
 
     tstr.tok_start=start_index;
     tstr.tok_end=end_index;
-    tstr.tok_val=&slice[start_index..end_index];
+    tstr.tok_val=toks.tok_values[start_index].as_str()[start_index..end_index].to_string();
     
 
     Ok(tstr)
@@ -93,9 +91,9 @@ pub fn find_token(toks: &TokenStruct,skip_index: usize,token: Token) -> Result<F
     for item in toks.tok_values.to_vec().iter().enumerate().skip(skip_index)
     {
             let (i, t): (usize, &String) = item;
-            if(t==token.as_str())
+            if t==token.as_str()
             {
-                if(!fndt_res.double_find)
+                if !fndt_res.double_find
                 {
                     fndt_res.index=i;
                     fndt_res.double_find=true;
@@ -108,7 +106,10 @@ pub fn find_token(toks: &TokenStruct,skip_index: usize,token: Token) -> Result<F
                 }
             }
     }
-    result=Ok(fndt_res);
+    if fndt_res.index!=0
+    {
+        result=Ok(fndt_res);
+    }
     result     
 }
 

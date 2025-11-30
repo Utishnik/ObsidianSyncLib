@@ -110,7 +110,7 @@ fn tokinezed(config: String) -> Result<Vec<String>,Tokinezed_Error>
 {
     if let Ok(tokens)=Splitt_b_Space(config,SPACE_SYMBOLS.to_string())
     {
-        for tok in tokens.tok_values.to_vec()
+        for tok in tokens.tok_values.iter().cloned()
         {
             if tok == Token::as_str( &Token::UserName)
             {
