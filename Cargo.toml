@@ -15,3 +15,4 @@ path = "src/lib.rs"
 [dependencies]
 git2 = "0.20.2"
 validator = { version = "0.16", features = ["derive"] }
+dotenvy = "0.15.7"
