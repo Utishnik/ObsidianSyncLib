@@ -1,6 +1,7 @@
-use crate::tokinezed::{self, *};
+use crate::{AccTokCrypt::{self, SecurityParam}, tokinezed::{self, *}};
 use std::fmt;
 use validator::{Validate, ValidationError};
+use std::error::Error;
 
 pub enum ParserError {
     NotFindInit(String),
@@ -211,7 +212,7 @@ fn parse_set_email(toksref: &TokenStruct,index: usize) -> Result<String,String>
 }
 
 //auto decrypt
-pub fn parse_set_acctok(toksref: &TokenStruct,index: usize) -> Result<String,String>
+pub fn parse_set_acctok(toksref: &TokenStruct,index: usize,sec_par: &SecurityParam) -> Result<String,String>
 {
     let mut acctok: String="".to_string();
     let parse_acctok=parse_acctok(toksref, index);
@@ -222,6 +223,17 @@ pub fn parse_set_acctok(toksref: &TokenStruct,index: usize) -> Result<String,Str
         if let Ok(str_find) = parse_str
         {
             acctok=str_find.tok_val.to_string();
+            if(acctok.is_empty())
+            {
+                return Err("access token is not specified".to_string());
+            }
+            match AccTokCrypt::decrypt_acctok(acctok.as_bytes(), sec_par.clone())
+            {
+                Ok(val) => {
+                    return Ok(val)
+                }
+                Err(_) => return Err("Parser: Decrypt Access token error".to_string().into())
+            };
         }
         else if let Err(e) = parse_str
         {
@@ -233,10 +245,5 @@ pub fn parse_set_acctok(toksref: &TokenStruct,index: usize) -> Result<String,Str
        let msg_err: String=e.to_string();
        return Err(msg_err);
     }
-    if(acctok.is_empty())
-    {
-        acctok="Empty".to_string();
-        return Err("email address is not specified".to_string());
-    }
-    Ok(acctok)   
+    Ok(acctok) //ебаны раст не может понять что во всех ветках возврат значения
 }
