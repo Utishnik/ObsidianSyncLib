@@ -53,7 +53,7 @@ pub fn parse_string(toks: & TokenStruct,index: usize) -> Result<Token_String, St
         }
         end_index!=0
     };
-    for t in toks.tok_values.to_vec()
+    for t in toks.tok_values.iter().cloned()
     {
         if find_str(t)
         {
@@ -210,7 +210,8 @@ fn parse_set_email(toksref: &TokenStruct,index: usize) -> Result<String,String>
     Ok(email)   
 }
 
-pub fn parse_set_acctok(toksref: &TokenStruct,index: usize,encrypt: bool) -> Result<String,String>
+//auto decrypt
+pub fn parse_set_acctok(toksref: &TokenStruct,index: usize) -> Result<String,String>
 {
     let mut acctok: String="".to_string();
     let parse_acctok=parse_acctok(toksref, index);
