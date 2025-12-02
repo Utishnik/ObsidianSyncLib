@@ -128,7 +128,7 @@ macro_rules! generate_tok_parse {
     ($parse_type: ident , $token: path,$error: ty) => {
         pub fn $parse_type(toksref: &TokenStruct,index: usize) -> Result<FindTokenResult,$error>
         {    
-            let result = find_token(toksref,index,Token::UserName);
+            let result = find_token(toksref,index,$token);//ебаному расту похуй на неиспользования в макросах аргументов
             result
         }
     };
