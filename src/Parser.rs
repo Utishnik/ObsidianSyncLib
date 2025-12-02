@@ -253,7 +253,7 @@ pub fn parse_set_acctok(toksref: &TokenStruct,index: usize,sec_par: &SecurityPar
 pub fn parse_set_path_obsidian(toksref: &TokenStruct,index: usize) -> Result<String,String>
 {
     let mut obs_storage_path: String="".to_string();
-    let parse_path=parse_acctok(toksref, index);
+    let parse_path=parse_path_obsidian(toksref, index);
     if let Ok(findres) = parse_path
     {
         let index_find=findres.index;
@@ -289,4 +289,40 @@ pub fn parse_set_path_obsidian(toksref: &TokenStruct,index: usize) -> Result<Str
        return Err(msg_err);
     }
     Ok(obs_storage_path)
+}
+
+fn parse_set_text_commit(toksref: &TokenStruct,index: usize) -> Result<String,String>
+{
+   let mut commit_text: String="".to_string();
+   let parse_usrname=parse_text_commit(toksref, index);
+   if let Ok(findres) = parse_usrname
+   {
+        let index_find=findres.index;
+        let parse_str: Result<Token_String,String> = parse_string(toksref,index_find);
+        if let Ok(str_find) = parse_str
+        {
+            commit_text=str_find.tok_val.to_string();
+        }
+        else if let Err(e) = parse_str
+        {
+            return Err(e);
+        }
+   }
+   else if let Err(e) = parse_usrname
+   {
+       let msg_err: String=e.to_string();
+       return Err(msg_err);
+   }
+   if !commit_text.chars().any(|c| 
+        c.is_control() ||    
+        c == '<' ||         
+        c == '>' ||
+        c == '"' ||          
+        c == '\\' ||         
+        c == '\0'            
+    )
+    {
+        return Ok(commit_text);
+    }
+    Err(format!("unresolved characters in username\t {}",commit_text))
 }
