@@ -11,6 +11,9 @@ pub mod Parser;
 use Parser::*;
 pub mod AccTokCrypt;
 use AccTokCrypt::*;
+pub mod DirCheck;
+use DirCheck::*;
+
 #[derive(Debug)]
 enum Cfg_Error {
     ParseError(String),

@@ -1,7 +1,8 @@
-use crate::{AccTokCrypt::{self, SecurityParam}, tokinezed::{self, *}};
+use crate::{AccTokCrypt::{self, SecurityParam}, DirCheck::full_check_directory, tokinezed::{self, *}};
 use std::fmt;
 use validator::{Validate, ValidationError};
 use std::error::Error;
+use std::path::Path;
 
 pub enum ParserError {
     NotFindInit(String),
@@ -245,5 +246,47 @@ pub fn parse_set_acctok(toksref: &TokenStruct,index: usize,sec_par: &SecurityPar
        let msg_err: String=e.to_string();
        return Err(msg_err);
     }
-    Ok(acctok) //ебаны раст не может понять что во всех ветках возврат значения
+    Ok(acctok) //ебаный раст не может понять что во всех ветках возврат значения
+}
+
+//auto validation
+pub fn parse_set_path_obsidian(toksref: &TokenStruct,index: usize) -> Result<String,String>
+{
+    let mut obs_storage_path: String="".to_string();
+    let parse_path=parse_acctok(toksref, index);
+    if let Ok(findres) = parse_path
+    {
+        let index_find=findres.index;
+        let parse_str: Result<Token_String,String> = parse_string(toksref,index_find);
+        if let Ok(str_find) = parse_str
+        {
+            obs_storage_path=str_find.tok_val.to_string();
+            if obs_storage_path.is_empty()
+            {
+                return Err("obsidian path is not specified".to_string());
+            }    
+            let dir_check: Result<bool, String>=full_check_directory(obs_storage_path.clone());
+            let res_check:bool = match dir_check
+            {
+                Ok(val) => {val},
+                Err(error) => {
+                    return Err(error);
+                }
+            };
+            if !res_check
+            {
+                return Err("obsidian storage access denied".to_string());
+            }
+        }
+        else if let Err(e) = parse_str
+        {
+            return Err(e);
+        }
+    }
+    else if let Err(e) = parse_path
+    {
+       let msg_err: String=e.to_string();
+       return Err(msg_err);
+    }
+    Ok(obs_storage_path)
 }
