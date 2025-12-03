@@ -13,6 +13,25 @@
         IteratorEnd,
     }
 
+    pub fn get_symbol(str: &str,index: usize) -> Option<char>
+    {
+        return str.chars().nth(index);
+    }
+
+    pub fn skip_symbol(str: String,index: usize,symbol_list: String) -> bool
+    {
+        let mut is_skip_sym = |sym: char| -> bool
+        {
+            for s in symbol_list.chars()
+            {
+                let chr: Option<char> = get_symbol(&str, index);
+            }
+            true
+        };
+        true
+    }
+    //todo функция скип символом пока не дойдет до определенного
+
     pub struct Token_String
     {
         pub tok_start : usize,

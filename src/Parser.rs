@@ -30,7 +30,7 @@ impl fmt::Display for ParserError {
         write!(f, "{}", message)
     }
 }
-
+//todo логическая ошибка с непривальным возвравтом
 pub fn parse_string(toks: & TokenStruct,index: usize) -> Result<Token_String, String>
 {
     //let toks_len:usize=toks.get_size();
@@ -76,7 +76,7 @@ pub fn parse_string(toks: & TokenStruct,index: usize) -> Result<Token_String, St
 
     tstr.tok_start=start_index;
     tstr.tok_end=end_index;
-    tstr.tok_val=toks.tok_values[start_index].as_str()[start_index..end_index].to_string();
+    tstr.tok_val=toks.tok_values[start_index].as_str()[start_index..end_index].to_string();//ошибка у нас же строка может быть размана по токенам
     
 
     Ok(tstr)
