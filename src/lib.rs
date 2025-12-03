@@ -1,8 +1,10 @@
+use git2::Error;
 use git2::{Repository, PushOptions, RemoteCallbacks};
+use std::fmt::format;
 use std::path::Path;
 use std::fs;
 use std::panic;
-use std::error::Error;
+//use std::error::Error;
 use std::usize;
 pub mod tokinezed;
 use tokinezed::Token;
@@ -138,7 +140,7 @@ fn config_parser(config: String) -> Result<String,Cfg_Error>
 }
 
 fn get_config<P: AsRef<Path>>(path: P)-> std::io::Result<()> {
-    let path = path.as_ref(); 
+    let path: &Path = path.as_ref(); 
     
     if let Ok(contents) = fs::read_to_string("file.txt") 
     {
@@ -146,7 +148,7 @@ fn get_config<P: AsRef<Path>>(path: P)-> std::io::Result<()> {
     }
     else 
     {
-        let e = fs::read_to_string("file.txt");
+        let e: Result<String, std::io::Error> = fs::read_to_string("file.txt");
         println!("{:#?}", e);   
     }
 
@@ -160,20 +162,53 @@ fn git_push<P: AsRef<std::path::Path>>(
     password_or_token: &str,
 ) -> Result<(), git2::Error> 
 {
-    let repo = Repository::open(obsid_vlt_path)?;
-    let mut remote = repo.find_remote(remote_name)?;
+    //todo check inits
+    let repo: Repository = Repository::open(obsid_vlt_path)?;
+    let mut remote: git2::Remote<'_> = repo.find_remote(remote_name)?;
     
-    let mut callbacks = RemoteCallbacks::new();
+    let mut callbacks: RemoteCallbacks<'_> = RemoteCallbacks::new();
     callbacks.credentials(move |_url, _username_from_url, _allowed_types| {
         git2::Cred::userpass_plaintext(username, password_or_token)
     });
 
-    let mut push_options = PushOptions::new();
+    let mut push_options: PushOptions<'_> = PushOptions::new();
     push_options.remote_callbacks(callbacks);
 
     // Формат: refs/heads/branch_name
-    let refspec = format!("refs/heads/{}:refs/heads/{}", branch_name, branch_name);
+    let refspec: String = format!("refs/heads/{}:refs/heads/{}", branch_name, branch_name);
     remote.push(&[&refspec], Some(&mut push_options))?;
 
     Ok(())
+}
+
+pub fn errhandl_indx_commits(error: git2::Error) -> String
+{
+    let result: String = format!("message -> {}  \n code -> {}",error.message(),error.raw_code());
+    return result;
+}
+// todo check spec https://docs.rs/git2/latest/git2/struct.Revwalk.html
+fn indexing_commits(repo_path: String) -> Result<usize, git2::Error> 
+{
+    let repo: Result<Repository, git2::Error> = Repository::open(&repo_path);
+    if let Ok(repo_valid) = repo
+    {
+        let revw: git2::Revwalk = repo_valid.revwalk()?;
+        let cnt: usize = revw.count();
+        return Ok(cnt);
+    }
+    else if let Err(_) = repo
+    {
+        let init_res: Result<Repository, git2::Error> = Repository::init(&repo_path);
+        match init_res
+        {
+            Ok(_) => {
+                return Ok(0);
+            }
+            Err(err) => {
+                return Err(err);
+            }
+        }
+    }
+
+    Ok(0) //ебаный раст не может понять что во всех ветках есть возврат
 }

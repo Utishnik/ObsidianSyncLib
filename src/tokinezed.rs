@@ -1,5 +1,6 @@
     #[derive(Debug, Clone, PartialEq)]
-    pub enum Token {
+    pub enum Token 
+    {
         Email,
         AccTok,
         RemoteRepAddr,
@@ -8,6 +9,8 @@
         TimeCommit,
         TextCommit, 
         UserName,
+        IteratorStart,
+        IteratorEnd,
     }
 
     pub struct Token_String
@@ -51,6 +54,8 @@
                 Token::PathObsidian => "Path",
                 Token::TimeCommit => "Time",
                 Token::TextCommit => "Text",
+                Token::IteratorStart => "{{",
+                Token::IteratorEnd => "}}",
             }
         }
     }

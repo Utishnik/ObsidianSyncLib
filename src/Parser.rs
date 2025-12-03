@@ -89,9 +89,50 @@ pub struct FindTokenResult
     double_find_index: usize,
 }
 
+pub enum IteratorType 
+{
+   None,
+   Numeration,
+   Time,
+   CustomScript,
+}
+
+pub struct IteratorCommit
+{
+    msgpos: IteratorDecl,
+    itr_type: IteratorType
+}
+
+pub struct IteratorDecl
+{
+    start: usize,
+    end: usize
+}
+
+impl IteratorDecl
+{
+    fn is_decl(&self) -> bool
+    {
+        if self.start == self.end 
+        {
+            return false;
+        }
+        else 
+        {
+            return true;    
+        }
+    }
+    
+    fn set(&mut self,new_start: usize,new_end: usize) 
+    {
+        self.start=new_start;
+        self.end=new_end;
+    }
+}
+
 pub fn find_token(toks: &TokenStruct,skip_index: usize,token: Token) -> Result<FindTokenResult,ParserError>
 {
-    let mut fndt_res = FindTokenResult
+    let mut fndt_res: FindTokenResult = FindTokenResult
     {
         index: 0,
         double_find: false,
@@ -290,7 +331,7 @@ pub fn parse_set_path_obsidian(toksref: &TokenStruct,index: usize) -> Result<Str
     }
     Ok(obs_storage_path)
 }
-
+//todo потдежка итератор типо cm1 cm2 ....
 fn parse_set_text_commit(toksref: &TokenStruct,index: usize) -> Result<String,String>
 {
    let mut commit_text: String="".to_string();
@@ -315,8 +356,6 @@ fn parse_set_text_commit(toksref: &TokenStruct,index: usize) -> Result<String,St
    }
    if !commit_text.chars().any(|c| 
         c.is_control() ||    
-        c == '<' ||         
-        c == '>' ||
         c == '"' ||          
         c == '\\' ||         
         c == '\0'            
@@ -325,4 +364,28 @@ fn parse_set_text_commit(toksref: &TokenStruct,index: usize) -> Result<String,St
         return Ok(commit_text);
     }
     Err(format!("unresolved characters in username\t {}",commit_text))
+}
+
+pub fn parse_text_commit_iterator(str: String, index:usize) -> Option<Vec<IteratorCommit>>
+{
+    let mut iterators: Vec<IteratorCommit> = Vec::new();
+
+    let mut find_decl = |str:String| -> Option<IteratorDecl>
+    {
+        let mut decl: IteratorDecl = IteratorDecl { start: 0, end: 0 };
+        Some(decl)
+    };
+
+    let mut find_iterator = |str:String| -> Option<IteratorCommit>
+    {
+        let decl: IteratorDecl = IteratorDecl { start: 0, end: 0};
+        let mut iterator: IteratorCommit = IteratorCommit { msgpos: decl, itr_type: IteratorType::None};
+        for item in str.chars().enumerate().skip(index)
+        {
+            let (i, t): (usize, char) = item;
+            
+        }
+        Some(iterator)
+    };
+    None
 }
