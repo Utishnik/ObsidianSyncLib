@@ -82,11 +82,24 @@ pub fn parse_string(toks: & TokenStruct,index: usize) -> Result<Token_String, St
         tok_val: "".to_string()
     };
 
+    let mut original_str: String="".to_string();
+    let cfg_res: Result<String, String> = CONFIG.get_value();
+    match cfg_res
+    {
+        Ok(val) =>
+        {
+            original_str=val;
+        }
+        Err(err) =>
+        {
+            return Err(err);
+        }
+    }
+    //todo распаковка config
     tstr.tok_start=start_index;
     tstr.tok_end=end_index;
-    //tstr.tok_val=original_str[start_index..end_index].to_string();//ошибка у нас же строка может быть размана по токенам
+    tstr.tok_val=original_str[start_index..end_index].to_string();
     
-
     Ok(tstr)
 }
 

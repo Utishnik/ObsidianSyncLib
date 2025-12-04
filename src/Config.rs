@@ -39,7 +39,7 @@ impl Config
         else 
         {
             let guard: std::sync::RwLockReadGuard<'_, String> = self.config.read()
-                .map_err(|e: std::sync::PoisonError<std::sync::RwLockReadGuard<'_, String>>| format!("Failed to acquire write lock: {}", e))?;
+                .map_err(|e: std::sync::PoisonError<std::sync::RwLockReadGuard<'_, String>>| format!("Failed to acquire read lock: {}", e))?;
             return Ok(guard.clone());
         }
     }

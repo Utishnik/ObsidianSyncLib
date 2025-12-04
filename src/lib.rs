@@ -29,7 +29,8 @@ enum Cfg_Error {
 pub enum Tokinezed_Error {
     SyntaxErr(String),
     UnknowToken(String),
-    Empty(String)
+    Empty(String),
+    RecordBlock(String)
 }
 
 const SPACE_SYMBOLS: &str = " \t\n";
@@ -74,7 +75,7 @@ fn Count_Syms_b_Str(str:&String,syms: String) -> Result<u64,()>
     Ok(cnt)
 }
 
-pub fn Splitt_b_Space(str: String,syms:String) -> Result<TokenStruct,()>
+pub fn splitt_b_space(str: String,syms:String) -> Result<TokenStruct,()>
 {
     let mut idx: usize = 0;
     let mut line: u64 =0;
@@ -114,27 +115,53 @@ pub fn Splitt_b_Space(str: String,syms:String) -> Result<TokenStruct,()>
  
 }
 
-
-
+//тип ошибки Tokinezed_Error соответствует самой высокой причине тоесть если
+//ошибка записи config была и был empty config то причина самая верхняя =>
+//тоесть RecordBlock
 pub fn tokinezed(config: String) -> Result<Vec<String>,Tokinezed_Error>
 {
-    if let Ok(tokens)=Splitt_b_Space(config,SPACE_SYMBOLS.to_string())
+    let cnf_result: Result<(), String> = CONFIG.set_value(&config);
+    let mut msg_err: String="".to_string();
+    match cnf_result
+    {
+        Ok(_) =>{},
+        Err(err) =>
+        {
+            msg_err+=&err;
+        }
+    }
+    if let Ok(tokens)=splitt_b_space(config,SPACE_SYMBOLS.to_string())
     {
         for tok in tokens.tok_values.iter().cloned()
         {
+            //тут будут вызовы потом из Parser функций
             if tok == Token::as_str( &Token::UserName)
             {
                 
             }
         }
-        Ok(tokens.tok_values)
+        if msg_err.is_empty()
+        {
+            return Ok(tokens.tok_values);
+        }
+        else 
+        {
+            return Err(Tokinezed_Error::RecordBlock(msg_err));
+        }
     }
     else 
     {
-        Err(Tokinezed_Error::Empty("Empty config".to_string()))
+        msg_err+="Empty config";
+        if msg_err == "Empty config"
+        {
+            return Err(Tokinezed_Error::Empty(msg_err));
+        }
+        else 
+        {
+            return Err(Tokinezed_Error::RecordBlock(msg_err));
+        }
     }
 }
-
 
 fn config_parser(config: String) -> Result<String,Cfg_Error>
 {
