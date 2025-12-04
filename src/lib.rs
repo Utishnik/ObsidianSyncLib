@@ -9,12 +9,15 @@ use std::usize;
 pub mod tokinezed;
 use tokinezed::Token;
 use tokinezed::TokenStruct;
+
 pub mod Parser;
 use Parser::*;
 pub mod AccTokCrypt;
 use AccTokCrypt::*;
 pub mod DirCheck;
 use DirCheck::*;
+pub mod Config;
+use Config::*;
 
 #[derive(Debug)]
 enum Cfg_Error {
@@ -23,7 +26,7 @@ enum Cfg_Error {
     NotSearchConfig(String)
 }
 #[derive(Debug)]
-enum Tokinezed_Error {
+pub enum Tokinezed_Error {
     SyntaxErr(String),
     UnknowToken(String),
     Empty(String)
@@ -71,7 +74,7 @@ fn Count_Syms_b_Str(str:&String,syms: String) -> Result<u64,()>
     Ok(cnt)
 }
 
-fn Splitt_b_Space(str: String,syms:String) -> Result<TokenStruct,()>
+pub fn Splitt_b_Space(str: String,syms:String) -> Result<TokenStruct,()>
 {
     let mut idx: usize = 0;
     let mut line: u64 =0;
@@ -113,7 +116,7 @@ fn Splitt_b_Space(str: String,syms:String) -> Result<TokenStruct,()>
 
 
 
-fn tokinezed(config: String) -> Result<Vec<String>,Tokinezed_Error>
+pub fn tokinezed(config: String) -> Result<Vec<String>,Tokinezed_Error>
 {
     if let Ok(tokens)=Splitt_b_Space(config,SPACE_SYMBOLS.to_string())
     {

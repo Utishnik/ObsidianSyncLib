@@ -1,8 +1,11 @@
-use crate::{AccTokCrypt::{self, SecurityParam}, DirCheck::full_check_directory, tokinezed::{self, *}};
-use std::fmt;
+use crate::{AccTokCrypt::{self, SecurityParam}, Config, DirCheck::full_check_directory, tokinezed::{self, *}};
+
+use std::{fmt, sync::RwLock};
 use validator::{Validate, ValidationError};
 use std::error::Error;
 use std::path::Path;
+use std::sync::Once;
+use std::sync::LazyLock;
 
 pub enum ParserError {
     NotFindInit(String),
@@ -30,6 +33,11 @@ impl fmt::Display for ParserError {
         write!(f, "{}", message)
     }
 }
+
+pub static CONFIG: LazyLock<Config::Config> = LazyLock::new(|| {
+    Config::Config::new()
+});
+
 //todo логическая ошибка с непривальным возвравтом
 pub fn parse_string(toks: & TokenStruct,index: usize) -> Result<Token_String, String>
 {
@@ -76,7 +84,7 @@ pub fn parse_string(toks: & TokenStruct,index: usize) -> Result<Token_String, St
 
     tstr.tok_start=start_index;
     tstr.tok_end=end_index;
-    tstr.tok_val=toks.tok_values[start_index].as_str()[start_index..end_index].to_string();//ошибка у нас же строка может быть размана по токенам
+    //tstr.tok_val=original_str[start_index..end_index].to_string();//ошибка у нас же строка может быть размана по токенам
     
 
     Ok(tstr)
