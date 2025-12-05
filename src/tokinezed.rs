@@ -45,22 +45,70 @@
     false
     }
 
+    fn check_construction(ignore_symbol_list: &str,construction: &str) -> Option<Vec<usize>>
+    {
+        let mut idx: usize=0;
+        let mut collision: Vec<usize> = Vec::new();
+        for items in construction.chars().enumerate()
+        {
+            let (s_i,s): (usize, char) = items;
+            for c in ignore_symbol_list.chars()
+            {
+                if c == s
+                {
+                    collision[idx]=s_i;
+                    idx+=1;
+                }
+            }
+        }
+        if collision.is_empty()
+        {
+            return None;
+        }
+        else 
+        {
+            return Some(collision);
+        }
+    }
+
+    pub struct construction
+    {
+        start: usize,
+        end: usize
+    }
+
     //todo функция скип символом пока не дойдет до определенного
-    pub fn skip_construction(str: &str,index: &mut usize,ignore_symbol_list: &str,construction: String) -> bool
+    pub fn skip_construction(str: &str,index: &mut usize,ignore_symbol_list: &str,construction: &str) -> bool
     {
         let mut idx: usize=0;
         let mut iter: usize=0;
         let len_str: usize = str.len();
         let len_construction: usize = construction.len();
+        let option_collision_constuction: Option<Vec<usize>> = check_construction(ignore_symbol_list,construction);
+        let mut collision_construction: Vec<usize>;
+        let mut constuction_skiping: construction = construction { start: 0, end: 0 };//todo доделать щас нужно пофиксить основной loop
+        match option_collision_constuction
+        {
+            None => {},
+            Some(x) =>
+            {
+                collision_construction=x;
+            }
+        }
+        if len_str < len_construction
+        {
+            return false;
+        }
         loop 
         {
-            if !skip_symbol(str, index, ignore_symbol_list.to_string())  
+            if !skip_symbol(str, index, ignore_symbol_list.to_string()) //todo нужно соглосовать с collision_construction
             {
                 if iter > len_str-1
                 {
-                    return false;
+                    print!("test3\n");
+                    return true;
                 }
-                let option_str: Option<char> = get_symbol(str, iter);
+                let option_str: Option<char> = get_symbol(str, *index);
                 let mut give_sym_str: char=' ';
                 match  option_str
                 {
@@ -70,11 +118,7 @@
                         give_sym_str=x;
                     }
                 }
-                if idx > len_construction-1
-                {
-                    return false;
-                }
-                let option_construction: Option<char> = get_symbol(&construction, idx);
+                let option_construction: Option<char> = get_symbol(&construction, iter);
                 let mut give_sym_construction: char=' ';
                 match option_construction
                 {
@@ -87,15 +131,16 @@
 
                 if give_sym_construction != give_sym_str
                 {
-                    return false;
-                }
-                else 
-                {
-                    if idx == len_construction-1
+                    print!("construct: {} src: {}\n",give_sym_construction,give_sym_str);
+                    if idx != len_construction-1
                     {
-                        return true;
+                        return false;
                     }
-                    idx+=1;    
+                    else 
+                    {
+                        return true;    
+                    }
+
                 }
                 
             }
