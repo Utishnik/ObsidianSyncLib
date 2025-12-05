@@ -61,7 +61,7 @@
                     return false;
                 }
                 let option_str: Option<char> = get_symbol(str, iter);
-                let give_sym_str: char;
+                let mut give_sym_str: char=' ';
                 match  option_str
                 {
                     None => {},//невзможно из за проверки переполнения
@@ -74,20 +74,33 @@
                 {
                     return false;
                 }
-                let option_construction: Option<char> = get_symbol(str, idx);
-                let give_sym_construction: char;
-                match  option_construction
+                let option_construction: Option<char> = get_symbol(&construction, idx);
+                let mut give_sym_construction: char=' ';
+                match option_construction
                 {
-                    None => {},//невзможно из за проверки переполнения
+                    None => {},//невозможно из за проверки переполнения
                     Some(x) =>
                     {
                         give_sym_construction=x;
                     }
                 }
+
+                if give_sym_construction != give_sym_str
+                {
+                    return false;
+                }
+                else 
+                {
+                    if idx == len_construction-1
+                    {
+                        return true;
+                    }
+                    idx+=1;    
+                }
+                
             }
             iter+=1;
         }
-        false
     }
 
     pub struct Token_String

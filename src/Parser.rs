@@ -266,7 +266,7 @@ fn parse_set_email(toksref: &TokenStruct,index: usize) -> Result<String,String>
        let msg_err: String=e.to_string();
        return Err(msg_err);
     }
-    if(email.is_empty())
+    if email.is_empty()
     {
         email="Empty".to_string();
         return Err("email address is not specified".to_string());
