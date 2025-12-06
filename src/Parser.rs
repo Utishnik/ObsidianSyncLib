@@ -286,7 +286,7 @@ pub fn parse_set_acctok(toksref: &TokenStruct,index: usize,sec_par: &SecurityPar
         if let Ok(str_find) = parse_str
         {
             acctok=str_find.tok_val.to_string();
-            if(acctok.is_empty())
+            if acctok.is_empty()
             {
                 return Err("access token is not specified".to_string());
             }
