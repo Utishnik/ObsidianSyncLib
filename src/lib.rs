@@ -18,6 +18,8 @@ pub mod DirCheck;
 use DirCheck::*;
 pub mod Config;
 use Config::*;
+pub mod debug;
+use debug::*;
 
 #[derive(Debug)]
 enum Cfg_Error {

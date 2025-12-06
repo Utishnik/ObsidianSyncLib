@@ -1,3 +1,4 @@
+    use crate::debug;
     #[derive(Debug, Clone, PartialEq)]
     pub enum Token 
     {
@@ -119,6 +120,7 @@
                     }
                 }
                 let option_construction: Option<char> = get_symbol(&construction, iter);
+                crate::debug_println_fileinfo!("indexs:   {}",iter);
                 let mut give_sym_construction: char=' ';
                 match option_construction
                 {
@@ -131,7 +133,7 @@
 
                 if give_sym_construction != give_sym_str
                 {
-                    print!("construct: {} src: {}\n",give_sym_construction,give_sym_str);
+                    print!("construct: {} src: {}  index: {}\n",give_sym_construction,give_sym_str,iter);
                     if idx != len_construction-1
                     {
                         return false;
@@ -143,8 +145,8 @@
 
                 }
                 
+                iter+=1;
             }
-            iter+=1;
         }
     }
 
