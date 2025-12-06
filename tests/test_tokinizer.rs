@@ -15,5 +15,8 @@ fn test_skip_construction()
     println!("{}",result1);
     test_assert!(result1,true); 
 
-    result_list();
+    if !result_list()
+    {
+        std::process::exit(1);
+    }
 }

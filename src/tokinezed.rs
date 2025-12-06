@@ -39,11 +39,11 @@
         {
             if value == s
             {
-                *index+=1;
+                *index+=1;        
                 return true;
             }
-        }        
-    false
+        }
+        false
     }
 
     fn check_construction(ignore_symbol_list: &str,construction: &str) -> Option<Vec<usize>>
@@ -100,17 +100,17 @@
         {
             return false;
         }
+        crate::debug_println!("\n\n\n");
         loop 
         {
             if !skip_symbol(str, index, ignore_symbol_list.to_string()) //todo нужно соглосовать с collision_construction
             {
-                if iter > len_str-1
+                if *index > len_str-1
                 {
-                    print!("test3\n");
-                    return true;
+                    return false;
                 }
                 let option_str: Option<char> = get_symbol(str, *index);
-                let mut give_sym_str: char=' ';
+                let mut give_sym_str: char='a';
                 match  option_str
                 {
                     None => {},//невзможно из за проверки переполнения
@@ -120,8 +120,8 @@
                     }
                 }
                 let option_construction: Option<char> = get_symbol(&construction, iter);
-                crate::debug_println_fileinfo!("indexs:   {}",iter);
-                let mut give_sym_construction: char=' ';
+                crate::debug_println_fileinfo!("iter:   {}     index:    {}",iter,index);
+                let mut give_sym_construction: char='b';
                 match option_construction
                 {
                     None => {},//невозможно из за проверки переполнения
@@ -131,20 +131,15 @@
                     }
                 }
 
-                if give_sym_construction != give_sym_str
+                print!("construct: {} src: {}  index: {}\n",give_sym_construction,give_sym_str,iter);
+                if give_sym_construction == give_sym_str
                 {
-                    print!("construct: {} src: {}  index: {}\n",give_sym_construction,give_sym_str,iter);
-                    if idx != len_construction-1
+                    if iter == len_construction-1
                     {
-                        return false;
+                        return true;
                     }
-                    else 
-                    {
-                        return true;    
-                    }
-
                 }
-                
+                *index+=1;
                 iter+=1;
             }
         }

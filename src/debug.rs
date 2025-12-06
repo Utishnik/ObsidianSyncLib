@@ -95,13 +95,14 @@ pub fn get_last_test() -> Option<Test>
     guard.last().cloned()
 }
 
-pub fn result_list()
+pub fn result_list() -> bool
 {
     let cnt_test: usize=get_count_tests();
     let mut i: usize=0;
     const RED: &str = "\x1b[31m";
     const GREEN: &str = "\x1b[32m";
     const RESET: &str = "\x1b[0m";
+    let mut successfully: bool = true;
     //c like
     while i < cnt_test
     {
@@ -118,6 +119,7 @@ pub fn result_list()
                 else 
                 {
                     println!("{}",RED);
+                    successfully=false;
                 }
                 println!("index: {} --- status: {}",x.number,x.result);
                 print!("{}",RESET);
@@ -125,6 +127,7 @@ pub fn result_list()
         }
         i+=1;
     }
+    successfully
 }
 
 //ебаный раст засирает assert_eq поэтому пишем свой
