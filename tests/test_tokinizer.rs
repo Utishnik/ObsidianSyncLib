@@ -15,6 +15,19 @@ fn test_skip_construction()
     println!("{}",result1);
     test_assert!(result1,true); 
 
+    let result1: bool = obsidian_sync_lib::tokinezed::skip_construction("struct  {}", &mut 6, " ", "{}");
+    println!("{}",result1);
+    test_assert!(result1,true); 
+
+    let result1: bool = obsidian_sync_lib::tokinezed::skip_construction("    struct  {}", &mut 0, " ", "struct");
+    println!("{}",result1);
+    test_assert!(result1,true); 
+
+    
+    let result1: bool = obsidian_sync_lib::tokinezed::skip_construction("stuct  {}", &mut 0, " ", "struct");
+    println!("{}",result1);
+    test_assert!(result1,false); 
+
     if !result_list()
     {
         std::process::exit(1);
