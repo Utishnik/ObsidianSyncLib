@@ -14,11 +14,14 @@ impl AsciiSymbol
     }
 }
 
+//O(n*m) худщий случай O(n^2)=16 384
+//NOT BLAZING
 impl Iterator for AsciiSymbol
 {
     type Item = char;
     fn next(&mut self) -> Option<char> 
     {
+        'label1:
         while self.current < 128
         {
             let byte: u8 = self.current;
@@ -27,9 +30,10 @@ impl Iterator for AsciiSymbol
             {
                 if byte as char == b
                 {
-                    continue;
+                    continue 'label1;
                 }
             }
+            return Some(byte as char); 
         }
         None
     }

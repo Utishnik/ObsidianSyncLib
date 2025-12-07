@@ -16,6 +16,10 @@ path = "src/lib.rs"
 name = "test_tokinezer"  
 path = "tests/test_tokinizer.rs"
 
+[[test]]
+name = "test_iterators"
+path = "tests/test_iterators.rs"
+
 [dependencies]
 git2 = "0.20.2"
 validator = { version = "0.16", features = ["derive"] }
