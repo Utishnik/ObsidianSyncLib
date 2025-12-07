@@ -1,4 +1,4 @@
-use crate::{AccTokCrypt::{self, SecurityParam}, Config, DirCheck::full_check_directory, tokinezed::{self, *}};
+use crate::{AccTokCrypt::{self, SecurityParam}, Config, DirCheck::full_check_directory, black_list_iterator::{self, AsciiSymbol}, tokinezed::{self, *}};
 
 use std::{fmt, sync::RwLock};
 use validator::{Validate, ValidationError};
@@ -116,6 +116,20 @@ pub enum IteratorType
    Numeration,
    Time,
    CustomScript,
+}
+
+impl IteratorType
+{
+    pub fn an_str(&self) -> &'static str
+    {
+        match self
+        {
+            IteratorType::None => "",
+            IteratorType::Numeration => "num",
+            IteratorType::Time => "time",
+            IteratorType::CustomScript => "JS",//наверное буду использовать boa js
+        }
+    }
 }
 
 pub struct IteratorCommit
@@ -404,7 +418,8 @@ pub fn parse_text_commit_iterator(str: &str, index:usize) -> Option<Vec<Iterator
         let mut decl: IteratorDecl = IteratorDecl { start: 0, end: 0};
         let mut iterator: IteratorCommit = IteratorCommit { msgpos: decl, itr_type: IteratorType::None};
         let mut iter_construct: construction=construction { start: None, end: None, monolit:false };
-        let mut skip_result: bool = skip_construction(&str, &mut index_clone, " \t", "{{",&mut iter_construct);
+        let ignored_symbols: String = AsciiSymbol::new("{}".to_string()).collect();
+        let mut skip_result: bool = skip_construction(&str, &mut index_clone, &ignored_symbols, "{{",&mut iter_construct);
         if skip_result
         {
             decl = IteratorDecl { start: iter_construct.start?, end: 0/*тут будет конец }} */};
@@ -413,7 +428,7 @@ pub fn parse_text_commit_iterator(str: &str, index:usize) -> Option<Vec<Iterator
         {
             return None;
         }
-        skip_result = skip_construction(&str, &mut index_clone, " \t", "}}",&mut iter_construct);
+        skip_result = skip_construction(&str, &mut index_clone, &ignored_symbols, "}}",&mut iter_construct);
         if skip_result
         {
             decl.end=iter_construct.end?;

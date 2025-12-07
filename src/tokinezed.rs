@@ -1,6 +1,6 @@
-    use crate::debug;
-    #[derive(Debug, Clone, PartialEq)]
-    pub enum Token 
+use crate::debug;
+#[derive(Debug, Clone, PartialEq)]
+pub enum Token 
     {
         Email,
         AccTok,
@@ -13,6 +13,28 @@
         IteratorStart,
         IteratorEnd,
     }
+
+    impl Token 
+    {
+        pub fn as_str(&self) -> &'static str 
+        {
+            match self 
+            {
+                Token::Email => "Email",
+                Token::AccTok => "Token",
+                Token::UserName => "UserName",
+                Token::RemoteRepAddr => "Remote",
+                Token::SetVal => "=",
+                Token::PathObsidian => "Path",
+                Token::TimeCommit => "Time",
+                Token::TextCommit => "Text",
+                Token::IteratorStart => "{{",
+                Token::IteratorEnd => "}}",
+            }
+        }
+    }
+
+    
 
     pub fn get_symbol(str: &str,index: usize) -> Option<char>
     {
@@ -221,22 +243,5 @@
         pub fn get_size(&self) -> usize
         {
            self.tok_values.len()
-        }
-    }
-
-    impl Token {
-        pub fn as_str(&self) -> &'static str {
-            match self {
-                Token::Email => "Email",
-                Token::AccTok => "Token",
-                Token::UserName => "UserName",
-                Token::RemoteRepAddr => "Remote",
-                Token::SetVal => "=",
-                Token::PathObsidian => "Path",
-                Token::TimeCommit => "Time",
-                Token::TextCommit => "Text",
-                Token::IteratorStart => "{{",
-                Token::IteratorEnd => "}}",
-            }
         }
     }
