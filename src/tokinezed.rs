@@ -75,19 +75,39 @@
     pub struct construction
     {
         pub start: Option<usize>,
-        pub end: Option<usize>
+        pub end: Option<usize>,
+        pub monolit: bool
     }
 
     impl construction
     {
         pub fn get(&self) -> Self
         {
-            Self { start: self.start, end: self.end }
+            Self { start: self.start, end: self.end, monolit: self.monolit }
         }
         pub fn reset(&mut self)
         {
             self.start=None;
             self.end=None;
+        }
+        pub fn check_none(&self) -> bool
+        {
+            let start_option: Option<usize> = self.start;
+            let end_option: Option<usize> = self.end;
+            let mut start_none: bool = false;
+            let mut end_none: bool = false;
+            match start_option 
+            {
+                None => {start_none=true},   
+                Some(_) => {}
+            }
+
+            match end_option 
+            {
+                None => {end_none=true},   
+                Some(_) => {}
+            }
+            !start_none && !end_none
         }
     }
 
@@ -163,6 +183,13 @@
                 }
                 *index+=1;
                 iter+=1;
+            }
+            else 
+            {
+                if start_find && skip_construct.monolit
+                {
+                    return false;
+                }
             }
         }
     }

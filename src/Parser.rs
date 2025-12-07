@@ -387,10 +387,11 @@ pub fn parse_set_text_commit(toksref: &TokenStruct,index: usize) -> Result<Strin
     Err(format!("unresolved characters in username\t {}",commit_text))
 }
 
-pub fn parse_text_commit_iterator(str: String, index:usize) -> Option<Vec<IteratorCommit>>
+pub fn parse_text_commit_iterator(str: &str, index:usize) -> Option<Vec<IteratorCommit>>
 {
     let mut iterators: Vec<IteratorCommit> = Vec::new();
     let mut index_clone: usize=index;
+    let str_len: usize = str.len();
 
     let mut find_decl = |str:String| -> Option<IteratorDecl>
     {
@@ -398,13 +399,50 @@ pub fn parse_text_commit_iterator(str: String, index:usize) -> Option<Vec<Iterat
         Some(decl)
     };
 
-    let mut find_iterator = |str:String| -> Option<IteratorCommit>
+    let mut find_iterator = |str:&str| -> Option<IteratorCommit>
     {
-        let decl: IteratorDecl = IteratorDecl { start: 0, end: 0};
+        let mut decl: IteratorDecl = IteratorDecl { start: 0, end: 0};
         let mut iterator: IteratorCommit = IteratorCommit { msgpos: decl, itr_type: IteratorType::None};
-        let mut iter_construct: construction=construction { start: None, end: None };
-        skip_construction(&str, &mut index_clone, " \t", "{{",&mut iter_construct);
+        let mut iter_construct: construction=construction { start: None, end: None, monolit:false };
+        let mut skip_result: bool = skip_construction(&str, &mut index_clone, " \t", "{{",&mut iter_construct);
+        if skip_result
+        {
+            decl = IteratorDecl { start: iter_construct.start?, end: 0/*тут будет конец }} */};
+        }
+        else 
+        {
+            return None;
+        }
+        skip_result = skip_construction(&str, &mut index_clone, " \t", "}}",&mut iter_construct);
+        if skip_result
+        {
+            decl.end=iter_construct.end?;
+            iterator.msgpos=decl;
+        }
+        else 
+        {
+            return None;    
+        }
+
         Some(iterator)
     };
+    loop 
+    {
+        let option_find_iter: Option<IteratorCommit> = find_iterator(str);
+        let find_iter_res: IteratorCommit;
+        match option_find_iter 
+        {
+            None => 
+            {
+                break;
+            }
+            Some(x) => 
+            {
+                find_iter_res=x;
+            }
+        }
+        iterators.push(find_iter_res);
+    }
+
     None
 }
