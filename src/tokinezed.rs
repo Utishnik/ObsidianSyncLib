@@ -74,20 +74,32 @@
 
     pub struct construction
     {
-        start: usize,
-        end: usize
+        pub start: Option<usize>,
+        pub end: Option<usize>
+    }
+
+    impl construction
+    {
+        pub fn get(&self) -> Self
+        {
+            Self { start: self.start, end: self.end }
+        }
+        pub fn reset(&mut self)
+        {
+            self.start=None;
+            self.end=None;
+        }
     }
 
     //todo функция скип символом пока не дойдет до определенного
-    pub fn skip_construction(str: &str,index: &mut usize,ignore_symbol_list: &str,construction: &str) -> bool
+    pub fn skip_construction(str: &str,index: &mut usize,ignore_symbol_list: &str,construction: &str,skip_construct: &mut construction) -> bool
     {
-        let mut idx: usize=0;
+        let mut start_find: bool=false;
         let mut iter: usize=0;
         let len_str: usize = str.len();
         let len_construction: usize = construction.len();
         let option_collision_constuction: Option<Vec<usize>> = check_construction(ignore_symbol_list,construction);
         let mut collision_construction: Vec<usize>;
-        let mut constuction_skiping: construction = construction { start: 0, end: 0 };//todo доделать щас нужно пофиксить основной loop
         match option_collision_constuction
         {
             None => {},
@@ -134,10 +146,20 @@
                 print!("construct: {} src: {}  index: {}\n",give_sym_construction,give_sym_str,iter);
                 if give_sym_construction == give_sym_str
                 {
+                    if !start_find
+                    {
+                        start_find=true;
+                        skip_construct.start=Some(*index);
+                    }
                     if iter == len_construction-1
                     {
+                        skip_construct.end=Some(*index);
                         return true;
                     }
+                }
+                else
+                {
+                    return false;
                 }
                 *index+=1;
                 iter+=1;

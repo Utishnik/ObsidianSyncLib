@@ -353,7 +353,7 @@ pub fn parse_set_path_obsidian(toksref: &TokenStruct,index: usize) -> Result<Str
     Ok(obs_storage_path)
 }
 //todo потдежка итератор типо cm1 cm2 ....
-fn parse_set_text_commit(toksref: &TokenStruct,index: usize) -> Result<String,String>
+pub fn parse_set_text_commit(toksref: &TokenStruct,index: usize) -> Result<String,String>
 {
    let mut commit_text: String="".to_string();
    let parse_usrname=parse_text_commit(toksref, index);
@@ -390,6 +390,7 @@ fn parse_set_text_commit(toksref: &TokenStruct,index: usize) -> Result<String,St
 pub fn parse_text_commit_iterator(str: String, index:usize) -> Option<Vec<IteratorCommit>>
 {
     let mut iterators: Vec<IteratorCommit> = Vec::new();
+    let mut index_clone: usize=index;
 
     let mut find_decl = |str:String| -> Option<IteratorDecl>
     {
@@ -401,11 +402,8 @@ pub fn parse_text_commit_iterator(str: String, index:usize) -> Option<Vec<Iterat
     {
         let decl: IteratorDecl = IteratorDecl { start: 0, end: 0};
         let mut iterator: IteratorCommit = IteratorCommit { msgpos: decl, itr_type: IteratorType::None};
-        for item in str.chars().enumerate().skip(index)
-        {
-            let (i, t): (usize, char) = item;
-            
-        }
+        let mut iter_construct: construction=construction { start: None, end: None };
+        skip_construction(&str, &mut index_clone, " \t", "{{",&mut iter_construct);
         Some(iterator)
     };
     None
