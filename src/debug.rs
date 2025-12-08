@@ -1,3 +1,5 @@
+use std::fs::File;
+use std::io::Write;
 use std::sync::Mutex;
 use std::sync::Arc;
 use std::sync::OnceLock;
@@ -129,6 +131,46 @@ pub fn result_list() -> bool
     }
     successfully
 }
+
+pub fn dump_result_list(path: String) -> Result<(), std::io::Error> //todo: сделать асинхронной? типо тестов может быть очень много
+//и результаты всех нужно дампать
+//с другой стороны тут большая логическая нагрзука а не просто запросить данные
+{
+    let mut file: File = File::create(path)?;
+    let cnt_test: usize=get_count_tests();
+    const RED: &str = "\x1b[31m"; //todo по идеи можно заменить на константы глобальные в самом фаиле
+    const GREEN: &str = "\x1b[32m";
+    const RESET: &str = "\x1b[0m";
+    let mut i: usize = 0;
+
+    while i < cnt_test
+    {
+        let g_test: Option<Test> = get_test(i);
+        match g_test
+        {
+            None => {},
+            Some(x) =>
+            {
+                if x.result
+                {
+                    file.write_fmt(format_args!("{}",GREEN))?;
+                    
+                }
+                else 
+                {
+                    file.write_fmt(format_args!("{}",RED))?;
+                }
+                file.write_fmt(format_args!("index: {} --- status: {}",x.number,x.result))?;
+                file.write_fmt(format_args!("{}",RESET))?;
+            }
+        }
+        i+=1;
+    }
+    Ok(()) //TODO доделать там нумерацию фаилов пред проверки всякие и тд и наверное чтоб он автоматически взависомти от
+    //теста в нужную директорию
+}
+
+//todo: pub fn dump_list_print
 
 //ебаный раст засирает assert_eq поэтому пишем свой
 #[macro_export]
