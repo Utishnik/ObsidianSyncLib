@@ -44,7 +44,7 @@ pub enum Token
     pub fn skip_symbol(str: &str,index: &mut usize,symbol_list: String) -> bool
     { 
         let chr: Option<char> = get_symbol(str, *index);
-        let value: char  = match chr
+        let value: char = match chr
         {
             None =>
             {
@@ -54,7 +54,7 @@ pub enum Token
             {
                 x
             }
-        }
+        };
 
         for s in symbol_list.chars()
         {
