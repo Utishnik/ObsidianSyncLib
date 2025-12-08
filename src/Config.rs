@@ -34,13 +34,22 @@ impl Config
     {
         if !self.init_check().is_empty()
         {
-            return Ok("".to_string());
+            Err("".to_string())
         }
         else 
         {
             let guard: std::sync::RwLockReadGuard<'_, String> = self.config.read()
                 .map_err(|e: std::sync::PoisonError<std::sync::RwLockReadGuard<'_, String>>| format!("Failed to acquire read lock: {}", e))?;
-            return Ok(guard.clone());
+            Ok(guard.clone())
         }
     }
 }
+
+impl Default for Config 
+{
+     fn default() -> Self 
+     {
+         Self::new()
+     }
+}
+   

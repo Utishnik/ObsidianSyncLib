@@ -1,4 +1,4 @@
-use crate::debug;
+use crate::{debug, debug_println};
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token 
     {
@@ -38,14 +38,13 @@ pub enum Token
 
     pub fn get_symbol(str: &str,index: usize) -> Option<char>
     {
-        return str.chars().nth(index);
+        str.chars().nth(index)
     }
 
     pub fn skip_symbol(str: &str,index: &mut usize,symbol_list: String) -> bool
     { 
         let chr: Option<char> = get_symbol(str, *index);
-        let value: char;
-        match chr
+        let value: char  = match chr
         {
             None =>
             {
@@ -53,7 +52,7 @@ pub enum Token
             }
             Some(x) =>
             {
-                value=x;
+                x
             }
         }
 
@@ -86,11 +85,11 @@ pub enum Token
         }
         if collision.is_empty()
         {
-            return None;
+            None
         }
         else 
         {
-            return Some(collision);
+            Some(collision)
         }
     }
 
@@ -185,7 +184,7 @@ pub enum Token
                     }
                 }
 
-                print!("construct: {} src: {}  index: {}\n",give_sym_construction,give_sym_str,iter);
+                debug_println!("construct: {} src: {}  index: {}",give_sym_construction,give_sym_str,iter);
                 if give_sym_construction == give_sym_str
                 {
                     if !start_find
@@ -206,12 +205,10 @@ pub enum Token
                 *index+=1;
                 iter+=1;
             }
-            else 
+
+            if start_find && skip_construct.monolit
             {
-                if start_find && skip_construct.monolit
-                {
-                    return false;
-                }
+                return false;
             }
         }
     }

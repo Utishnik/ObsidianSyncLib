@@ -146,7 +146,8 @@ pub fn tokinezed(config: String) -> Result<Vec<String>,Tokinezed_Error>
         }
         if msg_err.is_empty()
         {
-            return Ok(tokens.tok_values);
+            return Ok(tokens.tok_values);//клипи пишет что удалить return надо но я считают что так лучше смотрится чем
+            //Ok , return Err
         }
         else 
         {
@@ -158,11 +159,11 @@ pub fn tokinezed(config: String) -> Result<Vec<String>,Tokinezed_Error>
         msg_err+="Empty config";
         if msg_err == "Empty config"
         {
-            return Err(Tokinezed_Error::Empty(msg_err));
+            Err(Tokinezed_Error::Empty(msg_err))
         }
         else 
         {
-            return Err(Tokinezed_Error::RecordBlock(msg_err));
+            Err(Tokinezed_Error::RecordBlock(msg_err))
         }
     }
 }
@@ -218,7 +219,7 @@ fn git_push<P: AsRef<std::path::Path>>(
 pub fn errhandl_indx_commits(error: git2::Error) -> String
 {
     let result: String = format!("message -> {}  \n code -> {}",error.message(),error.raw_code());
-    return result;
+    result
 }
 // todo check spec https://docs.rs/git2/latest/git2/struct.Revwalk.html
 fn indexing_commits(repo_path: String) -> Result<usize, git2::Error> 

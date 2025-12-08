@@ -9,14 +9,15 @@ fn test_parse_text_commit_iterator()
     
     test_assert!(option_res.is_some(),true);
     let mut x: Vec<IteratorCommit> = option_res.unwrap();
-    let b: bool=/*x.is_empty()*/false;
-    //test_assert!(b,false);
+    let b: bool=x.is_empty();
+    test_assert!(b,false);
     if !b
     {
         let ex: Option<IteratorCommit>=x.pop();
         let unwex: IteratorCommit= ex.unwrap();
         let poss: IteratorDecl = unwex.msgpos;
-        debug_println_fileinfo!("start {}  end {}",poss.start,poss.end);
+        let get_pos: PubPosStr = poss.get_pos();
+        debug_println_fileinfo!("start {}  end {}",get_pos.start,get_pos.end);
     }
 
     if !result_list()

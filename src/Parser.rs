@@ -7,6 +7,7 @@ use std::path::Path;
 use std::sync::Once;
 use std::sync::LazyLock;
 
+#[derive(Clone)]
 pub enum ParserError {
     NotFindInit(String),
     EmptyFile(String),
@@ -110,6 +111,7 @@ pub struct FindTokenResult
     double_find_index: usize,
 }
 
+#[derive(Clone)]
 pub enum IteratorCommitType 
 {
    None,
@@ -162,6 +164,27 @@ pub struct IteratorCommit //{{ iter_type }}
     pub itr_type: IteratorCommitType
 }
 
+impl IteratorCommit
+{
+    pub fn get_iter_pos(&self) -> IteratorDecl
+    {
+        let pos: IteratorDecl = IteratorDecl 
+        { 
+            start: self.msgpos.start, 
+            end: self.msgpos.end,  
+            init: self.msgpos.init,
+        };
+        pos
+    }
+
+    pub fn get_itr_type(&self) -> IteratorCommitType
+    {
+        self.itr_type.clone() //как по мне удобнее будет чем сыллка + enum же мало это же примерно небольшой массив
+    }
+
+    //todo set
+}
+
 pub struct iteratorPush // << iter_type >>
 {
     msgpos: IteratorDecl,
@@ -170,28 +193,50 @@ pub struct iteratorPush // << iter_type >>
 
 pub struct IteratorDecl
 {
-    pub start: usize, //pub временный
-    pub end: usize
+    start: usize, 
+    end: usize,
+    init: bool,
+}
+
+pub struct PubPosStr // нужен для получения в него из приватных структур
+{
+    pub start: usize,
+    pub end: usize,
 }
 
 impl IteratorDecl
 {
-    fn is_decl(&self) -> bool
+    fn is_one_symbol(&self) -> bool
     {
         if self.start == self.end 
         {
-            return false;
+            false
         }
         else 
         {
-            return true;    
+            true
         }
     }
+
+    pub fn get_pos(&self) -> PubPosStr
+    {
+        PubPosStr 
+        { 
+            start: self.start, 
+            end: self.end,
+        }
+    }
+
+    pub fn get_init_state(&self) -> bool
+    {
+        self.init
+    }
     
-    fn set(&mut self,new_start: usize,new_end: usize) 
+    fn set(&mut self,new_start: usize,new_end: usize,init_state: bool) 
     {
         self.start=new_start;
         self.end=new_end;
+        self.init=init_state;
     }
 }
 
@@ -439,20 +484,20 @@ pub fn parse_text_commit_iterator(str: &str, index:usize) -> Option<Vec<Iterator
 
     let mut find_decl = |str:String| -> Option<IteratorDecl>
     {
-        let mut decl: IteratorDecl = IteratorDecl { start: 0, end: 0 };
+        let mut decl: IteratorDecl = IteratorDecl { start: 0, end: 0,init: false};
         Some(decl)
     };
 
     let mut find_iterator = |str:&str| -> Option<IteratorCommit>
     {
-        let mut decl: IteratorDecl = IteratorDecl { start: 0, end: 0};
+        let mut decl: IteratorDecl = IteratorDecl { start: 0, end: 0,init: false};
         let mut iterator: IteratorCommit = IteratorCommit { msgpos: decl, itr_type: IteratorCommitType::None};
         let mut iter_construct: construction=construction { start: None, end: None, monolit:false };
         let ignored_symbols: String = AsciiSymbol::new("{}".to_string()).collect();
         let mut skip_result: bool = skip_construction(&str, &mut index_clone, &ignored_symbols, "{{",&mut iter_construct);
         if skip_result
         {
-            decl = IteratorDecl { start: iter_construct.start?, end: 0/*тут будет конец }} */};
+            decl = IteratorDecl { start: iter_construct.start?, end: 0/*тут будет конец }} */,init: true};
         }
         else 
         {
@@ -474,8 +519,7 @@ pub fn parse_text_commit_iterator(str: &str, index:usize) -> Option<Vec<Iterator
     loop 
     {
         let option_find_iter: Option<IteratorCommit> = find_iterator(str);
-        let find_iter_res: IteratorCommit;
-        match option_find_iter 
+        let find_iter_res: IteratorCommit = match option_find_iter 
         {
             None => 
             {
@@ -483,9 +527,9 @@ pub fn parse_text_commit_iterator(str: &str, index:usize) -> Option<Vec<Iterator
             }
             Some(x) => 
             {
-                find_iter_res=x;
+                x
             }
-        }
+        };
         iterators.push(find_iter_res);
     }
 
