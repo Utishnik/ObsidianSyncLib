@@ -110,7 +110,7 @@ pub struct FindTokenResult
     double_find_index: usize,
 }
 
-pub enum IteratorType 
+pub enum IteratorCommitType 
 {
    None,
    Numeration,
@@ -118,30 +118,60 @@ pub enum IteratorType
    CustomScript,
 }
 
-impl IteratorType
+impl IteratorCommitType
 {
-    pub fn an_str(&self) -> &'static str
+    pub fn as_str(&self) -> &'static str
     {
         match self
         {
-            IteratorType::None => "",
-            IteratorType::Numeration => "num",
-            IteratorType::Time => "time",
-            IteratorType::CustomScript => "JS",//наверное буду использовать boa js
+            IteratorCommitType::None => "",
+            IteratorCommitType::Numeration => "num",
+            IteratorCommitType::Time => "time",
+            IteratorCommitType::CustomScript => "JS",//наверное буду использовать boa js
         }
     }
 }
 
-pub struct IteratorCommit
+pub enum IteratorPushType 
+{
+   None,
+   Cnt,
+   Diff,
+   CustomScript,
+   GraphDiff
+}
+
+impl IteratorPushType
+{
+    pub fn as_str(&self) -> &'static str
+    {
+        match self
+        {
+            IteratorPushType::None => "",
+            IteratorPushType::Cnt => "cnt",
+            IteratorPushType::Diff => "diff",
+            IteratorPushType::CustomScript => "JS",//наверное буду использовать boa js
+            IteratorPushType::GraphDiff => "graph_diff",
+        }
+    }
+}
+
+pub struct IteratorCommit //{{ iter_type }}
+{
+    pub msgpos: IteratorDecl, //pub это временное решение
+    pub itr_type: IteratorCommitType
+}
+
+pub struct iteratorPush // << iter_type >>
 {
     msgpos: IteratorDecl,
-    itr_type: IteratorType
+    itr_type: IteratorPushType
 }
 
 pub struct IteratorDecl
 {
-    start: usize,
-    end: usize
+    pub start: usize, //pub временный
+    pub end: usize
 }
 
 impl IteratorDecl
@@ -416,7 +446,7 @@ pub fn parse_text_commit_iterator(str: &str, index:usize) -> Option<Vec<Iterator
     let mut find_iterator = |str:&str| -> Option<IteratorCommit>
     {
         let mut decl: IteratorDecl = IteratorDecl { start: 0, end: 0};
-        let mut iterator: IteratorCommit = IteratorCommit { msgpos: decl, itr_type: IteratorType::None};
+        let mut iterator: IteratorCommit = IteratorCommit { msgpos: decl, itr_type: IteratorCommitType::None};
         let mut iter_construct: construction=construction { start: None, end: None, monolit:false };
         let ignored_symbols: String = AsciiSymbol::new("{}".to_string()).collect();
         let mut skip_result: bool = skip_construction(&str, &mut index_clone, &ignored_symbols, "{{",&mut iter_construct);
@@ -459,5 +489,5 @@ pub fn parse_text_commit_iterator(str: &str, index:usize) -> Option<Vec<Iterator
         iterators.push(find_iter_res);
     }
 
-    None
+    Some(iterators)
 }

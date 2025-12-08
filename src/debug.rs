@@ -144,6 +144,7 @@ macro_rules! test_assert {
                 const RESET: &str = "\x1b[0m";
                 let mut result_test: bool = false;
                 use crate::debug::*;
+                //$crate::debug::* может так лучше?
                 let last_test_option: Option<Test> = get_last_test();
                 let mut test: Test;
                 match last_test_option

@@ -20,6 +20,7 @@ pub mod Config;
 use Config::*;
 pub mod debug;
 use debug::*;
+pub use debug::*;
 pub mod black_list_iterator;
 
 #[derive(Debug)]
