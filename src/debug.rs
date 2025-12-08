@@ -99,7 +99,7 @@ pub fn result_list() -> bool
 {
     let cnt_test: usize=get_count_tests();
     let mut i: usize=0;
-    const RED: &str = "\x1b[31m";
+    const RED: &str = "\x1b[31m"; //todo по идеи можно заменить на константы глобальные в самом фаиле
     const GREEN: &str = "\x1b[32m";
     const RESET: &str = "\x1b[0m";
     let mut successfully: bool = true;

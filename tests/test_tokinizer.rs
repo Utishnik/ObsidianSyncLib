@@ -42,6 +42,20 @@ fn test_skip_construction()
     test_assert!(result1,false); 
     construct.reset();
 
+    construct.monolit=false;
+    let result1: bool = obsidian_sync_lib::tokinezed::skip_construction("  struct", &mut 2, " ", "struct",&mut construct);
+    println!("{}",result1);
+    println!("\nSTART:  {}\tEND:  {}\n",construct.start.unwrap_or(defult_val),construct.end.unwrap_or(defult_val));
+    test_assert!(result1,true); 
+    construct.reset();
+
+    construct.monolit=false;
+    let result1: bool = obsidian_sync_lib::tokinezed::skip_construction("{{", &mut 0, " ", "{{",&mut construct);
+    println!("{}",result1);
+    println!("\nSTART:  {}\tEND:  {}\n",construct.start.unwrap_or(defult_val),construct.end.unwrap_or(defult_val));
+    test_assert!(result1,true); 
+    construct.reset();
+
     if !result_list()
     {
         std::process::exit(1);

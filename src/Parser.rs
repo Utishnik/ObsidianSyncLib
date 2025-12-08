@@ -1,4 +1,4 @@
-use crate::{AccTokCrypt::{self, SecurityParam}, Config, DirCheck::full_check_directory, black_list_iterator::{self, AsciiSymbol}, tokinezed::{self, *}};
+use crate::{AccTokCrypt::{self, SecurityParam}, Config, DirCheck::full_check_directory, black_list_iterator::{self, AsciiSymbol}, debug_println_fileinfo, tokinezed::{self, *},debug_println};
 
 use std::{fmt, sync::RwLock};
 use validator::{Validate, ValidationError};
@@ -501,8 +501,11 @@ pub fn parse_text_commit_iterator(str: &str, index:usize) -> Option<Vec<Iterator
         }
         else 
         {
+            debug_println_fileinfo!("parse_text_commit_iterator find_iterator debug skip_result1 branch");
             return None;
         }
+        debug_println!("index: {}",index_clone);
+        index_clone+=1;
         skip_result = skip_construction(&str, &mut index_clone, &ignored_symbols, "}}",&mut iter_construct);
         if skip_result
         {
@@ -511,6 +514,7 @@ pub fn parse_text_commit_iterator(str: &str, index:usize) -> Option<Vec<Iterator
         }
         else 
         {
+            debug_println_fileinfo!("parse_text_commit_iterator find_iterator debug skip_result2 branch");
             return None;    
         }
 
@@ -523,10 +527,13 @@ pub fn parse_text_commit_iterator(str: &str, index:usize) -> Option<Vec<Iterator
         {
             None => 
             {
+                debug_println_fileinfo!("parse_text_commit_iterator loop debug break branch");
                 break;
             }
             Some(x) => 
             {
+                debug_println_fileinfo!("parse_text_commit_iterator loop debug  start: {}   end: {}",x.msgpos.get_pos().start,
+                x.msgpos.get_pos().end);
                 x
             }
         };

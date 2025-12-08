@@ -1,4 +1,5 @@
-use crate::{debug, debug_println};
+use crate::{debug, debug_println,debug_println_fileinfo};
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token 
     {
@@ -173,7 +174,7 @@ pub enum Token
                     }
                 }
                 let option_construction: Option<char> = get_symbol(&construction, iter);
-                crate::debug_println_fileinfo!("iter:   {}     index:    {}",iter,index);
+                debug_println_fileinfo!("iter:   {}     index:    {}",iter,index);
                 let mut give_sym_construction: char='b';
                 match option_construction
                 {
