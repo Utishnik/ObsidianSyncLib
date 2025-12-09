@@ -56,6 +56,7 @@ fn test_skip_construction()
     test_assert!(result1,true); 
     construct.reset();
 
+
     if !result_list()
     {
         std::process::exit(1);

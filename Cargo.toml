@@ -17,6 +17,7 @@ path = "src/lib.rs"
 git2 = "0.20.2"
 validator = { version = "0.16", features = ["derive"] }
 dotenvy = "0.15.7"
+backtrace = "0.3"
 
 
 
@@ -31,3 +32,7 @@ path = "tests/test_iterators.rs"
 [[test]]
 name = "test_parser"
 path = "tests/test_parser.rs"
+
+[[test]]
+name = "test_backtrace_debug"
+path = "tests/back_trace_debug_test.rs"

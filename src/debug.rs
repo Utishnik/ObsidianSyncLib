@@ -3,6 +3,9 @@ use std::io::Write;
 use std::sync::Mutex;
 use std::sync::Arc;
 use std::sync::OnceLock;
+use std::sync::atomic::AtomicU64;
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering;
 
 #[macro_export]
 macro_rules! debug_println {
@@ -55,10 +58,13 @@ pub struct Test
 {
     pub result: bool,
     pub number: usize,
+    pub typetest: usize,
+    //pub cnt_types: usize,
 }
 
 //maybe многопоточное тестирования хз нужно?
 pub static TESTS: OnceLock<Arc<Mutex<Vec<Test>>>> = OnceLock::new();
+pub static type_test: AtomicUsize = AtomicUsize::new(0);
 
 fn get_tests() -> &'static Arc<Mutex<Vec<Test>>> 
 {
@@ -78,6 +84,16 @@ pub fn add_test(test: Test)
     let tests: &Arc<Mutex<Vec<Test>>> = get_tests();
     let mut guard: std::sync::MutexGuard<'_, Vec<Test>> = tests.lock().unwrap();
     guard.push(test);
+}
+
+pub fn add_type_test()
+{
+    type_test.fetch_add(1, Ordering::Relaxed);
+}
+
+pub fn get_type_test() -> usize
+{
+    type_test.load(Ordering::Relaxed)
 }
 
 pub fn get_test(index: usize) -> Option<Test>
@@ -186,6 +202,7 @@ macro_rules! test_assert {
                 const RESET: &str = "\x1b[0m";
                 let mut result_test: bool = false;
                 use crate::debug::*;
+                use std::sync::atomic::Ordering;
                 //$crate::debug::* может так лучше?
                 let last_test_option: Option<Test> = get_last_test();
                 let mut test: Test;
@@ -193,7 +210,7 @@ macro_rules! test_assert {
                 {
                     None => 
                     {
-                        test = Test {result: false, number: 1};
+                        test = Test {result: false, number: 1,typetest: 0};
                     },
                     Some(x) =>
                     {
@@ -223,6 +240,7 @@ macro_rules! test_assert {
                     result_test=true;
                 }
                 test.result=result_test;
+                test.typetest=get_type_test();
                 add_test(test);
             }
         }

@@ -12,6 +12,21 @@ impl AsciiSymbol
     {
         AsciiSymbol { current: 0 , black_list: black_list}
     }
+    
+    pub fn set(&mut self,black_list: String,cur: u8)
+    {
+        self.current=cur;
+        self.black_list=black_list;
+    }
+
+    pub fn get(&self) -> Self
+    {
+        Self 
+        {
+            current: self.current,
+            black_list: self.black_list.clone()
+        }
+    }
 }
 
 //O(n*m) худщий случай O(n^2)=16 384
