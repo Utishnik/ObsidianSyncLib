@@ -79,6 +79,11 @@ pub fn get_count_tests() -> usize
     cnt
 }
 
+pub fn clear_console() 
+{
+    print!("\x1B[2J\x1B[1;1H"); 
+}
+
 pub fn add_test(test: Test)
 {
     let tests: &Arc<Mutex<Vec<Test>>> = get_tests();

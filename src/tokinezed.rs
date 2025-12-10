@@ -225,6 +225,7 @@ pub enum Token
         pub tok_val : String,
     }
 
+    #[derive(Clone)]
     pub struct TokenStruct
     {
         pub tok_values : Vec<String>,
