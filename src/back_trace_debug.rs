@@ -5,6 +5,11 @@ use backtrace::Backtrace;
 use backtrace::SymbolName;
 use std::path::PathBuf;
 
+pub fn is_crate(symbol: String)
+{
+    
+}
+
 pub fn get_caller_info()
 {
     let bt: Backtrace = Backtrace::new();
@@ -29,7 +34,7 @@ pub fn get_caller_info()
             {
                 sym = Some(name.to_string());
                 vec_sym.push(sym.clone().unwrap());
-                println!("{}",name);
+                println!("{}",name.to_string());
             }
             if let Some(filename) = symbol.filename() 
             {
