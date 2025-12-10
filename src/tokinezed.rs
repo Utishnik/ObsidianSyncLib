@@ -1,4 +1,8 @@
+use std::{cell::Cell, ops::Mul, u64::MAX};
+
 use crate::{debug, debug_println,debug_println_fileinfo};
+
+pub static MAX_TOKEN_CAPACITY: usize = 1000000;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token 
@@ -241,5 +245,67 @@ pub enum Token
         pub fn get_size(&self) -> usize
         {
            self.tok_values.len()
+        }
+
+        pub fn add_ch(&mut self,idx: usize,ch: char) -> Result<(),String>
+        {
+            let empty_state: bool = self.tok_values[idx].is_empty();
+            let size_vec: usize = self.tok_values.len();
+            if size_vec < idx 
+            {
+                debug_println_fileinfo!("size_vec: {}  idx: {}",size_vec,idx);
+                return Err("size_vec overflow".to_string());
+            }
+            if empty_state
+            {
+                debug_println_fileinfo!("add_ch empty!");
+                return Err("add_ch empty!".to_string());
+            }
+            else 
+            {
+                self.tok_values[idx].push(ch);
+            }
+            Ok(())
+        }
+
+        fn add_ln_num(&mut self,idx: usize,line: u64) -> Result<(),String>
+        {
+            let size_vec: usize =  self.tok_lines_number.len();
+            let overflow_state: bool = idx  >= size_vec;
+
+            if overflow_state
+            {
+                debug_println_fileinfo!("overflow size_vec: {}  idx: {}",size_vec,idx);
+                return Err("overflow".to_string());
+            }
+            else 
+            {
+                self.tok_lines_number[idx] = line;
+            }
+            Ok(())
+        }
+
+        pub fn safe_add_ln_num(&mut self,idx: usize,line: u64) -> Result<(), String>
+        {
+            let result: Result<(), String> = self.add_ln_num(idx, line);
+            if let Err(_) = result
+            {
+                let capacity: usize = self.tok_lines_number.capacity();
+                let float_capacity: f64 =  (capacity as f64) * 0.75;
+                let usize_float_capacity: usize = float_capacity.round() as usize;
+                if idx >= usize_float_capacity
+                {
+                    if capacity > MAX_TOKEN_CAPACITY
+                    {
+                        let err_res: String = format!("overflow capacity {}  MAX_TOKEN_CAPACITY: {}",capacity*2,MAX_TOKEN_CAPACITY);
+                        debug_println_fileinfo!("{}",err_res);
+                        return Err(err_res);
+                    }
+                    let new_len: usize = capacity * 2;
+                    self.tok_lines_number.resize(new_len, 0);
+                }
+            
+            }
+            Ok(())
         }
     }

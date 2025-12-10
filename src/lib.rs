@@ -59,7 +59,7 @@ pub fn last_commit_message<P: AsRef<std::path::Path>>(repo_path: P) -> Result<St
     Ok(commit.message().unwrap_or("No message").to_string())
 }
 
-fn Count_Syms_b_Str(str:&String,syms: String) -> Result<u64,()>
+fn count_syms_b_str(str:&String,syms: String) -> Result<u64,()>
 {
     if str.is_empty() || syms.is_empty()
     {
@@ -84,24 +84,32 @@ pub fn splitt_b_space(str: String,syms:String) -> Result<TokenStruct,()>
 {
     let mut idx: usize = 0;
     let mut line: u64 =0;
-    if let Ok(cnt)=Count_Syms_b_Str(&str,syms.to_string())
+    if let Ok(cnt)=count_syms_b_str(&str,syms.to_string())
     {
+        debug_println!("CNT splitt_b_space  {}",cnt);
         let safe_cnt: usize= usize::try_from(cnt)
     .map_err(|_| ())?;
         let mut toks: TokenStruct = TokenStruct::new(safe_cnt);
+        debug_println!("safe_cnt splitt_b_space  {}",cnt);
         'outer:
+        //все эти пробелы не считались как отдельный токен и не увеличивался каждый раз индекс типо токена 2 
+        // а в массиве на 10 индекси из пробелов если текущий символ пропуск и предыдущий тоже то
+        //мы не увеличиваем индекс
         for c in str.chars() 
         {
+            //todo: для таких мест сделать две версии одна для больших массивов другая нет
+            //типо тут сложность O(n*m) а через хэш мапы O(n)
             for ss in syms.chars()
             {
                 if c=='\n'//todo переделать для произвольных символово переноса
                 {
+                    debug_println!("перенос splitt_b_space  ");
                     line+=1;
                     continue 'outer;
                 }
                 if c==ss
                 {
-                    if !toks.tok_values[idx].is_empty()//чтоб небыло пустыъ токенов
+                    if !toks.tok_values[idx].is_empty()
                     {
                         idx+=1;
                     }
@@ -109,8 +117,26 @@ pub fn splitt_b_space(str: String,syms:String) -> Result<TokenStruct,()>
                 }
             }
             
-            toks.tok_values[idx].push(c);
-            toks.tok_lines_number[idx]=line;
+            debug_println!("LEN {}\n", toks.tok_values[idx].len());
+            debug_println!("!!!splitt_b_space idx  {}\t",idx);
+            let res: Result<(), String> = toks.add_ch(idx, c);
+            if let Ok(_) = res
+            {
+                let size: usize = toks.tok_values.len();
+                //надо сделать типо вместо len количество иницилизированых если больше 75% уже занято увеличить в два раза
+            }
+            else 
+            {
+                toks.tok_values.insert(idx, c.to_string());
+            }
+            debug_println!("value:\t{}",toks.tok_values[idx]);
+            let res: Result<(), String> = toks.safe_add_ln_num(idx, line);
+            if let Err(e) = res
+            {
+                debug_eprintln_fileinfo!("{}",e);
+                return Err(());
+            }
+            //toks.tok_lines_number[idx]=line;//тут тоже паника
         }
         Ok(toks)
     }
@@ -147,12 +173,11 @@ pub fn tokinezed(config: String) -> Result<Vec<String>,Tokinezed_Error>
         }
         if msg_err.is_empty()
         {
-            return Ok(tokens.tok_values);//клипи пишет что удалить return надо но я считают что так лучше смотрится чем
-            //Ok , return Err
+            Ok(tokens.tok_values)
         }
         else 
         {
-            return Err(Tokinezed_Error::RecordBlock(msg_err));
+            Err(Tokinezed_Error::RecordBlock(msg_err))
         }
     }
     else 
