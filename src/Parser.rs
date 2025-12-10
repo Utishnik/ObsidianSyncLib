@@ -384,7 +384,7 @@ pub fn parse_set_acctok(toksref: &TokenStruct,index: usize,sec_par: &SecurityPar
                 Ok(val) => {
                     return Ok(val)
                 }
-                Err(_) => return Err("Parser: Decrypt Access token error".to_string().into())
+                Err(_) => return Err("Parser: Decrypt Access token error".to_string())
             };
         }
         else if let Err(e) = parse_str

@@ -8,7 +8,7 @@ fn test()
 {
     
     let txt: String = "token struct{ }       if else for ".to_string();
-    let result: Result<obsidian_sync_lib::tokinezed::TokenStruct, ()> = splitt_b_space(txt," \t".to_string());
+    let result: Result<obsidian_sync_lib::tokinezed::TokenStruct, ()> = splitt_b_space(txt," \t".to_string(),None);
     for ts in result.unwrap().tok_values
     {
         println!("{}",ts);

@@ -80,10 +80,15 @@ fn count_syms_b_str(str:&String,syms: String) -> Result<u64,()>
     Ok(cnt)
 }
 
-pub fn splitt_b_space(str: String,syms:String) -> Result<TokenStruct,()>
+pub fn splitt_b_space(str: String,syms: String,transfer: Option<String>) -> Result<TokenStruct,()>
 {
     let mut idx: usize = 0;
     let mut line: u64 =0;
+    let mut transfer_sym: String = "\n".to_string();
+    if let Some(t) = transfer
+    {
+        transfer_sym=t;
+    }
     if let Ok(cnt)=count_syms_b_str(&str,syms.to_string())
     {
         debug_println!("CNT splitt_b_space  {}",cnt);
@@ -97,19 +102,25 @@ pub fn splitt_b_space(str: String,syms:String) -> Result<TokenStruct,()>
         //мы не увеличиваем индекс
         for c in str.chars() 
         {
+            let pred_is_empty: bool = !toks.tok_values[idx].is_empty();
             //todo: для таких мест сделать две версии одна для больших массивов другая нет
             //типо тут сложность O(n*m) а через хэш мапы O(n)
-            for ss in syms.chars()
+
+            for t in transfer_sym.chars()
             {
-                if c=='\n'//todo переделать для произвольных символово переноса
+                if c==t && pred_is_empty
                 {
                     debug_println!("перенос splitt_b_space  ");
                     line+=1;
                     continue 'outer;
                 }
+            }
+
+            for ss in syms.chars()
+            {
                 if c==ss
                 {
-                    if !toks.tok_values[idx].is_empty()
+                    if pred_is_empty
                     {
                         idx+=1;
                     }
@@ -120,7 +131,7 @@ pub fn splitt_b_space(str: String,syms:String) -> Result<TokenStruct,()>
             debug_println!("LEN {}\n", toks.tok_values[idx].len());
             debug_println!("!!!splitt_b_space idx  {}\t",idx);
             let res: Result<(), String> = toks.add_ch(idx, c);
-            if let Ok(_) = res
+            if res.is_ok()
             {
                 let size: usize = toks.tok_values.len();
                 //надо сделать типо вместо len количество иницилизированых если больше 75% уже занято увеличить в два раза
@@ -161,7 +172,7 @@ pub fn tokinezed(config: String) -> Result<Vec<String>,Tokinezed_Error>
             msg_err+=&err;
         }
     }
-    if let Ok(tokens)=splitt_b_space(config,SPACE_SYMBOLS.to_string())
+    if let Ok(tokens)=splitt_b_space(config,SPACE_SYMBOLS.to_string(),None)//None временный
     {
         for tok in tokens.tok_values.iter().cloned()
         {
@@ -257,7 +268,7 @@ fn indexing_commits(repo_path: String) -> Result<usize, git2::Error>
         let cnt: usize = revw.count();
         return Ok(cnt);
     }
-    else if let Err(_) = repo
+    else if repo.is_err()
     {
         let init_res: Result<Repository, git2::Error> = Repository::init(&repo_path);
         match init_res
