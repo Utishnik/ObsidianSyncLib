@@ -40,3 +40,7 @@ path = "tests/back_trace_debug_test.rs"
 [[test]]
 name = "splitt_b_space_test"
 path = "tests/splitt_b_space_test.rs"
+
+[[test]]
+name = "debug_test"
+path = "tests/debug_test.rs"

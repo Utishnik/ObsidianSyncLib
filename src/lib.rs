@@ -97,6 +97,7 @@ pub fn splitt_b_space(str: String,syms: String,transfer: Option<String>) -> Resu
     .map_err(|_| ())?;
         let mut toks: TokenStruct = TokenStruct::new(safe_cnt);
         debug_println!("safe_cnt splitt_b_space  {}",cnt);
+        let mut skip_syms_iter: bool = false;
         'outer:
         //все эти пробелы не считались как отдельный токен и не увеличивался каждый раз индекс типо токена 2 
         // а в массиве на 10 индекси из пробелов если текущий символ пропуск и предыдущий тоже то
@@ -106,29 +107,33 @@ pub fn splitt_b_space(str: String,syms: String,transfer: Option<String>) -> Resu
             let pred_is_empty: bool = !toks.tok_values[idx].is_empty();
             //todo: для таких мест сделать две версии одна для больших массивов другая нет
             //типо тут сложность O(n*m) а через хэш мапы O(n)
-
             for t in transfer_sym.chars()
             {
+                debug_println!("transfer_sym iterator зашел");
                 if c==t && pred_is_empty
                 {
                     debug_println!("перенос splitt_b_space  ");//todo надо сделать через поиск подстроки отключать
                     //ненужны выводы например чтоб тока это сообщение выводилось
                     line+=1;
-                    continue 'outer;
+                    //continue 'outer;
+                    skip_syms_iter=true;
                 }
             }
-
-            for ss in syms.chars()
+            if !skip_syms_iter
             {
-                if c==ss
+                for ss in syms.chars()
                 {
-                    if pred_is_empty
+                    if c==ss
                     {
-                        idx+=1;
+                        if pred_is_empty
+                        {
+                            idx+=1;
+                        }
+                        continue 'outer;
                     }
-                    continue 'outer;
                 }
             }
+            skip_syms_iter=false;
             
             debug_println!("LEN {}\n", toks.tok_values[idx].len());
             debug_println!("!!!splitt_b_space idx  {}\t",idx);

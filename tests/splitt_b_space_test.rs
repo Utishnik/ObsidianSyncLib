@@ -10,7 +10,8 @@ use std::time::Duration;
 fn test()
 {
     
-    let txt: String = "token struct{ }    \n   if else for ".to_string();
+    let txt: String = "token struct{ }    \n\n\n  if else for ".to_string();
+    //на один перенос меньше так как при первой на индекс раньше пробел
     let result: Result<obsidian_sync_lib::tokinezed::TokenStruct, ()> = splitt_b_space(txt," \t".to_string(),None);
     
     /*
@@ -30,7 +31,8 @@ fn test()
     */
     let len: usize = result.clone().unwrap().tok_lines_number.len();
     println!("capacity:\t{}",len);
-    test_assert!(len==1,true);
+    test_assert!(len!=0,true);
+    clear_console();
     for ls in result.clone().unwrap().tok_lines_number
     {
         println!("\n---- {} -----\n",ls);

@@ -55,7 +55,19 @@ impl ArgsFmt
     }
 }
 
+macro_rules! args
+{
+    ($($arg:expr),* $(,)?) => 
+    {{
+        let mut args = ArgsFmt::new();
+        $(args.add($arg);)*
+        args
+    }};
+}
+
 //todo для всех debug print/eprint метод сделать ввод в фаил и возможность воспроизведения
+
+//todo функции серелизации и десерелизации stdout stderr
 
 fn private_printing_manage(args: fmt::Arguments)
 {
