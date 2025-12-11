@@ -89,6 +89,7 @@ pub fn splitt_b_space(str: String,syms: String,transfer: Option<String>) -> Resu
     {
         transfer_sym=t;
     }
+    debug_println!("splitt_b_space transfer_sym: {}",transfer_sym);
     if let Ok(cnt)=count_syms_b_str(&str,syms.to_string())
     {
         debug_println!("CNT splitt_b_space  {}",cnt);
@@ -110,7 +111,8 @@ pub fn splitt_b_space(str: String,syms: String,transfer: Option<String>) -> Resu
             {
                 if c==t && pred_is_empty
                 {
-                    debug_println!("перенос splitt_b_space  ");
+                    debug_println!("перенос splitt_b_space  ");//todo надо сделать через поиск подстроки отключать
+                    //ненужны выводы например чтоб тока это сообщение выводилось
                     line+=1;
                     continue 'outer;
                 }

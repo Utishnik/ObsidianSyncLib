@@ -2,7 +2,7 @@
 use std::str::SplitAsciiWhitespace;
 
 use obsidian_sync_lib::splitt_b_space;
-use obsidian_sync_lib::debug::*;
+use obsidian_sync_lib::{debug::{TESTS, get_count_tests, get_test, result_list,successes_beh}, tokinezed::construction, *};
 use std::thread;
 use std::time::Duration;
 
@@ -10,7 +10,7 @@ use std::time::Duration;
 fn test()
 {
     
-    let txt: String = "token struct{ }       if else for ".to_string();
+    let txt: String = "token struct{ }    \n   if else for ".to_string();
     let result: Result<obsidian_sync_lib::tokinezed::TokenStruct, ()> = splitt_b_space(txt," \t".to_string(),None);
     
     /*
@@ -28,8 +28,12 @@ fn test()
     thread::sleep(Duration::from_secs(2));
     clear_console();
     */
+    let len: usize = result.clone().unwrap().tok_lines_number.len();
+    println!("capacity:\t{}",len);
+    test_assert!(len==1,true);
     for ls in result.clone().unwrap().tok_lines_number
     {
         println!("\n---- {} -----\n",ls);
     }
+    successes_beh();
 }

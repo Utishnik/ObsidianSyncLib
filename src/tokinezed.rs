@@ -3,6 +3,7 @@ use std::{cell::Cell, ops::Mul, u64::MAX};
 use crate::{debug, debug_println,debug_println_fileinfo};
 
 pub static MAX_TOKEN_CAPACITY: usize = 1000000;
+pub static CAPACITY_UP_SIZE: usize = 64;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token 
@@ -281,6 +282,7 @@ pub enum Token
             }
             else 
             {
+                debug_println_fileinfo!("not overflow idx:  {}  line:  {}",idx,line);
                 self.tok_lines_number[idx] = line;
             }
             Ok(())
@@ -291,10 +293,18 @@ pub enum Token
             let result: Result<(), String> = self.add_ln_num(idx, line);
             if let Err(_) = result
             {
-                let capacity: usize = self.tok_lines_number.capacity();
-                let float_capacity: f64 =  (capacity as f64) * 0.75;
+                debug_println_fileinfo!("[safe_add_ln_num capacity up] idx = {}",idx);
+                let mut capacity: usize = self.tok_lines_number.capacity();
+                if capacity < CAPACITY_UP_SIZE
+                {
+                    capacity+=CAPACITY_UP_SIZE;
+                }
+                let float_capacity: f64 =  ((capacity) as f64) * 0.75;
                 let usize_float_capacity: usize = float_capacity.round() as usize;
-                if idx >= usize_float_capacity
+                debug_println!("[usize_float_capacity: {}]",usize_float_capacity);
+                let len_vec: usize = self.tok_lines_number.len();
+                debug_println!("[len vec = {}]",len_vec);
+                if len_vec <= usize_float_capacity // todo эту проверку надо вывести выше чтоб даже если не overflow
                 {
                     if capacity > MAX_TOKEN_CAPACITY
                     {
@@ -302,8 +312,9 @@ pub enum Token
                         debug_println_fileinfo!("{}",err_res);
                         return Err(err_res);
                     }
-                    let new_len: usize = capacity * 2;
-                    self.tok_lines_number.resize(new_len, 0);
+                    let new_capacity: usize = capacity * 2;
+                    debug_println_fileinfo!("[new capacity = {}]",new_capacity);
+                    self.tok_lines_number.resize(new_capacity, 0);
                 }
             
             }

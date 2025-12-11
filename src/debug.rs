@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::fs::File;
 use std::io::Write;
 use std::sync::Mutex;
@@ -6,6 +7,69 @@ use std::sync::OnceLock;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
+use std::fmt;
+
+struct ArgsFmt
+{
+    args: Vec<String>,
+    cnt_args: usize,
+}
+
+enum StreamPrint
+{
+    StdOut,
+    StdErr,
+}
+
+impl ArgsFmt
+{
+    fn new() -> Self
+    {
+        Self { args: Vec::new(), cnt_args: 0}
+    }
+
+    fn add <T:fmt::Display> (&mut self,arg: T)
+    {
+        self.args.push(format!("{}", arg));
+        self.cnt_args+=1;
+    }
+
+    fn first(&self) -> Option<String>
+    {
+        self.args.first().cloned()
+    }//todo использовать не только first но и другие значение например следуйщиее целое число
+    //это сколько выводов показать или каких их цветом
+    //patterns(несколько их может быть не только один вывод) после них количество выводов каждого патерна
+    //I64SIZEMAX значит все i64 используется так как + значит первый n выводов - последние n выводов
+    //и потом идут цвета каждого вывода
+    //first будет означать кого типа выводить обычных stdout или поток ошибок 
+
+    fn get_args_owned(&self) -> Vec<String>
+    {
+        self.args.clone()
+    }
+
+    fn get_args_ref(&self) -> &[String]
+    {
+        &self.args
+    }
+}
+
+//todo для всех debug print/eprint метод сделать ввод в фаил и возможность воспроизведения
+
+fn private_printing_manage(args: fmt::Arguments)
+{
+    let patern: String = args.as_str().unwrap().to_string();//contains
+    let str_args: String = args.to_string();
+    let find_state: bool = false;
+}
+
+#[macro_export]
+macro_rules! printing_manage {
+    ($($arg:tt)*) => {
+        private_printing_manage(format_args!($($arg)*));
+    };
+}
 
 #[macro_export]
 macro_rules! debug_println {
@@ -82,6 +146,48 @@ pub fn get_count_tests() -> usize
 pub fn clear_console() 
 {
     print!("\x1B[2J\x1B[1;1H"); 
+}
+
+pub fn successes_beh()
+{
+    let mut i: usize=0;
+    let cnt_test: usize=get_count_tests();
+    let mut suc_test: usize=0;
+    let mut not_suc_test: usize=0;
+    //c like
+    while i < cnt_test
+    {
+        let g_test: Option<Test> = get_test(i);
+        match g_test
+        {
+            None => {},
+            Some(x) =>
+            {
+                if x.result
+                {
+                    suc_test+=1;
+                }
+                else 
+                {
+                    not_suc_test+=1;
+                }
+            }
+        }
+        i+=1;
+    }
+    let mut diff: usize=0;
+    if suc_test > not_suc_test
+    {
+        diff=suc_test-not_suc_test;
+    }
+    else 
+    {
+        diff=not_suc_test-suc_test;
+    }
+    if not_suc_test > 0
+    {
+        std::process::exit(diff.try_into().unwrap_or(1));
+    }
 }
 
 pub fn add_test(test: Test)
