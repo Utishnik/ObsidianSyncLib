@@ -8,33 +8,72 @@ use std::sync::atomic::AtomicU64;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 use std::fmt;
+use crate::debug_println; 
 
-struct ArgsFmt
+pub struct ArgsFmt
 {
     args: Vec<String>,
     cnt_args: usize,
 }
 
-enum StreamPrint
+pub enum StreamPrint
 {
     StdOut,
     StdErr,
 }
 
+impl StreamPrint
+{
+    pub fn as_str(&self) -> String
+    {
+        match self
+        {
+            StreamPrint::StdErr => "stderr".to_string(),
+            StreamPrint::StdOut => "stdout".to_string(),
+        }
+    }
+}
+
+impl StreamPrint
+{
+    pub fn str_to_self(&self,str: &str) -> Result<StreamPrint,()>
+    {
+        let res: StreamPrint  = match &str
+        {
+            &"stderr" => {StreamPrint::StdErr},
+            &"stdout" => {StreamPrint::StdOut},
+            _ => 
+            {
+                return Err(());
+            },
+        };
+        Ok(res)
+    }
+}
+
 impl ArgsFmt
 {
-    fn new() -> Self
+    pub fn new() -> Self
     {
         Self { args: Vec::new(), cnt_args: 0}
     }
 
-    fn add <T:fmt::Display> (&mut self,arg: T)
+    pub fn add <T:fmt::Display> (&mut self,arg: T)
     {
         self.args.push(format!("{}", arg));
         self.cnt_args+=1;
     }
 
-    fn first(&self) -> Option<String>
+    pub fn debug_print(&self)
+    {
+        debug_println!("ArgsFmt args: ");
+        for i in self.args.iter()
+        {
+           debug_println!("{};", i);
+        }
+    }
+
+    pub fn first(&self) -> Option<String>
     {
         self.args.first().cloned()
     }//todo использовать не только first но и другие значение например следуйщиее целое число
@@ -44,18 +83,19 @@ impl ArgsFmt
     //и потом идут цвета каждого вывода
     //first будет означать кого типа выводить обычных stdout или поток ошибок 
 
-    fn get_args_owned(&self) -> Vec<String>
+    pub fn get_args_owned(&self) -> Vec<String>
     {
         self.args.clone()
     }
 
-    fn get_args_ref(&self) -> &[String]
+    pub fn get_args_ref(&self) -> &[String]
     {
         &self.args
     }
 }
 
-macro_rules! args
+#[macro_export]
+macro_rules! argsfmt
 {
     ($($arg:expr),* $(,)?) => 
     {{
@@ -69,10 +109,38 @@ macro_rules! args
 
 //todo функции серелизации и десерелизации stdout stderr
 
+pub fn fmt_args_parse(args: &[String]) -> Result<(),String>
+{
+    let mut stream_type: StreamPrint=StreamPrint::StdOut;
+    for item in args.to_vec().iter().enumerate()
+    {
+        let (i,str) : (usize,&String) = item;
+        if i == 0
+        {
+            let state: Result<StreamPrint, ()> = stream_type.str_to_self(str);
+            match state
+            {
+                Ok(v) => 
+                {
+                    stream_type=v
+                }
+                Err(_) => 
+                {
+                    return Err("parse stream error".to_string());
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
 fn private_printing_manage(args: fmt::Arguments)
 {
-    let patern: String = args.as_str().unwrap().to_string();//contains
-    let str_args: String = args.to_string();
+    //let patern: String = args.as_str().unwrap().to_string();//contains
+    let argsfmt: ArgsFmt = argsfmt!(args);
+    let args: Vec<String> = argsfmt.get_args_owned();
+    let patern: String=" ".to_string();
+    let str_args: String = patern.to_string();
     let find_state: bool = false;
 }
 
