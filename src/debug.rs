@@ -1,6 +1,8 @@
 use std::fmt::Debug;
 use std::fs::File;
+use std::i64::MAX;
 use std::io::Write;
+use std::num::ParseIntError;
 use std::sync::Mutex;
 use std::sync::Arc;
 use std::sync::OnceLock;
@@ -38,10 +40,10 @@ impl StreamPrint
 {
     pub fn str_to_self(&self,str: &str) -> Result<StreamPrint,()>
     {
-        let res: StreamPrint  = match &str
+        let res: StreamPrint  = match str
         {
-            &"stderr" => {StreamPrint::StdErr},
-            &"stdout" => {StreamPrint::StdOut},
+            "stderr" => {StreamPrint::StdErr},
+            "stdout" => {StreamPrint::StdOut},
             _ => 
             {
                 return Err(());
@@ -62,6 +64,11 @@ impl ArgsFmt
     {
         self.args.push(format!("{}", arg));
         self.cnt_args+=1;
+    }
+
+    pub fn get_len(&self) -> usize
+    {
+        self.cnt_args
     }
 
     pub fn debug_print(&self)
@@ -94,6 +101,39 @@ impl ArgsFmt
     }
 }
 
+impl Iterator for ArgsFmt
+{
+    type Item = String;
+    fn next(&mut self) -> Option<Self::Item> 
+    {
+        let len: usize = self.get_len();
+        let mut i: usize = len;
+        'out:
+        while i>0
+        {
+            let ret: Option<&String> = self.get_args_ref().get(i).clone();
+            if ret.is_none()
+            {
+                break 'out;
+            }
+            else 
+            {
+                i+=1;
+                return Some(ret.map_or("zxc", |v| v).to_string());
+            }
+        }
+        None
+    }
+}
+
+impl Default for ArgsFmt
+{
+    fn default() -> Self 
+    {
+        Self::new()
+    }
+}
+
 #[macro_export]
 macro_rules! argsfmt
 {
@@ -103,6 +143,21 @@ macro_rules! argsfmt
         $(args.add($arg);)*
         args
     }};
+}
+
+fn iterate_pattern_parse(args: &[String]) -> Option<Vec<String>>
+{
+    let mut result: Vec<String> = Vec::new();
+    for i in args.iter()
+    {
+        let item: Result<i64,ParseIntError> = i.parse();
+        if item.is_err()
+        {
+            break;
+        }
+        let val = item.unwrap(); //safe
+    }
+    Some(result)
 }
 
 //todo для всех debug print/eprint метод сделать ввод в фаил и возможность воспроизведения
@@ -129,6 +184,10 @@ pub fn fmt_args_parse(args: &[String]) -> Result<(),String>
                     return Err("parse stream error".to_string());
                 }
             }
+        }
+        else 
+        {
+
         }
     }
     Ok(())

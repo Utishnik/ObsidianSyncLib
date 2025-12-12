@@ -5,7 +5,7 @@ fn test_black_list_iterator()
 {
     let test: String = AsciiSymbol::new("".to_string()).collect();
     println!("{}\n\n",test);
-    let ascii_test: String = test.bytes()
+    let ascii_test: String = test.bytes() 
         .map(|b| b.to_string())
         .collect::<Vec<_>>()
         .join(" ");
