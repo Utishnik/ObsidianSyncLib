@@ -1,25 +1,27 @@
-
 use std::str::SplitAsciiWhitespace;
 
 use obsidian_sync_lib::splitt_b_space;
-use obsidian_sync_lib::{debug::{TESTS, get_count_tests, get_test, result_list,successes_beh}, tokinezed::construction, *};
+use obsidian_sync_lib::{
+    debug::{get_count_tests, get_test, result_list, successes_beh, TESTS},
+    tokinezed::construction,
+    *,
+};
 use std::thread;
 use std::time::Duration;
 
 #[test]
-fn test()
-{
-    
+fn test() {
     let txt: String = "token struct{ }    \n\n\n  if else for ".to_string();
     //на один перенос меньше так как при первой на индекс раньше пробел
-    let result: Result<obsidian_sync_lib::tokinezed::TokenStruct, ()> = splitt_b_space(txt," \t".to_string(),None);
-    
+    let result: Result<obsidian_sync_lib::tokinezed::TokenStruct, ()> =
+        splitt_b_space(txt, " \t".to_string(), None);
+
     /*
     for ts in result.clone().unwrap().tok_values
     {
         println!("{}",ts);
     }
-    
+
     let mut test_str: String = "".to_string();
     println!("state: {}",test_str.is_empty());
     test_str.push('c');
@@ -30,12 +32,11 @@ fn test()
     clear_console();
     */
     let len: usize = result.clone().unwrap().tok_lines_number.len();
-    println!("capacity:\t{}",len);
-    test_assert!(len!=0,true);
+    println!("capacity:\t{}", len);
+    test_assert!(len != 0, true);
     clear_console();
-    for ls in result.clone().unwrap().tok_lines_number
-    {
-        println!("\n---- {} -----\n",ls);
+    for ls in result.clone().unwrap().tok_lines_number {
+        println!("\n---- {} -----\n", ls);
     }
     successes_beh();
 }
