@@ -18,8 +18,9 @@ git2 = "0.20.2"
 validator = { version = "0.16", features = ["derive"] }
 dotenvy = "0.15.7"
 backtrace = "0.3"
-
-
+quote = "1.0"
+syn = "2.0"
+proc-macro2 = "1.0"
 
 [[test]]
 name = "test_tokinezer"  
