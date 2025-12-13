@@ -578,22 +578,23 @@ macro_rules! test_assert {
 
                 if !(*left_val == *right_val)
                 {
-                    eprintln!();
-                    eprintln!("{}══════════════════════════════════════════════════════════{}", RED, RESET);
-                    eprintln!("{} ✗ ТЕСТ НЕ ПРОЙДЕН{}", RED, RESET);
-                    eprintln!("{} Ожидалось: {:?}{}", YELLOW, right_val, RESET);
-                    eprintln!("{} Получено:  {:?}{}", RED, left_val, RESET);
-                    eprintln!("{}══════════════════════════════════════════════════════════{}\n", RED, RESET);
+                    println!();
+                    println!("{}══════════════════════════════════════════════════════════{}", RED, RESET);
+                    println!("{} ✗ ТЕСТ НЕ ПРОЙДЕН{}", RED, RESET);
+                    println!("{} Ожидалось: {:?}{}", YELLOW, right_val, RESET);
+                    println!("{} Получено:  {:?}{}", RED, left_val, RESET);
+                    println!("{}══════════════════════════════════════════════════════════{}\n", RED, RESET);
                     result_test=false;
+                    //todo чекнуть почему при eprintln! может ломматься вывод 
                 }
                 else
                 {
-                    eprintln!();
-                    eprintln!("{}══════════════════════════════════════════════════════════{}", GREEN, RESET);
-                    eprintln!("{} ✔ ТЕСТ ПРОЙДЕН{}", GREEN, RESET);
-                    eprintln!("{} Ожидалось: {:?}{}", YELLOW, right_val, RESET);
-                    eprintln!("{} Получено:  {:?}{}", GREEN, left_val, RESET);
-                    eprintln!("{}══════════════════════════════════════════════════════════{}\n", GREEN, RESET);
+                    println!();
+                    println!("{}══════════════════════════════════════════════════════════{}", GREEN, RESET);
+                    println!("{} ✔ ТЕСТ ПРОЙДЕН{}", GREEN, RESET);
+                    println!("{} Ожидалось: {:?}{}", YELLOW, right_val, RESET);
+                    println!("{} Получено:  {:?}{}", GREEN, left_val, RESET);
+                    println!("{}══════════════════════════════════════════════════════════{}\n", GREEN, RESET);
                     result_test=true;
                 }
                 test.result=result_test;

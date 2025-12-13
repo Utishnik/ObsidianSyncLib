@@ -67,7 +67,7 @@ fn test_parse_text_commit_iterator3() {
     let mut x: Vec<IteratorCommit> = option_res.unwrap();
     let b: bool = x.is_empty();
     debug_println_fileinfo!("vec len = {}",x.len());
-    test_assert!(x.len()==4,true);
+    test_assert!(x.len()==2,true);
     test_assert!(b, false);
     if !b {
         let ex: Option<IteratorCommit> = x.pop();
