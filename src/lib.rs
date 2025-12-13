@@ -95,7 +95,7 @@ pub fn splitt_b_space(
         //все эти пробелы не считались как отдельный токен и не увеличивался каждый раз индекс типо токена 2 
         // а в массиве на 10 индекси из пробелов если текущий символ пропуск и предыдущий тоже то
         //мы не увеличиваем индекс
-        for c in str.chars() 
+        for c in str.chars()
         {
             let pred_is_empty: bool = !toks.tok_values[idx].is_empty();
             //todo: для таких мест сделать две версии одна для больших массивов другая нет
@@ -127,7 +127,6 @@ pub fn splitt_b_space(
                 }
             }
             skip_syms_iter=false;
-            
             debug_println!("LEN {}\n", toks.tok_values[idx].len());
             debug_println!("!!!splitt_b_space idx  {}\t",idx);
             let res: Result<(), String> = toks.add_ch(idx, c);
@@ -136,7 +135,7 @@ pub fn splitt_b_space(
                 let size: usize = toks.tok_values.len();
                 //надо сделать типо вместо len количество иницилизированых если больше 75% уже занято увеличить в два раза
             }
-            else 
+            else
             {
                 toks.tok_values.insert(idx, c.to_string());
             }

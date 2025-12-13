@@ -122,29 +122,82 @@ macro_rules! argsfmt
     }};
 }
 
-fn iterate_cnt_parse(args: &[String]) -> Option<Vec<i64>> {
-    let mut result: Vec<i64> = Vec::new();
+pub const RED: &str = "\x1b[31m";
+pub const GREEN: &str = "\x1b[32m";
+pub const RESET: &str = "\x1b[0m";
+pub const YELLOW: &str = "\x1b[33m";
+
+pub enum Colors {
+    Red,
+    Yellow,
+    Green,
+    Blue,
+    Reset,
+}
+
+impl Colors {
+    fn as_str(&self) -> String {
+        match self {
+            Self::Red => RED.to_string(),
+            Self::Green => GREEN.to_string(),
+            Self::Reset => RESET.to_string(),
+            Self::Yellow => YELLOW.to_string(),
+            _ => todo!(),
+        }
+    }
+}
+
+pub struct ParseCntColor {
+    cnt: Vec<i64>,
+    color: Vec<Colors>,
+}
+
+impl ParseCntColor {
+    fn new() -> Self {
+        Self {
+            cnt: Vec::new(),
+            color: Vec::new(),
+        }
+    }
+
+    fn push_cnt(&mut self, val: i64) {
+        self.cnt.push(val);
+    }
+
+    fn push_color(&mut self, val: Colors) {
+        self.color.push(val);
+    }
+}
+
+fn iterate_cnt_color_parse(args: &[String]) -> Option<ParseCntColor> {
+    let mut result: ParseCntColor = ParseCntColor::new();
     for i in args.iter() {
         let item: Result<i64, ParseIntError> = i.parse();
         if item.is_err() {
             break;
         }
         let val: i64 = item.unwrap(); //safe
-        result.push(val);
+        result.push_cnt(val);
     }
     Some(result)
 }
 
 fn iterate_pattern_parse(args: &[String]) -> Option<Vec<String>> {
     let mut result: Vec<String> = Vec::new();
-    for i in args.iter() {
-        let item: Result<i64, ParseIntError> = i.parse();
+    let mut break_index: usize = 0;
+    for it in args.iter().enumerate() {
+        let (i, str): (usize, &String) = it;
+
+        let item: Result<i64, ParseIntError> = str.parse();
         if item.is_ok() {
+            break_index = i;
             break;
         }
-        let val: &String = i;
+        let val: &String = str;
         result.push(val.to_string());
     }
+
+    for i in args.iter().skip(break_index - 1) {}
     Some(result)
 }
 
