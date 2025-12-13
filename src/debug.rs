@@ -1,4 +1,5 @@
 use crate::debug_println;
+use crate::debug_println_fileinfo;
 use std::fmt;
 use std::fmt::Debug;
 use std::fs::File;
@@ -146,8 +147,7 @@ impl Colors {
         }
     }
 
-    pub fn str_to_color(str: &str) -> Option<Self>
-    {
+    pub fn str_to_color(str: &str) -> Option<Self> {
         let result: Self = match str {
             RED => Self::Red,
             GREEN => Self::Green,
@@ -159,7 +159,8 @@ impl Colors {
     }
 }
 
-pub struct ParseCntColor { //todo инкапсуляция
+pub struct ParseCntColor {
+    //todo инкапсуляция
     cnt: Vec<i64>,
     color: Vec<Colors>,
 }
@@ -181,18 +182,63 @@ impl ParseCntColor {
     }
 }
 
-pub enum IterateParseError
-{
+pub enum IterateParseError {
     PatternErr(String),
     ColorErr(String),
     CntErr(String),
 }
 
-fn iterate_cnt_color_parse(args: &[String],color_err: &mut str) -> Option<ParseCntColor> {
+pub struct IterateParse {
+    end_pattern: Option<usize>,
+    cnt_end: Option<usize>,
+    color_end: Option<usize>,
+}
+
+impl IterateParse {
+    pub fn new() -> Self {
+        Self {
+            end_pattern: None,
+            cnt_end: None,
+            color_end: None,
+        }
+    }
+
+    pub fn set_end_pattern(&mut self,idx: Option<usize>){
+        self.end_pattern=idx;
+    }
+
+    pub fn set_cnt_end(&mut self,idx: Option<usize>){
+        self.cnt_end=idx;
+    }
+    
+    pub fn set_color_end(&mut self,idx: Option<usize>){
+        self.color_end=idx;
+    }
+
+    pub fn get_end_pattern_idx(&self) -> Option<usize> {
+        self.end_pattern
+    }
+
+    pub fn get_cnt_end_idx(&self) -> Option<usize> {
+        self.cnt_end
+    }
+
+    pub fn get_color_end_idx(&self) -> Option<usize> {
+        self.color_end
+    }
+}
+
+impl Default for IterateParse{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+fn iterate_cnt_color_parse(args: &[String], color_err: &mut String) -> Option<ParseCntColor> {
     let mut result: ParseCntColor = ParseCntColor::new();
     let mut break_index: usize = 0;
     for i in args.iter().enumerate() {
-        let (iter,str):(usize,&String) = i;
+        let (iter, str): (usize, &String) = i;
         let item: Result<i64, ParseIntError> = str.parse();
         if item.is_err() {
             break_index = iter;
@@ -202,52 +248,67 @@ fn iterate_cnt_color_parse(args: &[String],color_err: &mut str) -> Option<ParseC
         result.push_cnt(val);
     }
     let mut parse_color: Colors;
-    if break_index < 1 {
+    if break_index < 1 || args.len() < (break_index - 1) {
+        debug_println!("break_index = {}\targs.len() = {}", break_index, args.len());
         return None; // тут надежда на обработку ошибки в функции которая
-        //эту вызывает CntErr
+                     //эту вызывает CntErr
     }
-    'skip_col:
-    for i in args.iter().skip(break_index - 1) {
-        match Colors::str_to_color(i){
-            Some(color) => parse_color=color,
+    let mut cnt_parse_color: usize = 0;
+    'skip_col: for i in args.iter().skip(break_index - 1) {
+        match Colors::str_to_color(i) {
+            Some(color) => parse_color = color,
             None => {
-                if args.len() >= (break_index - 1){
-                    if args.len() == (break_index - 1){
-                        break 'skip_col;//цвета необязательны
+                if args.len() >= (break_index - 1) {
+                    if args.len() == (break_index - 1) {
+                        break 'skip_col; //цвета необязательны
                     }
-                    //todo тут надо будет сравнить сколько мы цветов спрасили и сколько их всего и типо найти проблемные
+                    if (args.len() - break_index + 1) != cnt_parse_color {
+                        *color_err = format!(
+                            "args.len() = {}  break_index = {}  cnt_parse_color = {}",
+                            args.len(),
+                            break_index,
+                            cnt_parse_color
+                        );
+                        debug_println_fileinfo!("{}", color_err);
+                    }
                 }
                 break;
-            },
+            }
         }
-
+        cnt_parse_color += 1;
         result.push_color(parse_color);
-    } //тут чтоб обработать надо чекнуть 
+    } //тут чтоб обработать надо чекнуть
     Some(result)
 }
 
 fn iterate_pattern_parse(args: &[String]) -> Option<Vec<String>> {
     let mut result: Vec<String> = Vec::new();
-    for str in args.iter() {
+    let mut index_break: usize = 0; //нужно для того чтобы знать сколько скипнуть при парсинг цветов и количества
+    for item in args.iter().enumerate() {
+        let (i, str): (usize, &String) = item;
         let item: Result<i64, ParseIntError> = str.parse();
         if item.is_ok() {
+            index_break = i;
             break;
         }
         let val: &String = str;
         result.push(val.to_string());
     }
-    if !result.is_empty(){
+    if !result.is_empty() {
         return Some(result);
     }
     None
 }
 
-pub fn iterate_parse(args: &[String]) -> Result<(),IterateParseError>
-{
+pub fn iterate_parse(args: &[String]) -> Result<(), IterateParseError> {
     let patter_result: Option<Vec<String>> = iterate_pattern_parse(args);
-    let match_pattern: Vec<String> = match patter_result{
+    let match_pattern: Vec<String> = match patter_result {
         Some(x) => x,
-        None => return Err(IterateParseError::PatternErr("Empty pattern Vec".to_string())),
+        None => {
+            return Err(IterateParseError::PatternErr(
+                "Empty pattern Vec".to_string(),
+            ))
+        }
     };
     Ok(())
 }

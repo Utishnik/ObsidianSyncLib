@@ -42,7 +42,7 @@ impl fmt::Display for ParserError {
     }
 }
 
-pub static CONFIG: LazyLock<Config::Config> = LazyLock::new(|| Config::Config::new());
+pub static CONFIG: LazyLock<Config::Config> = LazyLock::new(Config::Config::new);
 
 //todo логическая ошибка с непривальным возвравтом
 pub fn parse_string(toks: &TokenStruct, index: usize) -> Result<Token_String, String> {

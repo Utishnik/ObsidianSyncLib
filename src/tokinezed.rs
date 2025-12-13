@@ -105,9 +105,8 @@ impl construction {
             Some(_) => {}
         }
 
-        match end_option {
-            None => end_none = true,
-            Some(_) => {}
+        if end_option == None { 
+            end_none = true 
         }
         !start_none && !end_none
     }
@@ -247,7 +246,7 @@ impl TokenStruct {
 
     pub fn safe_add_ln_num(&mut self, idx: usize, line: u64) -> Result<(), String> {
         let result: Result<(), String> = self.add_ln_num(idx, line);
-        if let Err(_) = result {
+        if result.is_err() {
             debug_println_fileinfo!("[safe_add_ln_num capacity up] idx = {}", idx);
             let mut capacity: usize = self.tok_lines_number.capacity();
             if capacity < CAPACITY_UP_SIZE {
