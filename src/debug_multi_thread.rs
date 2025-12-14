@@ -24,15 +24,53 @@ pub struct TypedResult {
 
 pub enum TypedValue {
     I32(i32),
+    I64(i64),
+    F64(f64),
+    USIZE(usize),
     String(String),
     Bool(bool),
     // другие типы...
 }
 
-impl TypedValue{
-    pub fn as_i32(&self) -> Option<i32>{
-        match self{
+impl TypedValue {
+    pub fn as_i32(&self) -> Option<i32> {
+        match self {
             TypedValue::I32(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    pub fn as_i64(&self) -> Option<i64> {
+        match self {
+            TypedValue::I64(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    pub fn as_usize(&self) -> Option<usize> {
+        match self {
+            TypedValue::USIZE(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    pub fn f64(&self) -> Option<f64> {
+        match self {
+            TypedValue::F64(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    pub fn as_string(&self) -> Option<String> {
+        match self {
+            TypedValue::String(v) => Some(v.clone()),
+            _ => None,
+        }
+    }
+
+    pub fn as_bool(&self) -> Option<bool> {
+        match self {
+            TypedValue::Bool(v) => Some(*v),
             _ => None,
         }
     }
@@ -44,9 +82,9 @@ impl TypedResult {
             t if t == TypeId::of::<i32>() => {
                 self.downcast_ref::<i32>().map(|v| TypedValue::I32(*v))
             }
-            t if t == TypeId::of::<String>() => {
-                self.downcast_ref::<String>().map(|v| TypedValue::String(v.clone()))
-            }
+            t if t == TypeId::of::<String>() => self
+                .downcast_ref::<String>()
+                .map(|v| TypedValue::String(v.clone())),
             t if t == TypeId::of::<bool>() => {
                 self.downcast_ref::<bool>().map(|v| TypedValue::Bool(*v))
             }
@@ -64,11 +102,11 @@ impl TypedResult {
         }
     }
 
-    pub fn get_value(&self) ->  Option<Box<dyn Any + '_>>{
-        let res: Result<_, TypedResult> = Ok(self.downcast_ref::<i32>()); // todo более общий случай через get_typed_value
-        match res{
-            Ok(x) => {Some(Box::new(x))},
-            Err(e) => {None}
+    pub fn get_value(&self) -> Result<Option<Box<dyn Any + '_>>, TypedResult> {
+        let res: Result<_, TypedResult> = Ok(self.get_typed_value());
+        match res {
+            Ok(x) => Ok(Some(Box::new(x))),
+            Err(e) => Err(e),
         }
     }
 
