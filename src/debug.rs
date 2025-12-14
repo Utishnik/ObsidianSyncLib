@@ -203,16 +203,16 @@ impl IterateParse {
         }
     }
 
-    pub fn set_end_pattern(&mut self,idx: Option<usize>){
-        self.end_pattern=idx;
+    pub fn set_end_pattern(&mut self, idx: Option<usize>) {
+        self.end_pattern = idx;
     }
 
-    pub fn set_cnt_end(&mut self,idx: Option<usize>){
-        self.cnt_end=idx;
+    pub fn set_cnt_end(&mut self, idx: Option<usize>) {
+        self.cnt_end = idx;
     }
-    
-    pub fn set_color_end(&mut self,idx: Option<usize>){
-        self.color_end=idx;
+
+    pub fn set_color_end(&mut self, idx: Option<usize>) {
+        self.color_end = idx;
     }
 
     pub fn get_end_pattern_idx(&self) -> Option<usize> {
@@ -228,7 +228,7 @@ impl IterateParse {
     }
 }
 
-impl Default for IterateParse{
+impl Default for IterateParse {
     fn default() -> Self {
         Self::new()
     }
@@ -585,7 +585,7 @@ macro_rules! test_assert {
                     println!("{} Получено:  {:?}{}", RED, left_val, RESET);
                     println!("{}══════════════════════════════════════════════════════════{}\n", RED, RESET);
                     result_test=false;
-                    //todo чекнуть почему при eprintln! может ломматься вывод 
+                    //todo чекнуть почему при eprintln! может ломматься вывод
                 }
                 else
                 {

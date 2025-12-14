@@ -359,9 +359,6 @@ dependencies = [
  "backtrace",
  "dotenvy",
  "git2",
- "proc-macro2",
- "quote",
- "syn 2.0.111",
  "validator",
 ]
 

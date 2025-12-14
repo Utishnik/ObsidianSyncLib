@@ -105,8 +105,8 @@ impl construction {
             Some(_) => {}
         }
 
-        if end_option == None { 
-            end_none = true 
+        if end_option == None {
+            end_none = true
         }
         !start_none && !end_none
     }

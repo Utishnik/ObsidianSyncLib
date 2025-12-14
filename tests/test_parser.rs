@@ -14,8 +14,8 @@ fn test_parse_text_commit_iterator() {
     test_assert!(option_res.is_some(), true);
     let mut x: Vec<IteratorCommit> = option_res.unwrap();
     let b: bool = x.is_empty();
-    debug_println_fileinfo!("vec len = {}",x.len());
-    test_assert!(x.len()==3,true);
+    debug_println_fileinfo!("vec len = {}", x.len());
+    test_assert!(x.len() == 3, true);
     test_assert!(b, false);
     if !b {
         let ex: Option<IteratorCommit> = x.pop();
@@ -39,8 +39,8 @@ fn test_parse_text_commit_iterator2() {
     test_assert!(option_res.is_some(), true);
     let mut x: Vec<IteratorCommit> = option_res.unwrap();
     let b: bool = x.is_empty();
-    debug_println_fileinfo!("vec len = {}",x.len());
-    test_assert!(x.len()==4,true);
+    debug_println_fileinfo!("vec len = {}", x.len());
+    test_assert!(x.len() == 4, true);
     test_assert!(b, false);
     if !b {
         let ex: Option<IteratorCommit> = x.pop();
@@ -58,16 +58,18 @@ fn test_parse_text_commit_iterator2() {
 #[test]
 fn test_parse_text_commit_iterator3() {
     let mut res: Vec<IteratorCommit> = Vec::new();
-    let option_res: Option<Vec<IteratorCommit>> =
-        parse_text_commit_iterator("ghghghaaa553gh {{iter} {aaa} {zxc}} {iter} gggghhg7_hhth", 0);
-        //todo такой синтаксис {{}} это значит если например итератор по времени и по кол ву изменений и типо когда оба условия
-        // тоесть прошло например 5 мин и 2 изменения
+    let option_res: Option<Vec<IteratorCommit>> = parse_text_commit_iterator(
+        "ghghghaaa553gh {{iter} {aaa} {zxc}} {iter} gggghhg7_hhth",
+        0,
+    );
+    //todo такой синтаксис {{}} это значит если например итератор по времени и по кол ву изменений и типо когда оба условия
+    // тоесть прошло например 5 мин и 2 изменения
 
     test_assert!(option_res.is_some(), true);
     let mut x: Vec<IteratorCommit> = option_res.unwrap();
     let b: bool = x.is_empty();
-    debug_println_fileinfo!("vec len = {}",x.len());
-    test_assert!(x.len()==2,true);
+    debug_println_fileinfo!("vec len = {}", x.len());
+    test_assert!(x.len() == 2, true);
     test_assert!(b, false);
     if !b {
         let ex: Option<IteratorCommit> = x.pop();
@@ -81,6 +83,3 @@ fn test_parse_text_commit_iterator3() {
         std::process::exit(1);
     }
 }
-
-
-

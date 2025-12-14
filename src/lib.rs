@@ -23,6 +23,7 @@ use debug::*;
 pub use debug::*;
 pub mod back_trace_debug;
 pub mod black_list_iterator;
+pub mod debug_multi_thread;
 
 #[derive(Debug)]
 enum Cfg_Error {
