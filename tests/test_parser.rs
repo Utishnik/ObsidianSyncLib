@@ -5,20 +5,23 @@ use obsidian_sync_lib::{
     *,
 };
 
-
 #[test]
 fn test_parse_text_commit_iterator() {
     let start_iter: String = "{{".to_string();
     let end_iter: String = "}}".to_string();
     let mut res: Vec<IteratorCommit> = Vec::new();
-    let option_res: Option<Vec<IteratorCommit>> =
-        parse_text_commit_iterator("ghghghaaa553gh {{}} {zxc} {iter} gggghhg7_hhth", 0,start_iter,end_iter);
+    let option_res: Option<Vec<IteratorCommit>> = parse_text_commit_iterator(
+        "ghghghaaa553gh {{}} {{iter}} {zxc}  gggghhg7_hhth",
+        0,
+        start_iter,
+        end_iter,
+    );
 
     test_assert!(option_res.is_some(), true);
     let mut x: Vec<IteratorCommit> = option_res.unwrap();
     let b: bool = x.is_empty();
     debug_println_fileinfo!("vec len = {}", x.len());
-    test_assert!(x.len() == 3, true);
+    test_assert!(x.len() == 2, true);
     test_assert!(b, false);
     if !b {
         let ex: Option<IteratorCommit> = x.pop();
@@ -41,7 +44,9 @@ fn test_parse_text_commit_iterator2() {
     let mut res: Vec<IteratorCommit> = Vec::new();
     let option_res: Option<Vec<IteratorCommit>> = parse_text_commit_iterator(
         "ghghghaaa553gh {{iter}} {{aaa}} {{zxc}} {{iter}} gggghhg7_hhth",
-        0,start_iter,end_iter,
+        0,
+        start_iter,
+        end_iter,
     );
 
     test_assert!(option_res.is_some(), true);
