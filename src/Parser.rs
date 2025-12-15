@@ -404,10 +404,16 @@ pub fn parse_set_text_commit(toksref: &TokenStruct, index: usize) -> Result<Stri
     ))
 }
 
-pub fn parse_text_commit_iterator(str: &str, index: usize) -> Option<Vec<IteratorCommit>> {
+pub fn parse_text_commit_iterator(
+    str: &str,
+    index: usize,
+    start_commit_iter: String,
+    end_commit_iter: String,
+) -> Option<Vec<IteratorCommit>> {
     let mut iterators: Vec<IteratorCommit> = Vec::new();
     let mut index_clone: usize = index;
     let str_len: usize = str.len();
+    let len_end_commit_iter: usize = end_commit_iter.len();
 
     let mut find_decl = |str: String| -> Option<IteratorDecl> {
         let mut decl: IteratorDecl = IteratorDecl {
@@ -438,7 +444,7 @@ pub fn parse_text_commit_iterator(str: &str, index: usize) -> Option<Vec<Iterato
             &str,
             &mut index_clone,
             &ignored_symbols,
-            "{{",
+            &start_commit_iter,
             &mut iter_construct,
         );
         if skip_result {
@@ -459,11 +465,12 @@ pub fn parse_text_commit_iterator(str: &str, index: usize) -> Option<Vec<Iterato
             &str,
             &mut index_clone,
             &ignored_symbols,
-            "}}",
+            &end_commit_iter,
             &mut iter_construct,
         );
+        index_clone += len_end_commit_iter;
         if skip_result {
-            decl.end = iter_construct.end?;
+            decl.end = iter_construct.end?; //
             iterator.msgpos = decl;
         } else {
             debug_println_fileinfo!(
