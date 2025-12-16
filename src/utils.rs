@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::default;
 
 use crate::debug_eprintln_fileinfo;
@@ -24,6 +25,32 @@ pub fn unique_sym_to_str(str1: &str, str2: &str) -> String {
     }
 
     result
+}
+
+//O(n*m)
+pub fn remove_duplicate_chars_simple_nm(s: &str) -> String {
+    if s.len() > 64 {
+        debug_println_fileinfo!("remove_duplicate_chars_simple_nm s.len() = {}\nможет лучше использовать remove_duplicate_chars_simple_n?",
+        s.len());
+    }
+    let mut result = String::new();
+
+    for ch in s.chars() {
+        if !result.contains(ch) {
+            result.push(ch);
+        }
+    }
+    result
+}
+
+//O(n)
+pub fn remove_duplicate_chars_simple_n(s: &str) -> String {
+    if s.len() < 64 {
+        debug_println_fileinfo!("remove_duplicate_chars_simple_n s.len() = {}\nможет нужно remove_duplicate_chars_simple_nm?",
+        s.len());
+    }
+    let mut result = HashSet::new();
+    s.chars().filter(|&c| result.insert(c)).collect()
 }
 
 pub fn unique_sym_to_vec_str(strs: &[String]) -> String {
@@ -96,9 +123,10 @@ where
 }
 
 pub fn convert_vec_to_owned<T>(vec: Vec<&T>) -> Vec<T::Owned>
-where T: /*std::clone::Clone +*/ std::cmp::PartialEq + ToOwned + ?Sized
+where
+    T: std::cmp::PartialEq + ToOwned + ?Sized,
 {
-    let result: Vec<<T as ToOwned>::Owned>=vec.into_iter().map(|t| t.to_owned()).collect();
+    let result: Vec<<T as ToOwned>::Owned> = vec.into_iter().map(|t| t.to_owned()).collect();
     result
 }
 //надо для clone
