@@ -117,7 +117,7 @@ impl IteratorCommitType {
         match self {
             IteratorCommitType::None => "",
             IteratorCommitType::Numeration => "num",
-            IteratorCommitType::Time => "time",
+            IteratorCommitType::Time => "time", //{{time:(as_millis)}}
             IteratorCommitType::CustomScript => "JS", //наверное буду использовать boa js
         }
     }
@@ -404,6 +404,8 @@ pub fn parse_set_text_commit(toksref: &TokenStruct, index: usize) -> Result<Stri
         commit_text
     ))
 }
+
+pub fn parse_text_commit_iter_body() {}
 
 pub fn parse_text_commit_iterator(
     str: &str,

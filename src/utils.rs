@@ -1,9 +1,47 @@
 use std::collections::HashSet;
 use std::default;
+use std::time::Instant;
 
 use crate::debug_eprintln_fileinfo;
 use crate::debug_println;
 use crate::debug_println_fileinfo;
+
+fn days_to_ms(days: u128) -> u128 {
+    days * 24 * 3600 * 1000
+}
+fn hours_to_ms(hours: u128) -> u128 {
+    hours * 3600 * 1000
+}
+fn minutes_to_ms(minutes: u128) -> u128 {
+    minutes * 60 * 1000
+}
+fn seconds_to_ms(seconds: u128) -> u128 {
+    seconds * 1000
+}
+fn ms_to_ms(miliseconds: u128) -> u128{
+    miliseconds * 1
+}
+
+pub fn check_period_passed(prev_time: Instant, diff_time: u128) -> bool {
+    let duration: std::time::Duration = prev_time.elapsed();
+    if duration.as_millis() > diff_time {
+        //нужно что то точнее милисекунд?
+        debug_println_fileinfo!("check_time_diff time diff: {}", duration.as_millis());
+        return true;
+    }
+    false
+}
+//память нынче дорогая(
+fn time_period_set(d: u128,h: u128, m: u128, s: u128, ms: u128) -> u128 {
+    let result: u128 = days_to_ms(d) + hours_to_ms(h) + minutes_to_ms(m)+
+    seconds_to_ms(s) + ms_to_ms(ms);
+    result
+}
+
+pub fn get_time() -> Instant {
+    let time: Instant = Instant::now();
+    time
+}
 
 pub fn unique_sym_to_str(str1: &str, str2: &str) -> String {
     if str1.is_empty() {
