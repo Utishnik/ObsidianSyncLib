@@ -6,20 +6,83 @@ use crate::debug_eprintln_fileinfo;
 use crate::debug_println;
 use crate::debug_println_fileinfo;
 
+const MILLIS_PER_MILLIS: u128 = 1;
+const MILLIS_PER_SECOND: u128 = 1000;
+const MILLIS_PER_MINUTE: u128 = 60 * MILLIS_PER_SECOND; // 60,000
+const MILLIS_PER_HOUR: u128 = 60 * MILLIS_PER_MINUTE; // 3,600,000
+const MILLIS_PER_DAY: u128 = 24 * MILLIS_PER_HOUR; // 86,400,000
+
+pub struct TimePoint {
+    days: u128,
+    hours: u128,
+    minutes: u128,
+    seconds: u128,
+    miliseconds: u128,
+}
+
+impl TimePoint {
+    pub fn new(days: u128, hours: u128, minutes: u128, seconds: u128, miliseconds: u128) -> Self {
+        Self {
+            days,
+            hours,
+            minutes,
+            seconds,
+            miliseconds,
+        }
+    }
+    pub fn miliseconds_to_time_point(miliseconds: u128) -> Self {
+        let mut clone_miliseconds: u128 = miliseconds;
+        let days: u128 = clone_miliseconds / MILLIS_PER_DAY;
+        clone_miliseconds -= days * MILLIS_PER_DAY;
+        let hours: u128 = clone_miliseconds / MILLIS_PER_HOUR;
+        clone_miliseconds -= hours * MILLIS_PER_HOUR;
+        let minutes: u128 = clone_miliseconds / MILLIS_PER_MINUTE;
+        clone_miliseconds -= minutes * MILLIS_PER_MINUTE;
+        let seconds: u128 = clone_miliseconds / MILLIS_PER_SECOND;
+        clone_miliseconds -= seconds * MILLIS_PER_SECOND;
+        let miliseconds: u128 = clone_miliseconds / MILLIS_PER_MILLIS;
+        clone_miliseconds -= miliseconds;
+        debug_println!(
+            "days {} hours {} minutes {} seconds {} mills {}",
+            days,
+            hours,
+            minutes,
+            seconds,
+            miliseconds
+        );
+        Self {
+            days,
+            hours,
+            minutes,
+            seconds,
+            miliseconds,
+        }
+    }
+    pub fn time_point_to_miliseconds(&self) -> u128 {
+        let mut result: u128 = 0;
+        result += self.days * MILLIS_PER_DAY;
+        result += self.hours * MILLIS_PER_HOUR;
+        result += self.minutes * MILLIS_PER_MINUTE;
+        result += self.seconds * MILLIS_PER_SECOND;
+        result += self.miliseconds * MILLIS_PER_MILLIS;
+        result
+    }
+}
+
 fn days_to_ms(days: u128) -> u128 {
-    days * 24 * 3600 * 1000
+    days * MILLIS_PER_DAY
 }
 fn hours_to_ms(hours: u128) -> u128 {
-    hours * 3600 * 1000
+    hours * MILLIS_PER_HOUR
 }
 fn minutes_to_ms(minutes: u128) -> u128 {
-    minutes * 60 * 1000
+    minutes * MILLIS_PER_MINUTE
 }
 fn seconds_to_ms(seconds: u128) -> u128 {
-    seconds * 1000
+    seconds * MILLIS_PER_SECOND
 }
-fn ms_to_ms(miliseconds: u128) -> u128{
-    miliseconds * 1
+fn ms_to_ms(miliseconds: u128) -> u128 {
+    miliseconds * MILLIS_PER_MILLIS
 }
 
 pub fn check_period_passed(prev_time: Instant, diff_time: u128) -> bool {
@@ -32,9 +95,9 @@ pub fn check_period_passed(prev_time: Instant, diff_time: u128) -> bool {
     false
 }
 //память нынче дорогая(
-fn time_period_set(d: u128,h: u128, m: u128, s: u128, ms: u128) -> u128 {
-    let result: u128 = days_to_ms(d) + hours_to_ms(h) + minutes_to_ms(m)+
-    seconds_to_ms(s) + ms_to_ms(ms);
+fn time_period_set(d: u128, h: u128, m: u128, s: u128, ms: u128) -> u128 {
+    let result: u128 =
+        days_to_ms(d) + hours_to_ms(h) + minutes_to_ms(m) + seconds_to_ms(s) + ms_to_ms(ms);
     result
 }
 

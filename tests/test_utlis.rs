@@ -1,3 +1,4 @@
+use git2::opts::get_server_timeout_in_milliseconds;
 use obsidian_sync_lib::argsfmt;
 use obsidian_sync_lib::utils::*;
 use obsidian_sync_lib::{debug::*, tokinezed::construction, *};
@@ -18,4 +19,13 @@ fn test() {
     let ostrstest = convert_vec_to_owned(strstest);
     let rt4: String = unique_sym_to_vec_str(&ostrstest);
     println!("rt4:  {}", rt4);
+}
+
+#[test]
+fn test_time() {
+    let mut tp: TimePoint = TimePoint::new(0, 1, 32, 45, 127);
+    tp = TimePoint::miliseconds_to_time_point(12200000);
+    let ms: u128 = tp.time_point_to_miliseconds();
+    println!("ms = {}", ms);
+    test_assert!(12200000 == ms, true);
 }
