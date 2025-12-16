@@ -46,3 +46,7 @@ path = "tests/debug_test.rs"
 [[test]]
 name = "multi_thread_debug_test"
 path = "tests/multi_thread_debug_test.rs"
+
+[[test]]
+name = "test_utils"
+path = "tests/test_utlis.rs"

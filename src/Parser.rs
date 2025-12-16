@@ -1,10 +1,5 @@
 use crate::{
-    black_list_iterator::{self, AsciiSymbol},
-    debug_println, debug_println_fileinfo,
-    tokinezed::{self, *},
-    AccTokCrypt::{self, SecurityParam},
-    Config,
-    DirCheck::full_check_directory,
+    AccTokCrypt::{self, SecurityParam}, Config, DirCheck::full_check_directory, black_list_iterator::{self, AsciiSymbol}, debug_println, debug_println_fileinfo, tokinezed::{self, *}, utils
 };
 
 use std::error::Error;
@@ -439,7 +434,8 @@ pub fn parse_text_commit_iterator(
             end: None,
             monolit: false,
         };
-        let ignored_symbols: String = AsciiSymbol::new("{}".to_string()).collect();
+        let us: String = utils::unique_sym_to_str(&start_commit_iter, &end_commit_iter);
+        let ignored_symbols: String = AsciiSymbol::new(us.to_string()).collect();
         let mut skip_result: bool = skip_construction(
             &str,
             &mut index_clone,

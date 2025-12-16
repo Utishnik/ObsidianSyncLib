@@ -61,7 +61,6 @@ pub fn sum_slice_len<T: std::ops::Add>(sl1: &[T], sl2: &[T]) -> usize {
     sl1.len() + sl2.len()
 }
 
-//todo через where
 pub fn unique_sym_to_vec<T>(sl1: &[T], sl2: &[T]) -> Vec<T>
 where
     T: std::ops::Add + std::clone::Clone + std::cmp::PartialEq + std::default::Default,
@@ -95,6 +94,15 @@ where
     result.resize(last_len, T::default());
     result
 }
+
+pub fn convert_vec_to_owned<T>(vec: Vec<&T>) -> Vec<T::Owned>
+where T: /*std::clone::Clone +*/ std::cmp::PartialEq + ToOwned + ?Sized
+{
+    let result: Vec<<T as ToOwned>::Owned>=vec.into_iter().map(|t| t.to_owned()).collect();
+    result
+}
+//надо для clone
+//для строк можно проще с asref сделать fn для этого
 
 //todo нужно для tinyvec?
 //todo для слайца слайцов сделать
