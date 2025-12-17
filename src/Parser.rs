@@ -424,6 +424,7 @@ pub fn parse_time(time: &str, index: &mut usize) {
 
     let state1: bool = skip_symbol(time, index, "(".to_string());
     let d: bool = skip_construction(time, index, "todo!", "d:", d_construct);
+    //skip value и ,
     let h: bool = skip_construction(time, index, "todo!", "h:", h_construct);
     let m: bool = skip_construction(time, index, "todo!", "m:", m_construct);
     let s: bool = skip_construction(time, index, "todo!", "s:", s_construct);
