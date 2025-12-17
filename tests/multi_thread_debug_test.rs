@@ -1,7 +1,7 @@
 use obsidian_sync_lib::argsfmt;
 use obsidian_sync_lib::call_functions;
 use obsidian_sync_lib::debug_multi_thread::TypedResult;
-use obsidian_sync_lib::{debug::*, tokinezed::construction, *};
+use obsidian_sync_lib::{debug::*, tokinezed::Construction, *};
 use std::any::Any;
 
 fn test_add(a: i32, b: i32) -> i32 {

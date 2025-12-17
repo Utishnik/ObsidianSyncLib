@@ -1,13 +1,13 @@
 use obsidian_sync_lib::{
     debug::{get_count_tests, get_test, result_list, TESTS},
-    tokinezed::construction,
+    tokinezed::Construction,
     *,
 };
 
 #[test]
 fn test_skip_construction() {
     let defult_val: usize = 1000000;
-    let mut construct: construction = construction {
+    let mut construct: Construction = Construction {
         start: None,
         end: None,
         monolit: false,

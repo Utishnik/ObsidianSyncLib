@@ -1,6 +1,9 @@
 use std::collections::HashSet;
 use std::default;
+use std::result;
 use std::time::Instant;
+
+use git2::Submodule;
 
 use crate::debug_eprintln_fileinfo;
 use crate::debug_println;
@@ -18,6 +21,68 @@ pub struct TimePoint {
     minutes: u128,
     seconds: u128,
     miliseconds: u128,
+}
+
+pub fn substr_by_char_start_idx_owned(str: &str, start_idx: usize) -> String {
+    let start_byte: &str = str
+        .char_indices()
+        .nth(start_idx)
+        .map(|(i, _)| &str[start_idx..])
+        .unwrap_or("");
+    let owned: String = start_byte.to_string();
+    owned
+}
+
+pub fn substr_by_char_end_idx_owned(str: &str, end_idx: usize) -> String {
+    let end_byte: &str = str
+        .char_indices()
+        .nth(end_idx)
+        .map(|(i, _)| &str[..end_idx])
+        .unwrap_or("");
+    let owned: String = end_byte.to_string();
+    owned
+}
+
+pub fn substr_by_char_start_idx_ref(str: &str, start_idx: usize) -> &str {
+    str.char_indices()
+        .nth(start_idx)
+        .map(|(i, _)| &str[start_idx..])
+        .unwrap_or("")
+}
+
+pub fn substr_by_char_end_idx_ref(str: &str, end_idx: usize) -> &str {
+    str.char_indices()
+        .nth(end_idx)
+        .map(|(i, _)| &str[..end_idx])
+        .unwrap_or("")
+}
+
+pub fn substr_by_char_end_start_idx_owned(
+    str: &str,
+    start_idx: usize,
+    end_idx: usize,
+) -> Option<String> {
+    let substr: String =
+        substr_by_char_start_idx_owned(substr_by_char_end_idx_ref(str, start_idx), end_idx);
+    let mut result: Option<String> = None;
+    if substr != "" {
+        result = Some(substr);
+    }
+    result
+}
+
+pub fn substr_by_char_end_start_idx_ref(
+    str: &str,
+    start_idx: usize,
+    end_idx: usize,
+) -> Option<&str> {
+    let substr: &str =
+        substr_by_char_start_idx_ref(substr_by_char_end_idx_ref(str, start_idx), end_idx);
+    let mut result: Option<&str> = None;
+    if substr != "" {
+        result = Some(substr);
+    }
+    result
 }
 
 impl TimePoint {

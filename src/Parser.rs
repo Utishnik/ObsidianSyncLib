@@ -3,6 +3,7 @@ use crate::{
     debug_println, debug_println_fileinfo,
     tokinezed::{self, *},
     utils,
+    utils::*,
     AccTokCrypt::{self, SecurityParam},
     Config,
     DirCheck::full_check_directory,
@@ -29,6 +30,13 @@ struct SignupData {
     mail: String,
     #[validate(url)]
     site: String,
+}
+
+#[derive(Clone, PartialEq)]
+pub enum ParseTimeError {
+    None,
+    KeyWord(String),
+    Time(String),
 }
 
 impl fmt::Display for ParserError {
@@ -405,7 +413,42 @@ pub fn parse_set_text_commit(toksref: &TokenStruct, index: usize) -> Result<Stri
     ))
 }
 
-pub fn parse_text_commit_iter_body() {}
+pub fn parse_time_commit_sync(
+    str: &str,
+    index: &mut usize,
+    ignore_symbol_list: &str,
+) -> Result<(), ParseTimeError> {
+    let mut parse_error_hand: ParseTimeError = ParseTimeError::None;
+    let skip_time_iter: &mut Construction = &mut Construction::default();
+    let skip_time: bool = skip_construction(
+        str,
+        &mut index.clone(),
+        ignore_symbol_list,
+        "time",
+        skip_time_iter,
+    );
+    let find_s: Option<usize> = str.find(":");//не skip так как неопредельшь при ошибки в key word time где начинать
+    if find_s.is_none() {
+        parse_error_hand = ParseTimeError::KeyWord("err parse : not find".to_string());
+        return Err(parse_error_hand);
+    }
+    if !skip_time {
+        let error_msg: Option<String> = substr_by_char_end_start_idx_owned(str, find_s.unwrap_or(0), index.clone());
+        if error_msg.is_some(){
+            debug_println_fileinfo!("error msg = {}",error_msg.clone().unwrap_or("".to_string()));
+            parse_error_hand = ParseTimeError::KeyWord(error_msg.clone().unwrap_or("".to_string()));
+        }
+        return Err(parse_error_hand);
+    }
+    else{
+        if find_s.unwrap_or(0) < skip_time_iter.end.unwrap_or(0){
+            
+        }
+    }
+    Ok(())
+}
+
+pub fn parse_text_commit_iter_body(str: &str) {}
 
 pub fn parse_text_commit_iterator(
     str: &str,
@@ -437,7 +480,7 @@ pub fn parse_text_commit_iterator(
             msgpos: decl,
             itr_type: IteratorCommitType::None,
         };
-        let mut iter_construct: construction = construction {
+        let mut iter_construct: Construction = Construction {
             start: None,
             end: None,
             monolit: false,

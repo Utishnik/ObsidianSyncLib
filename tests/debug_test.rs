@@ -1,5 +1,5 @@
 use obsidian_sync_lib::argsfmt;
-use obsidian_sync_lib::{debug::*, tokinezed::construction, *};
+use obsidian_sync_lib::{debug::*, tokinezed::Construction, *};
 
 #[test]
 fn test() {

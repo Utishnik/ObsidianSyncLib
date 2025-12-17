@@ -1,7 +1,7 @@
 use git2::opts::get_server_timeout_in_milliseconds;
 use obsidian_sync_lib::argsfmt;
 use obsidian_sync_lib::utils::*;
-use obsidian_sync_lib::{debug::*, tokinezed::construction, *};
+use obsidian_sync_lib::{debug::*, tokinezed::Construction, *};
 
 #[test]
 fn test() {

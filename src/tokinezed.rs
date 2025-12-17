@@ -77,13 +77,23 @@ fn check_construction(ignore_symbol_list: &str, construction: &str) -> Option<Ve
     }
 }
 
-pub struct construction {
+pub struct Construction {
     pub start: Option<usize>,
     pub end: Option<usize>,
     pub monolit: bool,
 }
 
-impl construction {
+impl Default for Construction {
+    fn default() -> Self {
+        Self {
+            start: None,
+            end: None,
+            monolit: false,
+        }
+    }
+}
+
+impl Construction {
     pub fn get(&self) -> Self {
         Self {
             start: self.start,
@@ -118,7 +128,7 @@ pub fn skip_construction(
     index: &mut usize,
     ignore_symbol_list: &str,
     construction: &str,
-    skip_construct: &mut construction,
+    skip_construct: &mut Construction,
 ) -> bool {
     let mut start_find: bool = false;
     let mut iter: usize = 0;
