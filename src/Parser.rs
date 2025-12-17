@@ -125,7 +125,7 @@ impl IteratorCommitType {
         match self {
             IteratorCommitType::None => "",
             IteratorCommitType::Numeration => "num",
-            IteratorCommitType::Time => "time", //{{time:(as_millis)}}
+            IteratorCommitType::Time => "time", //{{time:(d:,h:,...)}}
             IteratorCommitType::CustomScript => "JS", //наверное буду использовать boa js
         }
     }
@@ -413,6 +413,25 @@ pub fn parse_set_text_commit(toksref: &TokenStruct, index: usize) -> Result<Stri
     ))
 }
 
+//mili seconds
+//{{time:(d:,h:,...)}}
+pub fn parse_time(time: &str, index: &mut usize) {
+    let d_construct: &mut Construction = &mut Construction::default();
+    let h_construct: &mut Construction = &mut Construction::default();
+    let m_construct: &mut Construction = &mut Construction::default();
+    let s_construct: &mut Construction = &mut Construction::default();
+    let ms_construct: &mut Construction = &mut Construction::default();
+
+    let state1: bool = skip_symbol(time, index, "(".to_string());
+    let d: bool = skip_construction(time, index, "todo!", "d:", d_construct);
+    let h: bool = skip_construction(time, index, "todo!", "h:", h_construct);
+    let m: bool = skip_construction(time, index, "todo!", "m:", m_construct);
+    let s: bool = skip_construction(time, index, "todo!", "s:", s_construct);
+    let ms: bool = skip_construction(time, index, "todo!", "ms:", ms_construct);
+    let state2: bool = skip_symbol(time, index, ")".to_string());
+}
+
+//todo тестировать не только с ascii
 pub fn parse_time_commit_sync(
     str: &str,
     index: &mut usize,
@@ -420,29 +439,25 @@ pub fn parse_time_commit_sync(
 ) -> Result<(), ParseTimeError> {
     let mut parse_error_hand: ParseTimeError = ParseTimeError::None;
     let skip_time_iter: &mut Construction = &mut Construction::default();
-    let skip_time: bool = skip_construction(
-        str,
-        &mut index.clone(),
-        ignore_symbol_list,
-        "time",
-        skip_time_iter,
-    );
-    let find_s: Option<usize> = str.find(":");//не skip так как неопредельшь при ошибки в key word time где начинать
+    let skip_time: bool = skip_construction(str, index, ignore_symbol_list, "time", skip_time_iter);
+    let find_s: Option<usize> = str.find(":"); //не skip так как неопредельшь при ошибки в key word time где начинать
     if find_s.is_none() {
-        parse_error_hand = ParseTimeError::KeyWord("err parse : not find".to_string());
+        parse_error_hand = ParseTimeError::KeyWord("syntax error: not find".to_string());
         return Err(parse_error_hand);
     }
     if !skip_time {
-        let error_msg: Option<String> = substr_by_char_end_start_idx_owned(str, find_s.unwrap_or(0), index.clone());
-        if error_msg.is_some(){
-            debug_println_fileinfo!("error msg = {}",error_msg.clone().unwrap_or("".to_string()));
-            parse_error_hand = ParseTimeError::KeyWord(error_msg.clone().unwrap_or("".to_string()));
+        let error_msg: Option<String> =
+            substr_by_char_end_start_idx_owned(str, find_s.unwrap(), *index);
+        if error_msg.is_some() {
+            debug_println_fileinfo!("error msg = {}", error_msg.clone().unwrap());
+            parse_error_hand = ParseTimeError::KeyWord(error_msg.clone().unwrap());
         }
         return Err(parse_error_hand);
-    }
-    else{
-        if find_s.unwrap_or(0) < skip_time_iter.end.unwrap_or(0){
-            
+    } else {
+        if find_s.unwrap_or(0) < skip_time_iter.end.unwrap_or(0) {
+            parse_error_hand =
+                ParseTimeError::KeyWord("syntax error: time ... -> \':\'".to_string());
+            return Err(parse_error_hand);
         }
     }
     Ok(())

@@ -58,6 +58,7 @@ pub fn skip_symbol(str: &str, index: &mut usize, symbol_list: String) -> bool {
     false
 }
 
+//todo
 fn check_construction(ignore_symbol_list: &str, construction: &str) -> Option<Vec<usize>> {
     let mut idx: usize = 0;
     let mut collision: Vec<usize> = Vec::new();
