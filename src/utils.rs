@@ -8,12 +8,18 @@ use git2::Submodule;
 use crate::debug_eprintln_fileinfo;
 use crate::debug_println;
 use crate::debug_println_fileinfo;
+use crate::number_utils::safe_divide_with_remainder;
 
 const MILLIS_PER_MILLIS: u128 = 1;
 const MILLIS_PER_SECOND: u128 = 1000;
 const MILLIS_PER_MINUTE: u128 = 60 * MILLIS_PER_SECOND; // 60,000
 const MILLIS_PER_HOUR: u128 = 60 * MILLIS_PER_MINUTE; // 3,600,000
 const MILLIS_PER_DAY: u128 = 24 * MILLIS_PER_HOUR; // 86,400,000
+
+const MAX_MILLIS: u128 = 1000;
+const MAX_SECOND: u128 = 60; //59.9999... -> 60
+const MAX_MINUTE: u128 = 60;
+const MAX_HOUR: u128 = 60;
 
 pub struct TimePoint {
     days: u128,
@@ -85,15 +91,67 @@ pub fn substr_by_char_end_start_idx_ref(
     result
 }
 
+struct Discharge {
+    new_val: Option<u128>,
+    delta_next: Option<u128>,
+}
+
+impl Discharge {
+    pub fn init(new_val: Option<u128>, delta_next: Option<u128>) -> Self {
+        Self {
+            new_val,
+            delta_next,
+        }
+    }
+    pub fn init_some(new_val: u128, delta_next: u128) -> Self {
+        let option_new_val: Option<u128> = Some(new_val);
+        let option_delta_next: Option<u128> = Some(delta_next);
+        Self {
+            new_val: option_new_val,
+            delta_next: option_delta_next,
+        }
+    }
+    fn set(&mut self, new_new_val: Option<u128>, new_delta_next: Option<u128>) {
+        self.delta_next = new_delta_next;
+        self.new_val = new_new_val;
+    }
+}
+
+impl Default for Discharge {
+    fn default() -> Self {
+        Discharge {
+            new_val: None,
+            delta_next: None,
+        }
+    }
+}
+
+pub fn transf_discharge(val: u128, max_val: u128) {
+    let mut new_val: u128 = 0;
+    let mut delta: u128 = 0;
+    //delta.checked_rem(rhs)
+    if val > max_val {
+        let div: Result<(u128, u128), crate::number_utils::DivisionError> =
+            safe_divide_with_remainder(val, max_val);
+        if let Err(err) = div {
+            debug_eprintln_fileinfo!("type {}", err);
+        }
+    }
+}
+
 impl TimePoint {
     pub fn new(days: u128, hours: u128, minutes: u128, seconds: u128, miliseconds: u128) -> Self {
-        Self {
+        if miliseconds > MAX_MILLIS {}
+        let result: TimePoint = Self {
             days,
             hours,
             minutes,
             seconds,
             miliseconds,
-        }
+        };
+
+        //if miliseconds >
+        result
     }
     pub fn miliseconds_to_time_point(miliseconds: u128) -> Self {
         let mut clone_miliseconds: u128 = miliseconds;
