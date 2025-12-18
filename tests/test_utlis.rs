@@ -23,7 +23,7 @@ fn test() {
 
 #[test]
 fn test_time() {
-    let mut tp: TimePoint = TimePoint::new(0, 1, 32, 45, 127);
+    let mut tp: TimePoint = TimePoint::new(0, 1, 32, 45, 127).unwrap();
     tp = TimePoint::miliseconds_to_time_point(12200000);
     let ms: u128 = tp.time_point_to_miliseconds();
     println!("ms = {}", ms);

@@ -68,6 +68,23 @@ fn test_parse_text_commit_iterator2() {
     }
 }
 
+#[test]
+fn tst() {
+    let operations = vec![|x| x + 1, |x| x * 2, |x| x - 5];
+    let m = 1;
+    let m1 = 1;
+    let m2 = 1;
+    println!("{}", operations[0](m));
+    println!("{}", operations[1](m));
+    println!("{}", operations[2](m));
+
+    let a = |&&x| x;
+    let v = 1;
+    let rv = &v;
+    let rrv = &rv;
+    let ret = a(rrv);
+}
+
 //todo
 
 /*

@@ -9,6 +9,7 @@ use crate::debug_eprintln_fileinfo;
 use crate::debug_println;
 use crate::debug_println_fileinfo;
 use crate::number_utils::safe_divide_with_remainder;
+use crate::number_utils::DivisionError;
 
 const MILLIS_PER_MILLIS: u128 = 1;
 const MILLIS_PER_SECOND: u128 = 1000;
@@ -91,7 +92,7 @@ pub fn substr_by_char_end_start_idx_ref(
     result
 }
 
-struct Discharge {
+pub struct Discharge {
     new_val: Option<u128>,
     delta_next: Option<u128>,
 }
@@ -126,22 +127,51 @@ impl Default for Discharge {
     }
 }
 
-pub fn transf_discharge(val: u128, max_val: u128) {
+pub fn transf_discharge(val: u128, max_val: u128) -> Result<Discharge, DivisionError> {
     let mut new_val: u128 = 0;
     let mut delta: u128 = 0;
+    let mut result: Discharge = Discharge::default();
     //delta.checked_rem(rhs)
     if val > max_val {
         let div: Result<(u128, u128), crate::number_utils::DivisionError> =
             safe_divide_with_remainder(val, max_val);
         if let Err(err) = div {
             debug_eprintln_fileinfo!("type {}", err);
+            return Err(err);
+        } else if let Ok(ok) = div {
+            new_val = ok.1; //safe
+            delta = ok.0;
         }
     }
+    result.set(Some(new_val), Some(delta));
+    Ok(result)
 }
 
 impl TimePoint {
-    pub fn new(days: u128, hours: u128, minutes: u128, seconds: u128, miliseconds: u128) -> Self {
-        if miliseconds > MAX_MILLIS {}
+    pub fn new(
+        days: u128,
+        hours: u128,
+        minutes: u128,
+        seconds: u128,
+        miliseconds: u128,
+    ) -> Result<Self, DivisionError> {
+        let mut errhand: Option<DivisionError> = None;
+        let mut transf_ms: Discharge = Discharge {
+            new_val: None,
+            delta_next: None,
+        };
+        let transf_ms_res: Result<Discharge, DivisionError> =
+            transf_discharge(miliseconds, MAX_MILLIS);
+        if let Ok(ok) = transf_ms_res {
+            if transf_ms.new_val.unwrap_or(miliseconds) != miliseconds
+                || transf_ms.delta_next.unwrap_or(0) != 0
+            {
+                transf_ms = ok;
+            }
+        } else if let Err(err) = transf_ms_res {
+            errhand = Some(err);
+            return Err(errhand.unwrap()); //safe(очевидно)
+        }
         let result: TimePoint = Self {
             days,
             hours,
@@ -151,7 +181,7 @@ impl TimePoint {
         };
 
         //if miliseconds >
-        result
+        Ok(result)
     }
     pub fn miliseconds_to_time_point(miliseconds: u128) -> Self {
         let mut clone_miliseconds: u128 = miliseconds;
