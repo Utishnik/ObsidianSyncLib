@@ -461,6 +461,7 @@ pub fn parse_time_commit_sync(
             return Err(parse_error_hand);
         }
     }
+    //todo дописать
     Ok(())
 }
 

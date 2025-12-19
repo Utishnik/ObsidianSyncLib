@@ -1,11 +1,11 @@
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::default;
+use std::fmt;
 use std::result;
 use std::time::Instant;
-use std::u32::MAX;
 use std::u128::MAX as OtherMAX;
-use std::fmt;
+use std::u32::MAX;
 
 use git2::Submodule;
 
@@ -96,22 +96,30 @@ pub fn substr_by_char_end_start_idx_ref(
     result
 }
 
-#[derive(Clone,Debug)]
-pub struct TimePointErr{
+#[derive(Clone, Debug)]
+pub struct TimePointErr {
     err_type: DivisionError,
     err_msg: String,
 }
 
-impl fmt::Display for TimePointErr {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.err_type{
-            DivisionError::DivisionByZero => writeln!(f,"Error Type: DivisionByZero")?,
-            DivisionError::Overflow => writeln!(f,"Error Type: Overflow")?,
-        };
-        writeln!(f,"Error Msg: {}",self.err_msg)
+impl TimePointErr {
+    pub fn get_err_type(&self) -> DivisionError {
+        self.err_type.clone()
+    }
+    pub fn get_err_msg(&self) -> String {
+        self.err_msg.clone()
     }
 }
 
+impl fmt::Display for TimePointErr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self.err_type {
+            DivisionError::DivisionByZero => writeln!(f, "Error Type: DivisionByZero")?,
+            DivisionError::Overflow => writeln!(f, "Error Type: Overflow")?,
+        };
+        writeln!(f, "Error Msg: {}", self.err_msg)
+    }
+}
 
 #[derive(Clone)]
 pub struct Discharge {
@@ -176,7 +184,7 @@ impl TimePoint {
         minutes: u128,
         seconds: u128,
         miliseconds: u128,
-    ) -> Result<Self, (DivisionError,String)> {
+    ) -> Result<Self, (DivisionError, String)> {
         let errhand: RefCell<Option<DivisionError>> = RefCell::new(None);
         let all_transf_discharge =
             |val: u128, max_val, transf_val: &mut Discharge| -> Result<(), DivisionError> {
@@ -192,13 +200,13 @@ impl TimePoint {
                     return Err(errhand.borrow().clone().unwrap());
                 }
                 Ok(())
-        };
-              
+            };
+
         let mut transf_ms: Discharge = Discharge {
             new_val: None,
             delta_next: None,
         };
-        
+
         let mut transf_s: Discharge = Discharge {
             new_val: None,
             delta_next: None,
@@ -220,38 +228,50 @@ impl TimePoint {
         };
 
         let msec_res: Result<(), DivisionError> =
-            all_transf_discharge(miliseconds,MAX_MILLIS,&mut transf_ms);
+            all_transf_discharge(miliseconds, MAX_MILLIS, &mut transf_ms);
 
-        if let Err(err) = msec_res{
-            return Err((err,"msec_res".to_string()));
+        if let Err(err) = msec_res {
+            return Err((err, "msec_res".to_string()));
         }
 
-        let sec_res: Result<(), DivisionError> =
-            all_transf_discharge(seconds+transf_ms.delta_next.unwrap_or(0), MAX_SECOND, &mut transf_s);
-        
-        if let Err(err) = sec_res{
-            return Err((err,"sec_res".to_string()));
+        let sec_res: Result<(), DivisionError> = all_transf_discharge(
+            seconds + transf_ms.delta_next.unwrap_or(0),
+            MAX_SECOND,
+            &mut transf_s,
+        );
+
+        if let Err(err) = sec_res {
+            return Err((err, "sec_res".to_string()));
         }
 
-        let m_res: Result<(), DivisionError> =
-            all_transf_discharge(minutes+transf_s.delta_next.unwrap_or(0), MAX_MINUTE, &mut transf_m);
+        let m_res: Result<(), DivisionError> = all_transf_discharge(
+            minutes + transf_s.delta_next.unwrap_or(0),
+            MAX_MINUTE,
+            &mut transf_m,
+        );
 
-        if let Err(err) = m_res{
-            return Err((err,"m_res".to_string()));
+        if let Err(err) = m_res {
+            return Err((err, "m_res".to_string()));
         }
 
-        let h_res: Result<(), DivisionError> =
-            all_transf_discharge(hours+transf_m.delta_next.unwrap_or(0), MAX_HOUR, &mut transf_h);
+        let h_res: Result<(), DivisionError> = all_transf_discharge(
+            hours + transf_m.delta_next.unwrap_or(0),
+            MAX_HOUR,
+            &mut transf_h,
+        );
 
-        if let Err(err) = h_res{
-            return Err((err,"h_res".to_string()));
+        if let Err(err) = h_res {
+            return Err((err, "h_res".to_string()));
         }
 
-        let d_res: Result<(), DivisionError> =
-            all_transf_discharge(days+transf_m.delta_next.unwrap_or(0), MAX as u128, &mut transf_d);
+        let d_res: Result<(), DivisionError> = all_transf_discharge(
+            days + transf_m.delta_next.unwrap_or(0),
+            MAX as u128,
+            &mut transf_d,
+        );
 
-        if let Err(err) = d_res{
-            return Err((err,"d_res".to_string()));
+        if let Err(err) = d_res {
+            return Err((err, "d_res".to_string()));
         }
 
         let result: TimePoint = Self {
