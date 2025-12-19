@@ -163,8 +163,8 @@ impl TimePoint {
         let transf_ms_res: Result<Discharge, DivisionError> =
             transf_discharge(miliseconds, MAX_MILLIS);
         if let Ok(ok) = transf_ms_res {
-            if transf_ms.new_val.unwrap_or(miliseconds) != miliseconds
-                || transf_ms.delta_next.unwrap_or(0) != 0
+            if ok.new_val.unwrap_or(miliseconds) != miliseconds
+                || ok.delta_next.unwrap_or(0) != 0
             {
                 transf_ms = ok;
             }
@@ -172,6 +172,18 @@ impl TimePoint {
             errhand = Some(err);
             return Err(errhand.unwrap()); //safe(очевидно)
         }
+
+        let mut transf_s: Discharge = Discharge {
+            new_val: None,
+            delta_next: None,
+        };
+        let transf_s_res: Result<Discharge, DivisionError> =
+            transf_discharge(seconds+transf_ms.delta_next.unwrap_or(0), MAX_SECOND);
+        if let Ok(ok) = transf_s_res {
+            //if transf_ms.new_val
+        }
+
+
         let result: TimePoint = Self {
             days,
             hours,
