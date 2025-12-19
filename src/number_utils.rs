@@ -1,7 +1,7 @@
 use crate::{debug::*, debug_eprintln_fileinfo};
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub enum DivisionError {
     DivisionByZero,
     Overflow,

@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::collections::HashSet;
 use std::default;
 use std::result;
@@ -92,6 +93,7 @@ pub fn substr_by_char_end_start_idx_ref(
     result
 }
 
+#[derive(Clone)]
 pub struct Discharge {
     new_val: Option<u128>,
     delta_next: Option<u128>,
@@ -155,32 +157,54 @@ impl TimePoint {
         seconds: u128,
         miliseconds: u128,
     ) -> Result<Self, DivisionError> {
-        let mut errhand: Option<DivisionError> = None;
+        let mut errhand: RefCell<Option<DivisionError>> = RefCell::new(None);
+        let all_transf_discharge =
+            |val: u128, max_val, transf_val: &mut Discharge| -> Result<(), DivisionError> {
+                let transfm_res: Result<Discharge, DivisionError> = transf_discharge(val, max_val);
+                if let Ok(ok) = transfm_res {
+                    if ok.new_val.unwrap_or(miliseconds) != miliseconds
+                        || ok.delta_next.unwrap_or(0) != 0
+                    {
+                        *transf_val = ok;
+                    }
+                } else if let Err(err) = transfm_res {
+                    *errhand.borrow_mut() = Some(err);
+                    return Err(errhand.borrow().clone().unwrap());
+                }
+                Ok(())
+            };
+
+            /* 
+            let transf_ms_res: Result<Discharge, DivisionError> =
+            transf_discharge(miliseconds, MAX_MILLIS);
+            if let Ok(ok) = transf_ms_res {
+                if ok.new_val.unwrap_or(miliseconds) != miliseconds || ok.delta_next.unwrap_or(0) != 0 {
+                    transf_ms = ok;
+                    }
+                } else if let Err(err) = transf_ms_res {
+                    //errhand = Some(err);
+                    //return Err(errhand.unwrap()); //safe(очевидно)
+                    }
+                    */
+                    
         let mut transf_ms: Discharge = Discharge {
             new_val: None,
             delta_next: None,
         };
-        let transf_ms_res: Result<Discharge, DivisionError> =
-            transf_discharge(miliseconds, MAX_MILLIS);
-        if let Ok(ok) = transf_ms_res {
-            if ok.new_val.unwrap_or(miliseconds) != miliseconds
-                || ok.delta_next.unwrap_or(0) != 0
-            {
-                transf_ms = ok;
-            }
-        } else if let Err(err) = transf_ms_res {
-            errhand = Some(err);
-            return Err(errhand.unwrap()); //safe(очевидно)
-        }
-
+        
         let mut transf_s: Discharge = Discharge {
             new_val: None,
             delta_next: None,
         };
-        let transf_s_res: Result<Discharge, DivisionError> =
-            transf_discharge(seconds+transf_ms.delta_next.unwrap_or(0), MAX_SECOND);
-        if let Ok(ok) = transf_s_res {
-            //if transf_ms.new_val
+
+        let msec_res: Result<(), DivisionError> =
+            all_transf_discharge(miliseconds,MAX_MILLIS,&mut transf_ms);
+
+        let sec_res: Result<(), DivisionError> =
+            all_transf_discharge(seconds+transf_ms.delta_next.unwrap_or(0), MAX_SECOND, &mut transf_s);
+        
+        if let Err(err) = sec_res{
+            return Err(err);
         }
 
 
