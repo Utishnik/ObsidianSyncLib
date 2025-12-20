@@ -1,12 +1,20 @@
 use crate::splitt_b_space;
 use crate::tokinezed;
+use core::fmt;
 use std::default;
 use std::error::Error as OtherError;
+use std::ffi::os_str::Display;
 
 #[derive(Clone, Debug)]
 pub struct Pos {
     col: usize,
     line: usize,
+}
+
+impl fmt::Display for Pos {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        writeln!(f, "Col: {}\tLine: {}", self.col, self.line)
+    }
 }
 
 impl Pos {
@@ -58,6 +66,19 @@ where
     msg: String,
     file: String,
     err_type: T,
+}
+
+impl<T> fmt::Display for Error<T>
+where
+    T: std::clone::Clone + fmt::Display,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        writeln!(f, "{}", self.pos)?;
+        writeln!(f, "{}", self.msg)?;
+        writeln!(f, "{}", self.file)?;
+        writeln!(f, "{}", self.err_type)?;
+        Ok(())
+    }
 }
 
 impl<T> Default for Error<T>
@@ -119,6 +140,22 @@ where
     pos: Pos,
     val: Option<T>,
     err: Option<Error<E>>,
+}
+
+impl<T, E> fmt::Display for AbstractParseValue<T, E>
+where
+    T: AbstractValue + std::clone::Clone + std::fmt::Display,
+    E: std::clone::Clone + std::fmt::Display,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        writeln!(f, "{}", self.pos)?;
+        if self.val.is_some() {
+            writeln!(f, "{}", unsafe { self.val.clone().unwrap_unchecked() })?;
+        } else {
+            writeln!(f, "{}", unsafe { self.err.clone().unwrap_unchecked() })?;
+        }
+        Ok(())
+    }
 }
 
 impl<T, E> Default for AbstractParseValue<T, E>
@@ -224,7 +261,7 @@ where
 {
     let option_val: Option<T> = val.val.clone();
     if option_val.is_none() {
-        return Err(unsafe{val.err.unwrap_unchecked()});
+        return Err(unsafe { val.err.unwrap_unchecked() });
     }
     Ok((val.pos, unsafe { val.val.clone().unwrap_unchecked() }))
 }
@@ -237,11 +274,19 @@ where
     let mut ret: Vec<Result<(Pos, T), Error<E>>> = Vec::new();
     let len_vals: usize = vals.to_vec().len();
     ret.reserve(len_vals);
-    for item in vals.to_vec().iter().enumerate(){
-        let (i,v) = item;
+    for item in vals.to_vec().iter().enumerate() {
+        let (i, v) = item;
         ret[i] = skip_value(v.clone());
     }
     ret
+}
+
+pub fn get_errs_skip_values<T, E>(vec: Vec<Result<(Pos, T), Error<E>>>)
+where
+    T: AbstractValue + std::clone::Clone,
+    E: std::clone::Clone,
+{
+    //todo
 }
 
 pub fn skip_value_index<T, E>(
