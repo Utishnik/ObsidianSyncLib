@@ -43,6 +43,12 @@ impl Pos {
     }
 }
 
+impl Default for Pos {
+    fn default() -> Self {
+        Self { col: 0, line: 0 }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Error<T>
 where
@@ -60,7 +66,7 @@ where
 {
     fn default() -> Self {
         Self {
-            pos: Pos { col: 0, line: 0 },
+            pos: Pos::default(),
             msg: "".to_string(),
             file: "".to_string(),
             err_type: T::default(),
@@ -219,4 +225,38 @@ where
         return Err(val.err.unwrap());
     }
     Ok((val.pos, val.val.clone().unwrap())) //todo сделать конверт Pos в обычный index: usize
+}
+
+pub fn skip_value_index<T, E>(
+    val: AbstractParseValue<T, E>,
+    cfg: &str,
+    file_path: String,
+) -> Result<(usize, T), Error<E>>
+where
+    T: AbstractValue + std::clone::Clone + Default,
+    E: std::clone::Clone + Default,
+{
+    let skip_val_res: Result<(Pos, T), Error<E>> = skip_value(val);
+    let mut val_res: T = T::default();
+    let mut match_res: usize=0;
+    if let Err(err) = skip_val_res {
+        return Err(err);
+    } else if let Ok(ok) = skip_val_res {
+        let pos_ret: Pos = ok.0;
+        val_res = ok.1;
+        let conver_pos_to_usize: Result<usize, ()> = pos_ret.conver_to_idx(cfg);
+        match_res = match conver_pos_to_usize {
+            Ok(x) => x,
+            Err(_) => {
+                let err: Error<E> = Error {
+                    pos: Pos::default(),
+                    msg: "conver_to_idx err".to_string(),
+                    file: file_path,
+                    err_type: E::default(),
+                };
+                return Err(err);
+            }
+        };
+    }
+    return Ok((match_res,val_res));
 }
