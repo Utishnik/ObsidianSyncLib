@@ -192,7 +192,9 @@ where
     T: AbstractValue + std::clone::Clone,
     E: std::clone::Clone,
 {
+    let len_fns: usize = fns.len();
     let mut result: Vec<AbstractParseValue<T, E>> = Vec::new();
+    result.reserve(len_fns);
     for item in fns.iter() {
         result.push((item.clone())(idx));
     }
@@ -210,7 +212,7 @@ where
     let result: Option<&AbstractParseValue<T, E>> = vec.get(idx);
     let mut ret_res: Option<AbstractParseValue<T, E>> = None;
     if result.is_some() {
-        ret_res = Some((result.unwrap()).clone());
+        ret_res = Some(unsafe { (result.unwrap_unchecked()).clone() });
     }
     ret_res
 }
@@ -222,9 +224,24 @@ where
 {
     let option_val: Option<T> = val.val.clone();
     if option_val.is_none() {
-        return Err(val.err.unwrap());
+        return Err(unsafe{val.err.unwrap_unchecked()});
     }
-    Ok((val.pos, val.val.clone().unwrap())) //todo сделать конверт Pos в обычный index: usize
+    Ok((val.pos, unsafe { val.val.clone().unwrap_unchecked() }))
+}
+
+pub fn skip_values<T, E>(vals: &[AbstractParseValue<T, E>]) -> Vec<Result<(Pos, T), Error<E>>>
+where
+    T: AbstractValue + std::clone::Clone,
+    E: std::clone::Clone,
+{
+    let mut ret: Vec<Result<(Pos, T), Error<E>>> = Vec::new();
+    let len_vals: usize = vals.to_vec().len();
+    ret.reserve(len_vals);
+    for item in vals.to_vec().iter().enumerate(){
+        let (i,v) = item;
+        ret[i] = skip_value(v.clone());
+    }
+    ret
 }
 
 pub fn skip_value_index<T, E>(
@@ -238,7 +255,7 @@ where
 {
     let skip_val_res: Result<(Pos, T), Error<E>> = skip_value(val);
     let mut val_res: T = T::default();
-    let mut match_res: usize=0;
+    let mut match_res: usize = 0;
     if let Err(err) = skip_val_res {
         return Err(err);
     } else if let Ok(ok) = skip_val_res {
@@ -258,5 +275,5 @@ where
             }
         };
     }
-    return Ok((match_res,val_res));
+    return Ok((match_res, val_res));
 }
