@@ -1,5 +1,6 @@
 use crate::splitt_b_space;
 use crate::tokinezed;
+use std::default;
 use std::error::Error as OtherError;
 
 #[derive(Clone, Debug)]
@@ -19,22 +20,22 @@ impl Pos {
     pub fn get_line(&self) -> usize {
         self.line
     }
-    pub fn conver_to_idx(&self, cfg: &str) -> Result<usize,()> {
-        let mut idx: usize=0;
-        let ret_res: Result<tokinezed::TokenStruct, ()> = splitt_b_space(cfg.to_string(), None, Some("\n".to_string()));
-        if let Err(err) = ret_res{
+    pub fn conver_to_idx(&self, cfg: &str) -> Result<usize, ()> {
+        let mut idx: usize = 0;
+        let ret_res: Result<tokinezed::TokenStruct, ()> =
+            splitt_b_space(cfg.to_string(), None, Some("\n".to_string()));
+        if let Err(err) = ret_res {
             return Err(err);
-        }
-        else if let Ok(ok) = ret_res{
+        } else if let Ok(ok) = ret_res {
             //надо суммировать длину каждой строки в векторе вплоть до нужной
-            for item in ok.tok_values.iter().enumerate(){
-                let (i,str) = item;
+            for item in ok.tok_values.iter().enumerate() {
+                let (i, str) = item;
                 let str_len: usize = str.len();
-                if i != self.line{
-                    idx+=str_len;
-                }
-                else{//нужно до конкретно col
-                    idx+=self.col;
+                if i != self.line {
+                    idx += str_len;
+                } else {
+                    //нужно до конкретно col
+                    idx += self.col - 1; //типо с нуля начинаем же
                 }
             }
         }
@@ -51,6 +52,41 @@ where
     msg: String,
     file: String,
     err_type: T,
+}
+
+impl<T> Default for Error<T>
+where
+    T: std::clone::Clone + Default,
+{
+    fn default() -> Self {
+        Self {
+            pos: Pos { col: 0, line: 0 },
+            msg: "".to_string(),
+            file: "".to_string(),
+            err_type: T::default(),
+        }
+    }
+}
+
+impl<T> Error<T>
+where
+    T: std::clone::Clone,
+{
+    pub fn set(&mut self, pos: Pos, msg: String, file: String, err_type: T) {
+        self.err_type = err_type;
+        self.file = file;
+        self.msg = msg;
+        self.pos = pos;
+    }
+
+    pub fn get(&self) -> Self {
+        Self {
+            pos: self.pos.clone(),
+            msg: self.msg.clone(),
+            file: self.file.clone(),
+            err_type: self.err_type.clone(),
+        }
+    }
 }
 
 /*
@@ -77,6 +113,68 @@ where
     pos: Pos,
     val: Option<T>,
     err: Option<Error<E>>,
+}
+
+impl<T, E> Default for AbstractParseValue<T, E>
+where
+    T: AbstractValue + std::clone::Clone,
+    E: std::clone::Clone,
+{
+    fn default() -> Self {
+        Self {
+            pos: Pos { col: 0, line: 0 },
+            val: None,
+            err: None,
+        }
+    }
+}
+
+impl<T, E> AbstractParseValue<T, E>
+where
+    T: AbstractValue + std::clone::Clone,
+    E: std::clone::Clone,
+{
+    pub fn set_err(&mut self, err: Error<E>) {
+        self.val = None;
+        self.err = Some(err);
+    }
+
+    pub fn set_val(&mut self, val: T) {
+        self.val = Some(val);
+        self.err = None;
+    }
+
+    pub fn is_err(&self) -> bool {
+        let err: Option<Error<E>> = self.err.clone();
+
+        if err.is_none() {
+            false
+        } else {
+            true
+        }
+    }
+    pub fn is_val_some(&self) -> bool {
+        let is_some: Option<T> = self.val.clone();
+
+        if is_some.is_none() {
+            false
+        } else {
+            true
+        }
+    }
+
+    //err_cor отвечает за то что он автоматически сделает ошибко None
+    pub fn set_pos(&mut self, pos: Pos, err_cor: bool) -> bool {
+        let ret: bool = self.is_err();
+        if ret == true && !err_cor {
+            return false;
+        }
+
+        self.pos = pos;
+        self.err = None;
+
+        true
+    }
 }
 
 pub fn smart_abstract_multiconstruction_value_parse<F, T, E>(
