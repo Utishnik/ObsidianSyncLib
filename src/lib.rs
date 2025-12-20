@@ -79,7 +79,7 @@ fn count_syms_b_str(str: &String, syms: String) -> Result<u64, ()> {
 
 pub fn splitt_b_space(
     str: String,
-    syms: String,
+    syms: Option<String>,
     transfer: Option<String>,
 ) -> Result<TokenStruct, ()> {
     let mut idx: usize = 0;
@@ -89,7 +89,8 @@ pub fn splitt_b_space(
         transfer_sym = t;
     }
     debug_println!("splitt_b_space transfer_sym: {}", transfer_sym);
-    if let Ok(cnt) = count_syms_b_str(&str, syms.to_string()) {
+    let is_none_syms = syms.is_none();
+    if let Ok(cnt) = count_syms_b_str(&str, syms.clone().unwrap_or("".to_string()).to_string()) {
         debug_println!("CNT splitt_b_space  {}", cnt);
         let safe_cnt: usize = usize::try_from(cnt).map_err(|_| ())?;
         let mut toks: TokenStruct = TokenStruct::new(safe_cnt);
@@ -116,9 +117,9 @@ pub fn splitt_b_space(
                     skip_syms_iter=true;
                 }
             }
-            if !skip_syms_iter
+            if !skip_syms_iter && !is_none_syms
             {
-                for ss in syms.chars()
+                for ss in syms.clone().unwrap().chars()
                 {
                     if c==ss
                     {
@@ -170,7 +171,7 @@ pub fn tokinezed(config: String) -> Result<Vec<String>, Tokinezed_Error> {
             msg_err += &err;
         }
     }
-    if let Ok(tokens) = splitt_b_space(config, SPACE_SYMBOLS.to_string(), None)
+    if let Ok(tokens) = splitt_b_space(config, Some(SPACE_SYMBOLS.to_string()), None)
     //None временный
     {
         for tok in tokens.tok_values.iter().cloned() {

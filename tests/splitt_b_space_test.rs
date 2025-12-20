@@ -14,7 +14,7 @@ fn test() {
     let txt: String = "token struct{ }    \n\n\n  if else for ".to_string();
     //на один перенос меньше так как при первой на индекс раньше пробел
     let result: Result<obsidian_sync_lib::tokinezed::TokenStruct, ()> =
-        splitt_b_space(txt, " \t".to_string(), None);
+        splitt_b_space(txt, Some(" \t".to_string()), None);
 
     /*
     for ts in result.clone().unwrap().tok_values
