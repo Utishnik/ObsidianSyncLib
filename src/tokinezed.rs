@@ -1,5 +1,6 @@
 use std::{cell::Cell, ops::Mul, u64::MAX};
 
+use crate::abstract__tokinezer::*;
 use crate::{debug, debug_println, debug_println_fileinfo};
 
 pub static MAX_TOKEN_CAPACITY: usize = 1000000;
@@ -56,6 +57,18 @@ pub fn skip_symbol(str: &str, index: &mut usize, symbol_list: String) -> bool {
         }
     }
     false
+}
+
+pub fn skip_symbol_abstract_parse_value<T, E>(
+    str: &str,
+    index: &mut usize,
+    symbol_list: String,
+) -> AbstractParseValue<char, char> {
+    let err: Error<char> = Error::default();
+    let skip_res: bool = skip_symbol(str, index, symbol_list);
+    let mut ret: AbstractParseValue<char, char> = Default::default();
+    ret.set_pos(Pos::default(), true);
+    ret
 }
 
 //todo

@@ -7,6 +7,7 @@ use std::default;
 use std::error::Error as OtherError;
 use std::ffi::os_str::Display;
 use std::marker::PhantomData;
+use crate::debug_eprintln_fileinfo;
 
 static CAPASITY_MIN: usize = 10;
 
@@ -38,6 +39,7 @@ impl Pos {
         let ret_res: Result<tokinezed::TokenStruct, ()> =
             splitt_b_space(cfg.to_string(), None, Some("\n".to_string()));
         if let Err(err) = ret_res {
+            debug_eprintln_fileinfo!("conver_to_idx Err ret_res");
             return Err(err);
         } else if let Ok(ok) = ret_res {
             //надо суммировать длину каждой строки в векторе вплоть до нужной
@@ -53,6 +55,28 @@ impl Pos {
             }
         }
         Ok(idx)
+    }
+    pub fn conver_to_pos(idx: usize, cfg: &str) -> Result<Pos,()>{
+        let mut ret_pos: Pos = Pos::default();
+        let ret_res: Result<tokinezed::TokenStruct, ()> =
+            splitt_b_space(cfg.to_string(), None, Some("\n".to_string()));
+        let mut it: usize=0;
+        if let Err(err) = ret_res{
+            return Err(err);
+        }
+        else if let Ok(ok) = ret_res {
+            for item in ok.tok_values.iter().enumerate(){
+                let (i, str) = item;
+                let str_len: usize = str.len();
+                if it + str_len < idx{
+                    it += str_len;
+                }
+                else{
+                    ret_pos.set(idx-it, i);
+                }
+            }
+        }
+        Ok(ret_pos)
     }
 }
 
@@ -163,6 +187,31 @@ impl AbstractValue for u128 {
     }
 }
 
+impl AbstractValue for char {
+    type Item = char;
+    fn set(&mut self, item: Self::Item) {
+        *self = item;
+    }
+    fn get_ref(&self) -> Option<&Self::Item> {
+        Some(self)
+    }
+    fn get_owned(&self) -> Option<Self::Item> {
+        Some(*self)
+    }
+    fn get_pos(&self) -> Option<Pos> {
+        None
+    }
+    fn get_idx(&self) -> Option<usize> {
+        None
+    }
+    fn size_of(&self) -> usize {
+        size_of::<char>()
+    }
+    fn size(&self) -> usize {
+        1
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct AbstractParseValue<T, E>
 where
@@ -244,7 +293,6 @@ where
         if ret == true && !err_cor {
             return false;
         }
-
         self.pos = pos;
         self.err = None;
 
@@ -252,8 +300,7 @@ where
     }
 }
 
-
-pub struct ParseFnsVec<'a,F,T,E>
+pub struct ParseFnsVec<'a, F, T, E>
 where
     F: FnOnce(&mut usize) -> AbstractParseValue<T, E> + std::clone::Clone + 'a,
     T: AbstractValue + std::clone::Clone,
@@ -264,26 +311,26 @@ where
     _marker: PhantomData<&'a ()>,
 }
 
-impl<'a,'b,F,T,E> ParseFnsVec<'a,F,T,E>
+impl<'a, 'b, F, T, E> ParseFnsVec<'a, F, T, E>
 where
     F: FnOnce(&mut usize) -> AbstractParseValue<T, E> + std::clone::Clone,
     T: AbstractValue + std::clone::Clone,
     E: std::clone::Clone,
 {
-    fn push_parse_fn(&mut self,val: F){
+    fn push_parse_fn(&mut self, val: F) {
         self.fns.push(val);
-        self.len+=1;
+        self.len += 1;
     }
-    fn len(&self) -> usize{
+    fn len(&self) -> usize {
         self.len
     }
-    fn iter(&'b self) -> std::slice::Iter<'b,F>{
+    fn iter(&'b self) -> std::slice::Iter<'b, F> {
         self.fns.iter()
     }
 }
 
 pub fn smart_abstract_multiconstruction_value_parse<F, T, E>(
-    fns: ParseFnsVec<F,T,E>,
+    fns: ParseFnsVec<F, T, E>,
     idx: &mut usize,
 ) -> Vec<AbstractParseValue<T, E>>
 where
