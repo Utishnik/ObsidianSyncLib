@@ -6,6 +6,7 @@ use core::fmt;
 use std::default;
 use std::error::Error as OtherError;
 use std::ffi::os_str::Display;
+use std::marker::PhantomData;
 
 static CAPASITY_MIN: usize = 10;
 
@@ -251,8 +252,38 @@ where
     }
 }
 
-pub fn smart_abstract_multiconstruction_value_parse<F, T, E>(
+
+pub struct ParseFnsVec<'a,F,T,E>
+where
+    F: FnOnce(&mut usize) -> AbstractParseValue<T, E> + std::clone::Clone + 'a,
+    T: AbstractValue + std::clone::Clone,
+    E: std::clone::Clone,
+{
     fns: Vec<F>,
+    len: usize,
+    _marker: PhantomData<&'a ()>,
+}
+
+impl<'a,'b,F,T,E> ParseFnsVec<'a,F,T,E>
+where
+    F: FnOnce(&mut usize) -> AbstractParseValue<T, E> + std::clone::Clone,
+    T: AbstractValue + std::clone::Clone,
+    E: std::clone::Clone,
+{
+    fn push_parse_fn(&mut self,val: F){
+        self.fns.push(val);
+        self.len+=1;
+    }
+    fn len(&self) -> usize{
+        self.len
+    }
+    fn iter(&'b self) -> std::slice::Iter<'b,F>{
+        self.fns.iter()
+    }
+}
+
+pub fn smart_abstract_multiconstruction_value_parse<F, T, E>(
+    fns: ParseFnsVec<F,T,E>,
     idx: &mut usize,
 ) -> Vec<AbstractParseValue<T, E>>
 where
