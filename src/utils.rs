@@ -26,6 +26,8 @@ const MAX_SECOND: u128 = 60; //59.9999... -> 60
 const MAX_MINUTE: u128 = 60;
 const MAX_HOUR: u128 = 60;
 
+pub const DEFAULT_HEURISTICS_VAL: f64 = 1.0 / 100.0;
+
 pub struct TimePoint {
     days: u128,
     hours: u128,
@@ -490,3 +492,31 @@ where
 
 //todo нужно для tinyvec?
 //todo для слайца слайцов сделать
+
+pub fn compute_clean_capasity<T>(vec: &mut Vec<T>) -> usize {
+    let not_init_vec_slice: &[std::mem::MaybeUninit<T>] = vec.spare_capacity_mut();
+    let len_not_init_vec_slice: usize = not_init_vec_slice.len();
+    let new_len: usize = vec.len() - len_not_init_vec_slice;
+    new_len
+}
+
+pub fn set_new_len<T>(vec: &mut Vec<T>, compute_new_len: usize) {
+    unsafe {
+        vec.set_len(compute_new_len);
+    }
+}
+
+pub fn clean_capasity<T>(vec: &mut Vec<T>) {
+    let len: usize = compute_clean_capasity(vec);
+    set_new_len(vec, len);
+}
+
+pub fn clean_capasity_heuristics<T>(vec: &mut Vec<T>, heuristics_val: f64) {
+    let len: usize = compute_clean_capasity(vec);
+    if heuristics_val > 1.0 {
+        return;
+    }
+    if vec.len() - len < (((vec.len() as f64) * heuristics_val) as usize) {
+        set_new_len(vec, len);
+    }
+}

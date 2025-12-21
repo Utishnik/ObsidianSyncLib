@@ -1,9 +1,13 @@
 use crate::splitt_b_space;
 use crate::tokinezed;
+use crate::utils::clean_capasity_heuristics;
+use crate::utils::DEFAULT_HEURISTICS_VAL;
 use core::fmt;
 use std::default;
 use std::error::Error as OtherError;
 use std::ffi::os_str::Display;
+
+static CAPASITY_MIN: usize = 10;
 
 #[derive(Clone, Debug)]
 pub struct Pos {
@@ -281,12 +285,68 @@ where
     ret
 }
 
-pub fn get_errs_skip_values<T, E>(vec: Vec<Result<(Pos, T), Error<E>>>)
+pub fn get_errs_skip_values<T, E>(
+    vec: Vec<Result<(Pos, T), Error<E>>>,
+) -> (Vec<Error<E>>, Vec<(Pos, T)>)
 where
     T: AbstractValue + std::clone::Clone,
     E: std::clone::Clone,
 {
-    //todo
+    let vec_len: usize = vec.len();
+    let mut err_vec: Vec<Error<E>> = Vec::new();
+    let mut ok_vec: Vec<(Pos, T)> = Vec::new();
+    let mid_len_vec: usize = vec_len / 4;
+    let mut capasity_err_vec: usize = mid_len_vec;
+    let mut capasity_ok_vec: usize = vec_len - mid_len_vec;
+    if capasity_err_vec < CAPASITY_MIN {
+        capasity_err_vec += CAPASITY_MIN;
+    }
+    if capasity_ok_vec < CAPASITY_MIN {
+        capasity_ok_vec += CAPASITY_MIN;
+    }
+    err_vec.reserve(capasity_err_vec); //простая эвристика
+    ok_vec.reserve(capasity_ok_vec);
+    let mut idx_ok: usize = 0;
+    let mut idx_err: usize = 0;
+    for ret in vec.iter() {
+        match ret {
+            Ok(ok) => {
+                if idx_err < capasity_ok_vec {
+                    ok_vec[idx_ok] = ok.clone();
+                } else {
+                    capasity_ok_vec = vec_len;
+                    ok_vec.reserve(capasity_ok_vec);
+                    ok_vec[idx_ok] = ok.clone();
+                }
+                idx_ok += 1;
+            }
+            Err(err) => {
+                if idx_err < capasity_err_vec {
+                    err_vec[idx_err] = err.clone();
+                } else {
+                    capasity_err_vec *= 2;
+                    err_vec.reserve(capasity_err_vec);
+                    err_vec[idx_err] = err.clone();
+                }
+                idx_err += 1;
+            }
+        }
+    }
+    (err_vec, ok_vec)
+    //todo собирать статистику в среднем какой reserve было и по ней делать а не просто / 4
+}
+
+pub fn get_errs_skip_values_clean<T, E>(
+    vec: Vec<Result<(Pos, T), Error<E>>>,
+) -> (Vec<Error<E>>, Vec<(Pos, T)>)
+where
+    T: AbstractValue + std::clone::Clone,
+    E: std::clone::Clone,
+{
+    let mut res: (Vec<Error<E>>, Vec<(Pos, T)>) = get_errs_skip_values(vec);
+    clean_capasity_heuristics(&mut res.0, DEFAULT_HEURISTICS_VAL);
+    clean_capasity_heuristics(&mut res.1, DEFAULT_HEURISTICS_VAL);
+    res
 }
 
 pub fn skip_value_index<T, E>(
