@@ -131,8 +131,35 @@ pub trait AbstractValue {
     fn set(&mut self, item: Self::Item);
     fn get_ref(&self) -> Option<&Self::Item>;
     fn get_owned(&self) -> Option<Self::Item>;
-    fn get_pos(&self);
+    fn get_pos(&self) -> Option<Pos>;
+    fn get_idx(&self) -> Option<usize>;
+    fn size_of(&self) -> usize;
     fn size(&self) -> usize;
+}
+
+impl AbstractValue for u128 {
+    type Item = u128;
+    fn set(&mut self, item: Self::Item) {
+        *self = item;
+    }
+    fn get_ref(&self) -> Option<&Self::Item> {
+        Some(self)
+    }
+    fn get_owned(&self) -> Option<Self::Item> {
+        Some(*self)
+    }
+    fn get_pos(&self) -> Option<Pos> {
+        None
+    }
+    fn get_idx(&self) -> Option<usize> {
+        None
+    }
+    fn size_of(&self) -> usize {
+        size_of::<u128>()
+    }
+    fn size(&self) -> usize {
+        1
+    }
 }
 
 #[derive(Clone, Debug)]
