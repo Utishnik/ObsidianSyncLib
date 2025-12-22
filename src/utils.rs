@@ -123,7 +123,7 @@ impl fmt::Display for TimePointErr {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Discharge {
     new_val: Option<u128>,
     delta_next: Option<u128>,
@@ -147,15 +147,6 @@ impl Discharge {
     fn set(&mut self, new_new_val: Option<u128>, new_delta_next: Option<u128>) {
         self.delta_next = new_delta_next;
         self.new_val = new_new_val;
-    }
-}
-
-impl Default for Discharge {
-    fn default() -> Self {
-        Discharge {
-            new_val: None,
-            delta_next: None,
-        }
     }
 }
 

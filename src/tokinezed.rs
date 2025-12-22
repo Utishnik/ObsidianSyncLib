@@ -138,13 +138,14 @@ pub fn skip_construction_abstract_parse_value(
     }
     crate::debug_println!("\n\n\n");
     loop {
-        let skiping: Option<AbstractParseValue<char, TokinezedErrorLow>> = skip_symbol_abstract_parse_value(
-            str,
-            index,
-            ignore_symbol_list.to_string(),
-            true,
-            file.clone(),
-        );
+        let skiping: Option<AbstractParseValue<char, TokinezedErrorLow>> =
+            skip_symbol_abstract_parse_value(
+                str,
+                index,
+                ignore_symbol_list.to_string(),
+                true,
+                file.clone(),
+            );
         if skiping.is_some() {
             let skiping_unwrap: AbstractParseValue<char, TokinezedErrorLow> =
                 unsafe { skiping.unwrap_unchecked() };

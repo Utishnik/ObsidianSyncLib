@@ -454,12 +454,9 @@ pub fn parse_time_commit_sync(
             parse_error_hand = ParseTimeError::KeyWord(error_msg.clone().unwrap());
         }
         return Err(parse_error_hand);
-    } else {
-        if find_s.unwrap_or(0) < skip_time_iter.end.unwrap_or(0) {
-            parse_error_hand =
-                ParseTimeError::KeyWord("syntax error: time ... -> \':\'".to_string());
-            return Err(parse_error_hand);
-        }
+    } else if find_s.unwrap_or(0) < skip_time_iter.end.unwrap_or(0) {
+        parse_error_hand = ParseTimeError::KeyWord("syntax error: time ... -> \':\'".to_string());
+        return Err(parse_error_hand);
     }
     //todo дописать
     Ok(())

@@ -521,5 +521,5 @@ where
             }
         };
     }
-    return Ok((match_res, val_res));
+    Ok((match_res, val_res))
 }
