@@ -121,6 +121,7 @@ pub fn skip_construction_abstract_parse_value(
 ) -> Option<AbstractParseValue<String, String>> {
     let mut start_find: bool = false;
     let mut ret_abstract_parse_value: AbstractParseValue<String, String> = Default::default();
+    let mut give_sym_err: Option<String> = None;
     let mut iter: usize = 0;
     let len_str: usize = str.len();
     let len_construction: usize = construction.len();
@@ -161,6 +162,12 @@ pub fn skip_construction_abstract_parse_value(
                     None => {} //невзможно из за проверки переполнения
                     Some(x) => {
                         give_sym_str = x;
+                        if give_sym_err.clone().is_none() {
+                            give_sym_err = Some("".to_string());
+                        }
+                        unsafe {
+                            give_sym_err.as_mut().unwrap_unchecked().push(x); //rust если написть give_sym_err.unwrap_unchecked().push(x);
+                        }
                     }
                 }
                 let option_construction: Option<char> = get_symbol(&construction, iter);
@@ -186,6 +193,8 @@ pub fn skip_construction_abstract_parse_value(
                     }
                     if iter == len_construction - 1 {
                         skip_construct.end = Some(*index);
+                        //тут true в обычной skip_construcion
+                        give_sym_err = None;
                         return None;
                     }
                 } else {
