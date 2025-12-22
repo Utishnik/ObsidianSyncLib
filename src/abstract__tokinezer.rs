@@ -1,3 +1,4 @@
+use crate::debug_eprintln_fileinfo;
 use crate::splitt_b_space;
 use crate::tokinezed;
 use crate::utils::clean_capasity_heuristics;
@@ -7,7 +8,6 @@ use std::default;
 use std::error::Error as OtherError;
 use std::ffi::os_str::Display;
 use std::marker::PhantomData;
-use crate::debug_eprintln_fileinfo;
 
 static CAPASITY_MIN: usize = 10;
 
@@ -56,23 +56,30 @@ impl Pos {
         }
         Ok(idx)
     }
-    pub fn conver_to_pos(idx: usize, cfg: &str) -> Result<Pos,()>{
+    pub fn conver_to_pos(idx: usize, cfg: &str, transfers: Option<String>) -> Result<Pos, ()> {
         let mut ret_pos: Pos = Pos::default();
-        let ret_res: Result<tokinezed::TokenStruct, ()> =
-            splitt_b_space(cfg.to_string(), None, Some("\n".to_string()));
-        let mut it: usize=0;
-        if let Err(err) = ret_res{
-            return Err(err);
+        let ret_res: Result<tokinezed::TokenStruct, ()>;
+        if transfers == None {
+            ret_res = splitt_b_space(cfg.to_string(), None, Some("\n".to_string()));
+        } else if unsafe { transfers.clone().unwrap_unchecked().is_empty() } {
+            ret_res = splitt_b_space(cfg.to_string(), None, None);
+        } else {
+            ret_res = splitt_b_space(cfg.to_string(), None, unsafe {
+                Some(transfers.clone().unwrap_unchecked())
+            });
         }
-        else if let Ok(ok) = ret_res {
-            for item in ok.tok_values.iter().enumerate(){
+        let mut it: usize = 0;
+        if let Err(err) = ret_res {
+            return Err(err);
+        } else if let Ok(ok) = ret_res {
+            for item in ok.tok_values.iter().enumerate() {
                 let (i, str) = item;
                 let str_len: usize = str.len();
-                if it + str_len < idx{
+                if it + str_len < idx {
                     it += str_len;
-                }
-                else{
-                    ret_pos.set(idx-it, i);
+                } else {
+                    ret_pos.set(idx - it, i);
+                    break;
                 }
             }
         }
