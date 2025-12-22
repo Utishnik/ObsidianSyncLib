@@ -223,6 +223,31 @@ impl AbstractValue for char {
     }
 }
 
+impl AbstractValue for String {
+    type Item = String;
+    fn set(&mut self, item: Self::Item) {
+        *self = item;
+    }
+    fn get_ref(&self) -> Option<&Self::Item> {
+        Some(self)
+    }
+    fn get_owned(&self) -> Option<Self::Item> {
+        Some(self.clone())
+    }
+    fn get_pos(&self) -> Option<Pos> {
+        None
+    }
+    fn get_idx(&self) -> Option<usize> {
+        None
+    }
+    fn size_of(&self) -> usize {
+        size_of::<String>() * self.len()
+    }
+    fn size(&self) -> usize {
+        self.len()
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct AbstractParseValue<T, E>
 where

@@ -80,11 +80,11 @@ pub fn skip_symbol_abstract_parse_value(
     symbol_list: String,
     err_cor: bool,
     file: String,
-) -> Option<AbstractParseValue<char, char>> {
+) -> Option<AbstractParseValue<char, TokinezedErrorLow>> {
     let mut err: Error<TokinezedErrorLow> = Error::default();
     let pos: Pos = Pos::default();
     let skip_res: bool = skip_symbol(str, index, symbol_list.clone());
-    let mut ret: AbstractParseValue<char, char> = Default::default();
+    let mut ret: AbstractParseValue<char, TokinezedErrorLow> = Default::default();
     let convert_res: Result<Pos, ()> = Pos::conver_to_pos(*index, str, Some(symbol_list.clone()));
     if let Ok(ok) = convert_res {
         ret.set_pos(ok, err_cor);
@@ -105,6 +105,7 @@ pub fn skip_symbol_abstract_parse_value(
                     symbol_list, cur_sym_unwrap
                 )),
             );
+            ret.set_err(err);
         }
     }
     Some(ret)
@@ -117,8 +118,9 @@ pub fn skip_construction_abstract_parse_value(
     construction: &str,
     skip_construct: &mut Construction,
     file: String,
-) -> bool {
+) -> Option<AbstractParseValue<String, String>> {
     let mut start_find: bool = false;
+    let mut ret_abstract_parse_value: AbstractParseValue<String, String> = Default::default();
     let mut iter: usize = 0;
     let len_str: usize = str.len();
     let len_construction: usize = construction.len();
@@ -132,11 +134,11 @@ pub fn skip_construction_abstract_parse_value(
         }
     }
     if len_str < len_construction {
-        return false;
+        return None;
     }
     crate::debug_println!("\n\n\n");
     loop {
-        let skiping: Option<AbstractParseValue<char, char>> = skip_symbol_abstract_parse_value(
+        let skiping: Option<AbstractParseValue<char, TokinezedErrorLow>> = skip_symbol_abstract_parse_value(
             str,
             index,
             ignore_symbol_list.to_string(),
@@ -144,13 +146,13 @@ pub fn skip_construction_abstract_parse_value(
             file.clone(),
         );
         if skiping.is_some() {
-            let skiping_unwrap: AbstractParseValue<char, char> =
+            let skiping_unwrap: AbstractParseValue<char, TokinezedErrorLow> =
                 unsafe { skiping.unwrap_unchecked() };
             if skiping_unwrap.is_val_some()
             //todo нужно соглосовать с collision_construction
             {
                 if *index > len_str - 1 {
-                    return false;
+                    return None;
                 }
                 let option_str: Option<char> = get_symbol(str, *index);
                 let mut give_sym_str: char = 'a';
@@ -183,21 +185,20 @@ pub fn skip_construction_abstract_parse_value(
                     }
                     if iter == len_construction - 1 {
                         skip_construct.end = Some(*index);
-                        return true;
+                        return None;
                     }
                 } else {
-                    return false;
+                    return None;
                 }
                 *index += 1;
                 iter += 1;
             }
 
             if start_find && skip_construct.monolit {
-                return false;
+                return None;
             }
-            
         } else {
-            return false;
+            return None;
         }
     }
 }
