@@ -268,7 +268,7 @@ impl TimePoint {
 
         let d_res: Result<(), DivisionError> = all_transf_discharge(
             days + transf_m.delta_next.unwrap_or(0),
-            MAX as u128,
+            u32::MAX as u128,
             &mut transf_d,
         );
 

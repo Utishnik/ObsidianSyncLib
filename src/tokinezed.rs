@@ -74,7 +74,7 @@ impl Default for TokinezedErrorLow {
     }
 }
 
-pub fn skip_symbol_abstract_parse_value<T, E>(
+pub fn skip_symbol_abstract_parse_value(
     str: &str,
     index: &mut usize,
     symbol_list: String,
@@ -108,6 +108,98 @@ pub fn skip_symbol_abstract_parse_value<T, E>(
         }
     }
     Some(ret)
+}
+
+pub fn skip_construction_abstract_parse_value(
+    str: &str,
+    index: &mut usize,
+    ignore_symbol_list: &str,
+    construction: &str,
+    skip_construct: &mut Construction,
+    file: String,
+) -> bool {
+    let mut start_find: bool = false;
+    let mut iter: usize = 0;
+    let len_str: usize = str.len();
+    let len_construction: usize = construction.len();
+    let option_collision_constuction: Option<Vec<usize>> =
+        check_construction(ignore_symbol_list, construction);
+    let collision_construction: Vec<usize>;
+    match option_collision_constuction {
+        None => {}
+        Some(x) => {
+            collision_construction = x;
+        }
+    }
+    if len_str < len_construction {
+        return false;
+    }
+    crate::debug_println!("\n\n\n");
+    loop {
+        let skiping: Option<AbstractParseValue<char, char>> = skip_symbol_abstract_parse_value(
+            str,
+            index,
+            ignore_symbol_list.to_string(),
+            true,
+            file.clone(),
+        );
+        if skiping.is_some() {
+            let skiping_unwrap: AbstractParseValue<char, char> =
+                unsafe { skiping.unwrap_unchecked() };
+            if skiping_unwrap.is_val_some()
+            //todo нужно соглосовать с collision_construction
+            {
+                if *index > len_str - 1 {
+                    return false;
+                }
+                let option_str: Option<char> = get_symbol(str, *index);
+                let mut give_sym_str: char = 'a';
+                match option_str {
+                    None => {} //невзможно из за проверки переполнения
+                    Some(x) => {
+                        give_sym_str = x;
+                    }
+                }
+                let option_construction: Option<char> = get_symbol(&construction, iter);
+                debug_println_fileinfo!("iter:   {}     index:    {}", iter, index);
+                let mut give_sym_construction: char = 'b';
+                match option_construction {
+                    None => {} //невозможно из за проверки переполнения
+                    Some(x) => {
+                        give_sym_construction = x;
+                    }
+                }
+
+                debug_println!(
+                    "construct: {} src: {}  index: {}",
+                    give_sym_construction,
+                    give_sym_str,
+                    iter
+                );
+                if give_sym_construction == give_sym_str {
+                    if !start_find {
+                        start_find = true;
+                        skip_construct.start = Some(*index);
+                    }
+                    if iter == len_construction - 1 {
+                        skip_construct.end = Some(*index);
+                        return true;
+                    }
+                } else {
+                    return false;
+                }
+                *index += 1;
+                iter += 1;
+            }
+
+            if start_find && skip_construct.monolit {
+                return false;
+            }
+            
+        } else {
+            return false;
+        }
+    }
 }
 
 //todo
@@ -189,7 +281,7 @@ pub fn skip_construction(
     let len_construction: usize = construction.len();
     let option_collision_constuction: Option<Vec<usize>> =
         check_construction(ignore_symbol_list, construction);
-    let mut collision_construction: Vec<usize>;
+    let collision_construction: Vec<usize>;
     match option_collision_constuction {
         None => {}
         Some(x) => {
