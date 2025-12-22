@@ -59,6 +59,10 @@ impl Pos {
     pub fn conver_to_pos(idx: usize, cfg: &str, transfers: Option<String>) -> Result<Pos, ()> {
         let mut ret_pos: Pos = Pos::default();
         let ret_res: Result<tokinezed::TokenStruct, ()>;
+        if idx > cfg.len() {
+            debug_eprintln_fileinfo!("idx > cfg.len()\tidx: {}  cfg.len(): {}", idx, cfg.len());
+            return Err(());
+        }
         if transfers == None {
             ret_res = splitt_b_space(cfg.to_string(), None, Some("\n".to_string()));
         } else if unsafe { transfers.clone().unwrap_unchecked().is_empty() } {

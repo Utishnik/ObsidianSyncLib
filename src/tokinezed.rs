@@ -1,6 +1,7 @@
+use std::fmt::format;
 use std::{cell::Cell, ops::Mul, u64::MAX};
 
-use crate::abstract__tokinezer::*;
+use crate::abstract__tokinezer::{self, *};
 use crate::{debug, debug_println, debug_println_fileinfo};
 
 pub static MAX_TOKEN_CAPACITY: usize = 1000000;
@@ -59,16 +60,54 @@ pub fn skip_symbol(str: &str, index: &mut usize, symbol_list: String) -> bool {
     false
 }
 
+// более низкоуровенвый аналог Tokinezed_Error
+#[derive(Clone)]
+pub enum TokinezedErrorLow {
+    NoneErr,
+    SkipSymbolErr(String),
+    SkipConstructionErr(String),
+}
+
+impl Default for TokinezedErrorLow {
+    fn default() -> Self {
+        Self::NoneErr
+    }
+}
+
 pub fn skip_symbol_abstract_parse_value<T, E>(
     str: &str,
     index: &mut usize,
     symbol_list: String,
-) -> AbstractParseValue<char, char> {
-    let err: Error<char> = Error::default();
-    let skip_res: bool = skip_symbol(str, index, symbol_list);
+    err_cor: bool,
+    file: String,
+) -> Option<AbstractParseValue<char, char>> {
+    let mut err: Error<TokinezedErrorLow> = Error::default();
+    let pos: Pos = Pos::default();
+    let skip_res: bool = skip_symbol(str, index, symbol_list.clone());
     let mut ret: AbstractParseValue<char, char> = Default::default();
-    ret.set_pos(Pos::default(), true);
-    ret
+    let convert_res: Result<Pos, ()> = Pos::conver_to_pos(*index, str, Some(symbol_list.clone()));
+    if let Ok(ok) = convert_res {
+        ret.set_pos(ok, err_cor);
+    } else {
+        return None;
+    }
+    if !skip_res {
+        let cur_sym: Option<char> = str.chars().nth(*index);
+        if cur_sym.is_some() {
+            let cur_sym_unwrap: char = unsafe { cur_sym.unwrap_unchecked() };
+            let msg: String = format!("not skip sym curr sym: {}", cur_sym_unwrap);
+            err.set(
+                pos,
+                msg,
+                file,
+                TokinezedErrorLow::SkipConstructionErr(format!(
+                    "symbol_list: {} cur_sym: {}",
+                    symbol_list, cur_sym_unwrap
+                )),
+            );
+        }
+    }
+    Some(ret)
 }
 
 //todo
