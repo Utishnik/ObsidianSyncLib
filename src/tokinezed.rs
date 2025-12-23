@@ -111,6 +111,7 @@ pub fn skip_symbol_abstract_parse_value(
     Some(ret)
 }
 
+//None это когда неудачный skip + неудачное преобразование в Pos
 pub fn skip_construction_abstract_parse_value(
     str: &str,
     index: &mut usize,
@@ -118,9 +119,11 @@ pub fn skip_construction_abstract_parse_value(
     construction: &str,
     skip_construct: &mut Construction,
     file: String,
-) -> Option<AbstractParseValue<String, String>> {
+) -> Option<AbstractParseValue<String, TokinezedErrorLow>> {
     let mut start_find: bool = false;
-    let mut ret_abstract_parse_value: AbstractParseValue<String, String> = Default::default();
+    let mut err: Error<TokinezedErrorLow> = Error::default();
+    let mut ret_abstract_parse_value: AbstractParseValue<String, TokinezedErrorLow> =
+        Default::default();
     let mut give_sym_err: Option<String> = None;
     let mut iter: usize = 0;
     let len_str: usize = str.len();
@@ -194,18 +197,64 @@ pub fn skip_construction_abstract_parse_value(
                     if iter == len_construction - 1 {
                         skip_construct.end = Some(*index);
                         //тут true в обычной skip_construcion
-                        give_sym_err = None;
-                        return None;
+                        let give_sym_str_unwrap: String =
+                            unsafe { give_sym_err.unwrap_unchecked() };
+                        ret_abstract_parse_value.set_val(give_sym_str_unwrap);
+                        let pos_construction: Result<Pos, ()> =
+                            Pos::conver_to_pos(*index, str, None);
+                        let unwrap_pos_construction: Pos =
+                            unsafe { pos_construction.unwrap_unchecked() };
+                        ret_abstract_parse_value.set_pos(unwrap_pos_construction, true);
+                        return Some(ret_abstract_parse_value);
                     }
                 } else {
-                    return None;
+                    //если чо в одном месте я просто unwrap_unchecked а в другом проверяю это потому что если ошибка то
+                    //возможно она еще по причине например индекс больше cfg.len()
+                    //а если удачно то ошибок не будет
+                    let errpos: Result<Pos, ()> = Pos::conver_to_pos(*index, str, None);
+                    if errpos.is_ok() {
+                        let unwrap_errpos: Pos = unsafe { errpos.unwrap_unchecked() };
+                        let msg_err: String = format!(
+                            "Error skip construction: give_sym_construction ≠ give_sym_str"
+                        );
+                        let give_sym_err_unwrap: String =
+                            unsafe { give_sym_err.unwrap_unchecked() };
+                        let skip_construcion_msg: String = format!("give_char: {} construction_char: {}\ngive_sym_err: {} construction: {} index: {}",
+                        give_sym_str,give_sym_construction,give_sym_err_unwrap,construction,*index);
+                        err.set(
+                            unwrap_errpos,
+                            msg_err,
+                            file,
+                            TokinezedErrorLow::SkipConstructionErr(skip_construcion_msg),
+                        );
+                        return Some(ret_abstract_parse_value);
+                    } else {
+                        return None;
+                    }
                 }
                 *index += 1;
                 iter += 1;
             }
 
             if start_find && skip_construct.monolit {
-                return None;
+                let errpos: Result<Pos, ()> = Pos::conver_to_pos(*index, str, None);
+                if errpos.is_ok() {
+                    let unwrap_errpos: Pos = unsafe { errpos.unwrap_unchecked() };
+                    let msg_err: String = format!("Error skip construction: no monolit");
+                    let give_sym_err_unwrap: String = unsafe { give_sym_err.unwrap_unchecked() };
+                    let skip_construcion_msg: String =
+                        format!("give_sym_err: {}  index: {}", give_sym_err_unwrap, *index);
+                    err.set(
+                        unwrap_errpos,
+                        msg_err,
+                        file,
+                        TokinezedErrorLow::SkipConstructionErr(skip_construcion_msg),
+                    );
+                    ret_abstract_parse_value.set_err(err);
+                    return Some(ret_abstract_parse_value);
+                } else {
+                    return None;
+                }
             }
         } else {
             return None;
