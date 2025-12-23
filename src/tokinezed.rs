@@ -128,13 +128,16 @@ pub fn skip_construction_abstract_parse_value(
     let mut iter: usize = 0;
     let len_str: usize = str.len();
     let len_construction: usize = construction.len();
+    let mut chars_collision: String = Default::default();
     let option_collision_constuction: Option<Vec<usize>> =
-        check_construction(ignore_symbol_list, construction);
+        check_construction(ignore_symbol_list, construction, &mut chars_collision);
     let collision_construction: Vec<usize>;
+    //chars_collision.ch
     match option_collision_constuction {
         None => {}
         Some(x) => {
             collision_construction = x;
+            debug_println_fileinfo!("Warning:collision syms {}", chars_collision);
         }
     }
     if len_str < len_construction {
@@ -263,13 +266,18 @@ pub fn skip_construction_abstract_parse_value(
 }
 
 //todo
-fn check_construction(ignore_symbol_list: &str, construction: &str) -> Option<Vec<usize>> {
+fn check_construction(
+    ignore_symbol_list: &str,
+    construction: &str,
+    collision_chars: &mut String,
+) -> Option<Vec<usize>> {
     let mut idx: usize = 0;
     let mut collision: Vec<usize> = Vec::new();
     for items in construction.chars().enumerate() {
         let (s_i, s): (usize, char) = items;
         for c in ignore_symbol_list.chars() {
             if c == s {
+                collision_chars.push(c);
                 collision[idx] = s_i;
                 idx += 1;
             }
@@ -338,9 +346,10 @@ pub fn skip_construction(
     let mut start_find: bool = false;
     let mut iter: usize = 0;
     let len_str: usize = str.len();
+    let mut collision_chars: String = Default::default();
     let len_construction: usize = construction.len();
     let option_collision_constuction: Option<Vec<usize>> =
-        check_construction(ignore_symbol_list, construction);
+        check_construction(ignore_symbol_list, construction, &mut collision_chars);
     let collision_construction: Vec<usize>;
     match option_collision_constuction {
         None => {}
@@ -348,6 +357,10 @@ pub fn skip_construction(
             collision_construction = x;
         }
     }
+    debug_println!(
+        "Warning: collision_construction not empty {}",
+        collision_chars
+    );
     if len_str < len_construction {
         return false;
     }

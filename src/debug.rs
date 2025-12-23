@@ -7,6 +7,7 @@ use std::i64::MAX;
 use std::io::Write;
 use std::num::ParseIntError;
 use std::ops::Deref;
+use std::path::Display;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
@@ -510,6 +511,11 @@ pub fn result_list() -> bool {
         i += 1;
     }
     successfully
+}
+
+pub fn display_vec<T: std::fmt::Display>(vec: &[T], separator: String) -> String {
+    let items: Vec<String> = vec.iter().map(|x| x.to_string()).collect();
+    format!("[{}]", items.join(&separator))
 }
 
 pub fn dump_result_list(path: String) -> Result<(), std::io::Error> //todo: сделать асинхронной? типо тестов может быть очень много
