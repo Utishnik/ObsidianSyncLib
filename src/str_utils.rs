@@ -69,3 +69,11 @@ pub fn safe_insert_chars(str: &str, chars: &[InsertChar]) -> String {
 
     result
 }
+
+pub fn safe_insert_and_remove_chars(str: &str,chars_insert: &[InsertChar],chars_remove: &[usize]){
+    let mut chars_remove_correct: Vec<usize>;
+    for item in chars_remove{
+        let mut shift: usize = 0;
+        let _ = chars_insert.iter().filter(|&x| x.index < *item).map(|_| shift+=1);
+    }
+}
