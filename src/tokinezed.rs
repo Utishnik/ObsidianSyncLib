@@ -109,6 +109,11 @@ pub fn skip_symbol_abstract_parse_value(
             ret.set_err(err);
         }
     }
+    else {
+        let cur_sym: Option<char> = str.chars().nth(*index);
+        let cur_sym_unwrap: char = unsafe { cur_sym.unwrap_unchecked() };
+        ret.set_val(cur_sym_unwrap);
+    }
     Some(ret)
 }
 

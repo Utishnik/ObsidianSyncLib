@@ -1,6 +1,7 @@
 use crate::debug_eprintln_fileinfo;
 use crate::splitt_b_space;
 use crate::tokinezed;
+use crate::tokinezed::skip_symbol_abstract_parse_value;
 use crate::utils::clean_capasity_heuristics;
 use crate::utils::TimePointErr;
 use crate::utils::DEFAULT_HEURISTICS_VAL;
@@ -156,6 +157,37 @@ where
             err_type: self.err_type.clone(),
         }
     }
+}
+
+pub enum ParseIntError {
+    Overflow(String),
+    SkipError(String),
+    Empty,
+    None,
+}
+
+pub fn parse_int_value<T>(str: &str, index: &mut usize, file: String) -> Result<T, ParseIntError>
+where
+    T: std::default::Default,
+{
+    let ret_val: T = T::default();
+    let mut find_start: bool = false;
+    let mut curr_str: String = String::default();
+    'a: loop {
+        let skiping: Option<AbstractParseValue<char, tokinezed::TokinezedErrorLow>> =
+            skip_symbol_abstract_parse_value(str, index, "".to_string(), true, file.clone());
+        //как будто clone не blazing
+        if let Some(val)  = skiping /*&& тут нужно val.val унврапнуть*/ {
+            find_start=true;
+            //curr_str.push(val.val);//logic err у нас val set только при construction
+        }
+        else{
+            if !find_start{
+                return Err(ParseIntError::SkipError(format!("index: {}, curr_str: {}",index,curr_str)));
+            }
+        }
+    }
+    Ok(ret_val)
 }
 
 /*
