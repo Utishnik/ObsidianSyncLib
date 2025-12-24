@@ -2,7 +2,9 @@ use crate::debug_eprintln_fileinfo;
 use crate::splitt_b_space;
 use crate::tokinezed;
 use crate::utils::clean_capasity_heuristics;
+use crate::utils::TimePointErr;
 use crate::utils::DEFAULT_HEURISTICS_VAL;
+use crate::ParseTimeError;
 use core::fmt;
 use std::default;
 use std::error::Error as OtherError;
@@ -171,6 +173,7 @@ pub trait AbstractValue {
     fn get_idx(&self) -> Option<usize>;
     fn size_of(&self) -> usize;
     fn size(&self) -> usize;
+    fn parse_value(str: &str, index: &mut usize) -> Result<Self::Item, ParseTimeError>;
 }
 
 impl AbstractValue for u128 {
@@ -195,6 +198,11 @@ impl AbstractValue for u128 {
     }
     fn size(&self) -> usize {
         1
+    }
+    fn parse_value(str: &str, index: &mut usize) -> Result<u128, ParseTimeError> {
+        let ret_val: u128 = 0;
+
+        Ok(ret_val)
     }
 }
 
@@ -221,6 +229,11 @@ impl AbstractValue for char {
     fn size(&self) -> usize {
         1
     }
+    fn parse_value(str: &str, index: &mut usize) -> Result<char, ParseTimeError> {
+        let ret_val = ' ';
+
+        Ok(ret_val)
+    }
 }
 
 impl AbstractValue for String {
@@ -245,6 +258,11 @@ impl AbstractValue for String {
     }
     fn size(&self) -> usize {
         self.len()
+    }
+    fn parse_value(str: &str, index: &mut usize) -> Result<String, ParseTimeError> {
+        let ret_val: String = String::default();
+
+        Ok(ret_val)
     }
 }
 

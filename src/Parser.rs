@@ -1,9 +1,8 @@
 use crate::{
     black_list_iterator::{self, AsciiSymbol},
-    debug_println, debug_println_fileinfo,
+    debug_eprintln_fileinfo, debug_println, debug_println_fileinfo,
     tokinezed::{self, *},
-    utils,
-    utils::*,
+    utils::{self, *},
     AccTokCrypt::{self, SecurityParam},
     Config,
     DirCheck::full_check_directory,
@@ -431,14 +430,19 @@ pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<(), Par
         match d {
             Some(val) => val,
             None => {
-                let mut err_msg: String = Default::default();
+                let err_msg: String;
                 if d_construct.start.is_some() {
                     let unwrap_d_construct_start = unsafe { d_construct.start.unwrap_unchecked() };
                     err_msg = format!(
                         "the beginning of an unsuccessful parsing: {}",
                         unwrap_d_construct_start
                     );
+                } else {
+                    err_msg = format!(
+                        "skip_symbol_abstract_parse_value err and len_str < len_construction"
+                    );
                 }
+                debug_eprintln_fileinfo!("{}", err_msg);
                 return Err(ParseTimeError::Time(err_msg));
             }
         };
