@@ -1,6 +1,7 @@
 use std::char;
 
 use crate::debug_eprintln_fileinfo;
+use crate::debug_println_fileinfo;
 use crate::display_vec;
 
 #[derive(Clone)]
@@ -50,19 +51,16 @@ pub fn safe_insert_chars(str: &str, chars: &[InsertChar]) -> String {
     let mut result: String = str.to_string();
     let len: usize = str.len();
     for item in sorted {
-        if item.index < len{
+        if item.index < len {
             let idx: usize = item.index;
-            let byte_pos: usize = 
-            unsafe {
-                 str
-                .char_indices()
-                .nth(idx)
-                .map(|(pos, _)| pos)
-                .unwrap_unchecked()
+            let byte_pos: usize = unsafe {
+                str.char_indices()
+                    .nth(idx)
+                    .map(|(pos, _)| pos)
+                    .unwrap_unchecked()
             };
             result.insert(byte_pos, item.char_);
-        }
-        else{
+        } else {
             result.push(item.char_);
         }
     }
@@ -70,10 +68,33 @@ pub fn safe_insert_chars(str: &str, chars: &[InsertChar]) -> String {
     result
 }
 
-pub fn safe_insert_and_remove_chars(str: &str,chars_insert: &[InsertChar],chars_remove: &[usize]){
-    let mut chars_remove_correct: Vec<usize>;
-    for item in chars_remove{
+pub fn safe_insert_and_remove_chars(
+    str: &str,
+    chars_insert: &[InsertChar],
+    chars_remove: &mut [usize],
+) -> String {
+    let mut chars_remove_correct: Vec<usize> = Vec::new();
+    let mut i: usize = 0;
+    for item in chars_remove.iter() {
+        //O(n)
         let mut shift: usize = 0;
-        let _ = chars_insert.iter().filter(|&x| x.index < *item).map(|_| shift+=1);
+        let _ = chars_insert
+            .iter()
+            .skip(i)
+            .filter(|&x| x.index < *item)
+            .map(|_| shift += 1);
+        shift += *chars_remove_correct.get(i).unwrap_or(&0);
+        chars_remove_correct.push(shift);
+        i += 1;
     }
+    display_vec(&chars_remove_correct, " ,".to_string());
+    let insert_res: String = safe_insert_chars(str, chars_insert);
+    debug_eprintln_fileinfo!("insert str: {}", insert_res);
+    for item in chars_remove.iter_mut().enumerate() {
+        let (i, v) = item;
+        *v += chars_remove_correct[i];
+    }
+    let ret_res: String = safe_remove_chars(&insert_res, chars_remove);
+    debug_eprintln_fileinfo!("insert str: {}", ret_res);
+    ret_res
 }

@@ -2,6 +2,7 @@ use std::fmt::format;
 use std::{cell::Cell, ops::Mul, u64::MAX};
 
 use crate::abstract__tokinezer::{self, *};
+use crate::str_utils::safe_remove_chars;
 use crate::{debug, debug_println, debug_println_fileinfo};
 
 pub static MAX_TOKEN_CAPACITY: usize = 1000000;
@@ -131,7 +132,8 @@ pub fn skip_construction_abstract_parse_value(
     let mut chars_collision: String = Default::default();
     let option_collision_constuction: Option<Vec<usize>> =
         check_construction(ignore_symbol_list, construction, &mut chars_collision);
-    let collision_construction: Vec<usize>;
+    let mut collision_construction: Vec<usize> = Vec::new();
+    let mut fix_construction: String = String::default();
     //chars_collision.ch
     match option_collision_constuction {
         None => {}
@@ -140,8 +142,15 @@ pub fn skip_construction_abstract_parse_value(
             debug_println_fileinfo!("Warning:collision syms {}", chars_collision);
         }
     }
-    if len_str < len_construction {
-        return None;
+    if !collision_construction.is_empty() {
+        fix_construction = safe_remove_chars(construction, &collision_construction);
+        if len_str < fix_construction.len() {
+            return None;
+        }
+    } else {
+        if len_str < len_construction {
+            return None;
+        }
     }
     crate::debug_println!("\n\n\n");
     loop {
@@ -176,7 +185,7 @@ pub fn skip_construction_abstract_parse_value(
                         }
                     }
                 }
-                let option_construction: Option<char> = get_symbol(&construction, iter);
+                let option_construction: Option<char> = get_symbol(&fix_construction, iter);
                 debug_println_fileinfo!("iter:   {}     index:    {}", iter, index);
                 let mut give_sym_construction: char = 'b';
                 match option_construction {
@@ -350,7 +359,7 @@ pub fn skip_construction(
     let len_construction: usize = construction.len();
     let option_collision_constuction: Option<Vec<usize>> =
         check_construction(ignore_symbol_list, construction, &mut collision_chars);
-    let collision_construction: Vec<usize>;
+    let mut collision_construction: Vec<usize> = Vec::new();
     match option_collision_constuction {
         None => {}
         Some(x) => {
@@ -361,8 +370,17 @@ pub fn skip_construction(
         "Warning: collision_construction not empty {}",
         collision_chars
     );
-    if len_str < len_construction {
-        return false;
+    let mut fix_construction: String = construction.to_string();
+    if !collision_construction.is_empty() {
+        fix_construction = safe_remove_chars(construction, &collision_construction);
+
+        if len_str < fix_construction.len() {
+            return false;
+        }
+    } else {
+        if len_str < len_construction {
+            return false;
+        }
     }
     crate::debug_println!("\n\n\n");
     loop {
@@ -380,7 +398,7 @@ pub fn skip_construction(
                     give_sym_str = x;
                 }
             }
-            let option_construction: Option<char> = get_symbol(&construction, iter);
+            let option_construction: Option<char> = get_symbol(&fix_construction, iter);
             debug_println_fileinfo!("iter:   {}     index:    {}", iter, index);
             let mut give_sym_construction: char = 'b';
             match option_construction {

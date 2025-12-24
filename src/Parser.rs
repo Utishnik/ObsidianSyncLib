@@ -415,7 +415,7 @@ pub fn parse_set_text_commit(toksref: &TokenStruct, index: usize) -> Result<Stri
 
 //mili seconds
 //{{time:(d:,h:,...)}}
-pub fn parse_time(time: &str, index: &mut usize) {
+pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<(), ParseTimeError> {
     let d_construct: &mut Construction = &mut Construction::default();
     let h_construct: &mut Construction = &mut Construction::default();
     let m_construct: &mut Construction = &mut Construction::default();
@@ -423,13 +423,32 @@ pub fn parse_time(time: &str, index: &mut usize) {
     let ms_construct: &mut Construction = &mut Construction::default();
 
     let state1: bool = skip_symbol(time, index, "(".to_string());
-    let d: bool = skip_construction(time, index, "todo!", "d:", d_construct);
+    #[rustfmt::skip]
+    let d: Option<crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>> =
+    skip_construction_abstract_parse_value(time, index, " \t\n",
+    "d:", d_construct, file);
+    let unwrap_d: crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow> =
+        match d {
+            Some(val) => val,
+            None => {
+                let mut err_msg: String = Default::default();
+                if d_construct.start.is_some() {
+                    let unwrap_d_construct_start = unsafe { d_construct.start.unwrap_unchecked() };
+                    err_msg = format!(
+                        "the beginning of an unsuccessful parsing: {}",
+                        unwrap_d_construct_start
+                    );
+                }
+                return Err(ParseTimeError::Time(err_msg));
+            }
+        };
     //skip value и ,
     let h: bool = skip_construction(time, index, "todo!", "h:", h_construct);
     let m: bool = skip_construction(time, index, "todo!", "m:", m_construct);
     let s: bool = skip_construction(time, index, "todo!", "s:", s_construct);
     let ms: bool = skip_construction(time, index, "todo!", "ms:", ms_construct);
     let state2: bool = skip_symbol(time, index, ")".to_string());
+    Ok(())
 }
 
 //todo тестировать не только с ascii
