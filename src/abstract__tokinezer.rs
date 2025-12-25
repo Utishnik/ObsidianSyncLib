@@ -1,6 +1,7 @@
 use crate::ParseTimeError;
 use crate::debug_eprintln_fileinfo;
 use crate::splitt_b_space;
+use crate::str_utils::gen_decimal_digits;
 use crate::tokinezed;
 use crate::tokinezed::skip_symbol_abstract_parse_value;
 use crate::utils::DEFAULT_HEURISTICS_VAL;
@@ -174,15 +175,17 @@ where
     let ret_val: T = T::default();
     let mut find_start: bool = false;
     let mut curr_str: String = String::default();
-    'a: loop {
+    let sym_list: String = gen_decimal_digits();
+    loop {
         let skiping: Option<AbstractParseValue<char, tokinezed::TokinezedErrorLow>> =
-            skip_symbol_abstract_parse_value(str, index, "".to_string(), true, file.to_string());
+            skip_symbol_abstract_parse_value(str, index, &sym_list, true, file.to_string());
         //как будто clone не blazing
         if let Some(val) = skiping
             && unsafe { check_number(val.val.unwrap_unchecked()) }
         {
             find_start = true;
-            //curr_str.push(val.val);//logic err у нас val set только при construction
+            let unwrap_ch: char = unsafe { val.val.unwrap_unchecked() };
+            curr_str.push(unwrap_ch);
         } else {
             if !find_start {
                 return Err(ParseIntError::SkipError(format!(

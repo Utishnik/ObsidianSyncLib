@@ -78,15 +78,15 @@ impl Default for TokinezedErrorLow {
 pub fn skip_symbol_abstract_parse_value(
     str: &str,
     index: &mut usize,
-    symbol_list: String,
+    symbol_list: &str,
     err_cor: bool,
     file: String,
 ) -> Option<AbstractParseValue<char, TokinezedErrorLow>> {
     let mut err: Error<TokinezedErrorLow> = Error::default();
     let pos: Pos = Pos::default();
-    let skip_res: bool = skip_symbol(str, index, symbol_list.clone());
+    let skip_res: bool = skip_symbol(str, index, symbol_list.to_string());
     let mut ret: AbstractParseValue<char, TokinezedErrorLow> = Default::default();
-    let convert_res: Result<Pos, ()> = Pos::conver_to_pos(*index, str, Some(symbol_list.clone()));
+    let convert_res: Result<Pos, ()> = Pos::conver_to_pos(*index, str, Some(symbol_list.to_string()));
     if let Ok(ok) = convert_res {
         ret.set_pos(ok, err_cor);
     } else {
@@ -162,7 +162,7 @@ pub fn skip_construction_abstract_parse_value(
             skip_symbol_abstract_parse_value(
                 str,
                 index,
-                ignore_symbol_list.to_string(),
+                ignore_symbol_list,
                 true,
                 file.clone(),
             );

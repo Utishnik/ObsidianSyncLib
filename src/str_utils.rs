@@ -98,3 +98,22 @@ pub fn safe_insert_and_remove_chars(
     debug_eprintln_fileinfo!("insert str: {}", ret_res);
     ret_res
 }
+
+//todo можно ли тут применить формальный верефикатор для блокировки случаев создающий вечный цикл
+pub fn gen_digit_or_number<F>(start: f64, end: f64, transform: F) -> String
+where
+    F: Fn(f64) -> f64,
+{
+    let mut ret: String = String::default();
+    let mut i: f64 = start;
+    while i < end {
+        ret.push_str(&i.to_string());
+        i = transform(i);
+    }
+    ret
+}
+
+pub fn gen_decimal_digits() -> String {
+    let ret: String = gen_digit_or_number(0.0, 10.0, |x: f64| x + 1.0);
+    ret
+}
