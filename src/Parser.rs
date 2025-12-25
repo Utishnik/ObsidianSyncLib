@@ -415,6 +415,7 @@ pub fn skip_time_type_and_value(
     file: &str,
     construction: &str,
     mut_construct: &mut Construction,
+    time_set: &mut u128,
 ) -> Result<crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>, ParseTimeError>
 {
     let time_construct: &mut Construction = &mut Construction::default();
@@ -453,54 +454,112 @@ pub fn error_abort<V, E>(val: Result<V, E>) -> Result<V, E> {
     val
 }
 
-pub fn skip_symbol_result<V,E>(state: bool,ret_val: V,ret_err: E) -> Result<V,E>{
-    if state{
-        Ok(ret_val)
-    }
-    else{
-        Err(ret_err)
+pub fn skip_symbol_result<V, E>(state: bool, ret_val: V, ret_err: E) -> Result<V, E> {
+    if state { Ok(ret_val) } else { Err(ret_err) }
+}
+
+#[derive(Clone, Default)]
+pub struct Time {
+    day: u128,
+    h: u128,
+    m: u128,
+    s: u128,
+    ms: u128,
+}
+
+impl Time {
+    fn set(&mut self, day: u128, h: u128, m: u128, s: u128, ms: u128) {
+        self.day = day;
+        self.h = h;
+        self.m = m;
+        self.s = s;
+        self.ms = ms;
     }
 }
 
 //mili seconds
 //{{time:(d:,h:,...)}}
-pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<(), ParseTimeError> {
+pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<Time, ParseTimeError> {
     let d_construct: &mut Construction = &mut Construction::default();
     let h_construct: &mut Construction = &mut Construction::default();
     let m_construct: &mut Construction = &mut Construction::default();
     let s_construct: &mut Construction = &mut Construction::default();
     let ms_construct: &mut Construction = &mut Construction::default();
+    let mut return_parse_time: Time = Time::default();
 
     let state1: bool = skip_symbol(time, index, "(".to_string());
-    error_abort(skip_symbol_result(state1, (), ParseTimeError::KeyWord("(".to_string())))?;
+    error_abort(skip_symbol_result(
+        state1,
+        (),
+        ParseTimeError::KeyWord("(".to_string()),
+    ))?;
     let res_d: Result<
         crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>,
         ParseTimeError,
-    > = skip_time_type_and_value(time, index, &file, "d: ", d_construct);
+    > = skip_time_type_and_value(
+        time,
+        index,
+        &file,
+        "d: ",
+        d_construct,
+        &mut return_parse_time.day,
+    );
     error_abort(res_d)?;
     let res_h: Result<
         crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>,
         ParseTimeError,
-    > = skip_time_type_and_value(time, index, &file, "h: ", h_construct);
+    > = skip_time_type_and_value(
+        time,
+        index,
+        &file,
+        "h: ",
+        h_construct,
+        &mut return_parse_time.h,
+    );
     error_abort(res_h)?;
     let res_m: Result<
         crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>,
         ParseTimeError,
-    > = skip_time_type_and_value(time, index, &file, "m: ", m_construct);
+    > = skip_time_type_and_value(
+        time,
+        index,
+        &file,
+        "m: ",
+        m_construct,
+        &mut return_parse_time.m,
+    );
     error_abort(res_m)?;
     let res_s: Result<
         crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>,
         ParseTimeError,
-    > = skip_time_type_and_value(time, index, &file, "s: ", s_construct);
+    > = skip_time_type_and_value(
+        time,
+        index,
+        &file,
+        "s: ",
+        s_construct,
+        &mut return_parse_time.s,
+    );
     error_abort(res_s)?;
     let res_ms: Result<
         crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>,
         ParseTimeError,
-    > = skip_time_type_and_value(time, index, &file, "ms: ", ms_construct);
+    > = skip_time_type_and_value(
+        time,
+        index,
+        &file,
+        "ms: ",
+        ms_construct,
+        &mut return_parse_time.ms,
+    );
     error_abort(res_ms)?;
     let state2: bool = skip_symbol(time, index, ")".to_string());
-    error_abort(skip_symbol_result(state2, (), ParseTimeError::KeyWord("(".to_string())))?;
-    Ok(())
+    error_abort(skip_symbol_result(
+        state2,
+        (),
+        ParseTimeError::KeyWord("(".to_string()),
+    ))?;
+    Ok(return_parse_time)
 }
 
 //todo тестировать не только с ascii
