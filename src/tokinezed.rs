@@ -86,7 +86,8 @@ pub fn skip_symbol_abstract_parse_value(
     let pos: Pos = Pos::default();
     let skip_res: bool = skip_symbol(str, index, symbol_list.to_string());
     let mut ret: AbstractParseValue<char, TokinezedErrorLow> = Default::default();
-    let convert_res: Result<Pos, ()> = Pos::conver_to_pos(*index, str, Some(symbol_list.to_string()));
+    let convert_res: Result<Pos, ()> =
+        Pos::conver_to_pos(*index, str, Some(symbol_list.to_string()));
     if let Ok(ok) = convert_res {
         ret.set_pos(ok, err_cor);
     } else {
@@ -123,7 +124,7 @@ pub fn skip_construction_abstract_parse_value(
     ignore_symbol_list: &str,
     construction: &str,
     skip_construct: &mut Construction,
-    file: String,
+    file: &str,
 ) -> Option<AbstractParseValue<String, TokinezedErrorLow>> {
     let mut start_find: bool = false;
     let mut err: Error<TokinezedErrorLow> = Error::default();
@@ -164,7 +165,7 @@ pub fn skip_construction_abstract_parse_value(
                 index,
                 ignore_symbol_list,
                 true,
-                file.clone(),
+                file.to_string(),
             );
         if skiping.is_some() {
             let skiping_unwrap: AbstractParseValue<char, TokinezedErrorLow> =
@@ -246,7 +247,7 @@ pub fn skip_construction_abstract_parse_value(
                         err.set(
                             unwrap_errpos,
                             msg_err,
-                            file,
+                            file.to_string(),
                             TokinezedErrorLow::SkipConstructionErr(skip_construcion_msg),
                         );
                         return Some(ret_abstract_parse_value);
@@ -269,7 +270,7 @@ pub fn skip_construction_abstract_parse_value(
                     err.set(
                         unwrap_errpos,
                         msg_err,
-                        file,
+                        file.to_string(),
                         TokinezedErrorLow::SkipConstructionErr(skip_construcion_msg),
                     );
                     ret_abstract_parse_value.set_err(err);
@@ -309,6 +310,7 @@ fn check_construction(
     }
 }
 
+#[derive(Clone)]
 pub struct Construction {
     pub start: Option<usize>,
     pub end: Option<usize>,

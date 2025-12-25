@@ -169,10 +169,9 @@ pub enum ParseIntError {
 
 pub fn parse_int_value<T>(str: &str, index: &mut usize, file: &str) -> Result<T, ParseIntError>
 where
-    T: std::default::Default,
+    T: std::default::Default + std::str::FromStr,
 {
     let check_number = |char: char| -> bool { char.is_ascii_digit() };
-    let ret_val: T = T::default();
     let mut find_start: bool = false;
     let mut curr_str: String = String::default();
     let sym_list: String = gen_decimal_digits();
@@ -192,9 +191,12 @@ where
                     "index: {}, curr_str: {}",
                     index, curr_str
                 )));
+            } else {
+                break;
             }
         }
     }
+    let ret_val: T = unsafe { curr_str.parse().unwrap_unchecked() };
     Ok(ret_val)
 }
 

@@ -2,16 +2,17 @@ use crate::{
     AccTokCrypt::{self, SecurityParam},
     Config,
     DirCheck::full_check_directory,
+    abstract__tokinezer::skip_value_index,
     black_list_iterator::{self, AsciiSymbol},
     debug_eprintln_fileinfo, debug_println, debug_println_fileinfo,
     tokinezed::{self, *},
     utils::{self, *},
 };
 
-use std::error::Error;
 use std::path::Path;
 use std::sync::LazyLock;
 use std::sync::Once;
+use std::{error::Error, ops::Deref};
 use std::{fmt, sync::RwLock};
 use validator::{Validate, ValidationError};
 
@@ -408,27 +409,27 @@ pub fn parse_set_text_commit(toksref: &TokenStruct, index: usize) -> Result<Stri
     ))
 }
 
-//mili seconds
-//{{time:(d:,h:,...)}}
-pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<(), ParseTimeError> {
-    let d_construct: &mut Construction = &mut Construction::default();
-    let h_construct: &mut Construction = &mut Construction::default();
-    let m_construct: &mut Construction = &mut Construction::default();
-    let s_construct: &mut Construction = &mut Construction::default();
-    let ms_construct: &mut Construction = &mut Construction::default();
-
-    let state1: bool = skip_symbol(time, index, "(".to_string());
+pub fn skip_time_type_and_value(
+    time_parse: &str,
+    index: &mut usize,
+    file: &str,
+    construction: &str,
+    mut_construct: &mut Construction,
+) -> Result<crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>, ParseTimeError>
+{
+    let time_construct: &mut Construction = &mut Construction::default();
     #[rustfmt::skip]
-    let d: Option<crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>> =
-    skip_construction_abstract_parse_value(time, index, " \t\n",
-    "d:", d_construct, file);
-    let unwrap_d: crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow> =
-        match d {
+    let time: Option<crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>> = 
+    skip_construction_abstract_parse_value(time_parse, index, " \t\n", 
+    construction, time_construct, file);
+    let unwrap: crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow> =
+        match time {
             Some(val) => val,
             None => {
                 let err_msg: String;
-                if d_construct.start.is_some() {
-                    let unwrap_d_construct_start = unsafe { d_construct.start.unwrap_unchecked() };
+                if time_construct.start.is_some() {
+                    let unwrap_d_construct_start: usize =
+                        unsafe { time_construct.start.unwrap_unchecked() };
                     err_msg = format!(
                         "the beginning of an unsuccessful parsing: {}",
                         unwrap_d_construct_start
@@ -442,12 +443,63 @@ pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<(), Par
                 return Err(ParseTimeError::Time(err_msg));
             }
         };
-    //skip value и ,
-    let h: bool = skip_construction(time, index, "todo!", "h:", h_construct);
-    let m: bool = skip_construction(time, index, "todo!", "m:", m_construct);
-    let s: bool = skip_construction(time, index, "todo!", "s:", s_construct);
-    let ms: bool = skip_construction(time, index, "todo!", "ms:", ms_construct);
+    let val_d: Result<u128, crate::abstract__tokinezer::ParseIntError> =
+        crate::abstract__tokinezer::parse_int_value::<u128>(time_parse, index, &file);
+    *mut_construct = time_construct.clone();
+    Ok(unwrap)
+}
+
+pub fn error_abort<V, E>(val: Result<V, E>) -> Result<V, E> {
+    val
+}
+
+pub fn skip_symbol_result<V,E>(state: bool,ret_val: V,ret_err: E) -> Result<V,E>{
+    if state{
+        Ok(ret_val)
+    }
+    else{
+        Err(ret_err)
+    }
+}
+
+//mili seconds
+//{{time:(d:,h:,...)}}
+pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<(), ParseTimeError> {
+    let d_construct: &mut Construction = &mut Construction::default();
+    let h_construct: &mut Construction = &mut Construction::default();
+    let m_construct: &mut Construction = &mut Construction::default();
+    let s_construct: &mut Construction = &mut Construction::default();
+    let ms_construct: &mut Construction = &mut Construction::default();
+
+    let state1: bool = skip_symbol(time, index, "(".to_string());
+    error_abort(skip_symbol_result(state1, (), ParseTimeError::KeyWord("(".to_string())))?;
+    let res_d: Result<
+        crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>,
+        ParseTimeError,
+    > = skip_time_type_and_value(time, index, &file, "d: ", d_construct);
+    error_abort(res_d)?;
+    let res_h: Result<
+        crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>,
+        ParseTimeError,
+    > = skip_time_type_and_value(time, index, &file, "h: ", h_construct);
+    error_abort(res_h)?;
+    let res_m: Result<
+        crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>,
+        ParseTimeError,
+    > = skip_time_type_and_value(time, index, &file, "m: ", m_construct);
+    error_abort(res_m)?;
+    let res_s: Result<
+        crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>,
+        ParseTimeError,
+    > = skip_time_type_and_value(time, index, &file, "s: ", s_construct);
+    error_abort(res_s)?;
+    let res_ms: Result<
+        crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>,
+        ParseTimeError,
+    > = skip_time_type_and_value(time, index, &file, "ms: ", ms_construct);
+    error_abort(res_ms)?;
     let state2: bool = skip_symbol(time, index, ")".to_string());
+    error_abort(skip_symbol_result(state2, (), ParseTimeError::KeyWord("(".to_string())))?;
     Ok(())
 }
 
