@@ -108,8 +108,7 @@ pub fn skip_symbol_abstract_parse_value(
             );
             ret.set_err(err);
         }
-    }
-    else {
+    } else {
         let cur_sym: Option<char> = str.chars().nth(*index);
         let cur_sym_unwrap: char = unsafe { cur_sym.unwrap_unchecked() };
         ret.set_val(cur_sym_unwrap);
@@ -236,8 +235,14 @@ pub fn skip_construction_abstract_parse_value(
                         );
                         let give_sym_err_unwrap: String =
                             unsafe { give_sym_err.unwrap_unchecked() };
-                        let skip_construcion_msg: String = format!("give_char: {} construction_char: {}\ngive_sym_err: {} construction: {} index: {}",
-                        give_sym_str,give_sym_construction,give_sym_err_unwrap,construction,*index);
+                        let skip_construcion_msg: String = format!(
+                            "give_char: {} construction_char: {}\ngive_sym_err: {} construction: {} index: {}",
+                            give_sym_str,
+                            give_sym_construction,
+                            give_sym_err_unwrap,
+                            construction,
+                            *index
+                        );
                         err.set(
                             unwrap_errpos,
                             msg_err,

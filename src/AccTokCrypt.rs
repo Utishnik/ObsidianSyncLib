@@ -1,5 +1,5 @@
 use crate::fs::File;
-use dotenvy::{dotenv, var, Iter};
+use dotenvy::{Iter, dotenv, var};
 use git2::Status;
 use std::error::Error;
 use std::fs;

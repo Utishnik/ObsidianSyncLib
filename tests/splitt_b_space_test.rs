@@ -2,7 +2,7 @@ use std::str::SplitAsciiWhitespace;
 
 use obsidian_sync_lib::splitt_b_space;
 use obsidian_sync_lib::{
-    debug::{get_count_tests, get_test, result_list, successes_beh, TESTS},
+    debug::{TESTS, get_count_tests, get_test, result_list, successes_beh},
     tokinezed::Construction,
     *,
 };

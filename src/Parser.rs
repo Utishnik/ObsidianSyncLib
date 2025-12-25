@@ -1,11 +1,11 @@
 use crate::{
+    AccTokCrypt::{self, SecurityParam},
+    Config,
+    DirCheck::full_check_directory,
     black_list_iterator::{self, AsciiSymbol},
     debug_eprintln_fileinfo, debug_println, debug_println_fileinfo,
     tokinezed::{self, *},
     utils::{self, *},
-    AccTokCrypt::{self, SecurityParam},
-    Config,
-    DirCheck::full_check_directory,
 };
 
 use std::error::Error;
@@ -196,11 +196,7 @@ pub struct PubPosStr
 
 impl IteratorDecl {
     fn is_one_symbol(&self) -> bool {
-        if self.start == self.end {
-            false
-        } else {
-            true
-        }
+        if self.start == self.end { false } else { true }
     }
 
     pub fn get_pos(&self) -> PubPosStr {

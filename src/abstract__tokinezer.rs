@@ -1,11 +1,11 @@
+use crate::ParseTimeError;
 use crate::debug_eprintln_fileinfo;
 use crate::splitt_b_space;
 use crate::tokinezed;
 use crate::tokinezed::skip_symbol_abstract_parse_value;
-use crate::utils::clean_capasity_heuristics;
-use crate::utils::TimePointErr;
 use crate::utils::DEFAULT_HEURISTICS_VAL;
-use crate::ParseTimeError;
+use crate::utils::TimePointErr;
+use crate::utils::clean_capasity_heuristics;
 use core::fmt;
 use std::default;
 use std::error::Error as OtherError;
@@ -166,24 +166,29 @@ pub enum ParseIntError {
     None,
 }
 
-pub fn parse_int_value<T>(str: &str, index: &mut usize, file: String) -> Result<T, ParseIntError>
+pub fn parse_int_value<T>(str: &str, index: &mut usize, file: &str) -> Result<T, ParseIntError>
 where
     T: std::default::Default,
 {
+    let check_number = |char: char| -> bool { char.is_ascii_digit() };
     let ret_val: T = T::default();
     let mut find_start: bool = false;
     let mut curr_str: String = String::default();
     'a: loop {
         let skiping: Option<AbstractParseValue<char, tokinezed::TokinezedErrorLow>> =
-            skip_symbol_abstract_parse_value(str, index, "".to_string(), true, file.clone());
+            skip_symbol_abstract_parse_value(str, index, "".to_string(), true, file.to_string());
         //как будто clone не blazing
-        if let Some(val)  = skiping /*&& тут нужно val.val унврапнуть*/ {
-            find_start=true;
+        if let Some(val) = skiping
+            && unsafe { check_number(val.val.unwrap_unchecked()) }
+        {
+            find_start = true;
             //curr_str.push(val.val);//logic err у нас val set только при construction
-        }
-        else{
-            if !find_start{
-                return Err(ParseIntError::SkipError(format!("index: {}, curr_str: {}",index,curr_str)));
+        } else {
+            if !find_start {
+                return Err(ParseIntError::SkipError(format!(
+                    "index: {}, curr_str: {}",
+                    index, curr_str
+                )));
             }
         }
     }
@@ -357,20 +362,12 @@ where
     pub fn is_err(&self) -> bool {
         let err: Option<Error<E>> = self.err.clone();
 
-        if err.is_none() {
-            false
-        } else {
-            true
-        }
+        if err.is_none() { false } else { true }
     }
     pub fn is_val_some(&self) -> bool {
         let is_some: Option<T> = self.val.clone();
 
-        if is_some.is_none() {
-            false
-        } else {
-            true
-        }
+        if is_some.is_none() { false } else { true }
     }
 
     //err_cor отвечает за то что он автоматически сделает ошибко None

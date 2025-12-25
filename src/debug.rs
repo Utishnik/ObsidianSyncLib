@@ -8,12 +8,12 @@ use std::io::Write;
 use std::num::ParseIntError;
 use std::ops::Deref;
 use std::path::Display;
-use std::sync::atomic::AtomicU64;
-use std::sync::atomic::AtomicUsize;
-use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::OnceLock;
+use std::sync::atomic::AtomicU64;
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering;
 
 pub struct ArgsFmt {
     args: Vec<String>,
@@ -74,11 +74,11 @@ impl ArgsFmt {
     pub fn first(&self) -> Option<String> {
         self.args.first().cloned()
     } //todo использовать не только first но и другие значение например следуйщиее целое число
-      //это сколько выводов показать или каких их цветом
-      //patterns(несколько их может быть не только один вывод) после них количество выводов каждого патерна
-      //I64SIZEMAX значит все i64 используется так как + значит первый n выводов - последние n выводов
-      //и потом идут цвета каждого вывода
-      //first будет означать кого типа выводить обычных stdout или поток ошибок
+    //это сколько выводов показать или каких их цветом
+    //patterns(несколько их может быть не только один вывод) после них количество выводов каждого патерна
+    //I64SIZEMAX значит все i64 используется так как + значит первый n выводов - последние n выводов
+    //и потом идут цвета каждого вывода
+    //first будет означать кого типа выводить обычных stdout или поток ошибок
 
     pub fn get_args_owned(&self) -> Vec<String> {
         self.args.clone()
@@ -252,7 +252,7 @@ fn iterate_cnt_color_parse(args: &[String], color_err: &mut String) -> Option<Pa
     if break_index < 1 || args.len() < (break_index - 1) {
         debug_println!("break_index = {}\targs.len() = {}", break_index, args.len());
         return None; // тут надежда на обработку ошибки в функции которая
-                     //эту вызывает CntErr
+        //эту вызывает CntErr
     }
     let mut cnt_parse_color: usize = 0;
     'skip_col: for i in args.iter().skip(break_index - 1) {
@@ -308,7 +308,7 @@ pub fn iterate_parse(args: &[String]) -> Result<(), IterateParseError> {
         None => {
             return Err(IterateParseError::PatternErr(
                 "Empty pattern Vec".to_string(),
-            ))
+            ));
         }
     };
     Ok(())
@@ -546,7 +546,7 @@ pub fn dump_result_list(path: String) -> Result<(), std::io::Error> //todo: сд
         i += 1;
     }
     Ok(()) //TODO доделать там нумерацию фаилов пред проверки всякие и тд и наверное чтоб он автоматически взависомти от
-           //теста в нужную директорию
+    //теста в нужную директорию
 }
 
 //todo: pub fn dump_list_print

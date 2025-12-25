@@ -4,16 +4,16 @@ use std::default;
 use std::fmt;
 use std::result;
 use std::time::Instant;
-use std::u128::MAX as OtherMAX;
 use std::u32::MAX;
+use std::u128::MAX as OtherMAX;
 
 use git2::Submodule;
 
 use crate::debug_eprintln_fileinfo;
 use crate::debug_println;
 use crate::debug_println_fileinfo;
-use crate::number_utils::safe_divide_with_remainder;
 use crate::number_utils::DivisionError;
+use crate::number_utils::safe_divide_with_remainder;
 
 const MILLIS_PER_MILLIS: u128 = 1;
 const MILLIS_PER_SECOND: u128 = 1000;
@@ -379,8 +379,10 @@ pub fn unique_sym_to_str(str1: &str, str2: &str) -> String {
 //O(n*m)
 pub fn remove_duplicate_chars_simple_nm(s: &str) -> String {
     if s.len() > 64 {
-        debug_println_fileinfo!("remove_duplicate_chars_simple_nm s.len() = {}\nможет лучше использовать remove_duplicate_chars_simple_n?",
-        s.len());
+        debug_println_fileinfo!(
+            "remove_duplicate_chars_simple_nm s.len() = {}\nможет лучше использовать remove_duplicate_chars_simple_n?",
+            s.len()
+        );
     }
     let mut result = String::new();
 
@@ -395,8 +397,10 @@ pub fn remove_duplicate_chars_simple_nm(s: &str) -> String {
 //O(n)
 pub fn remove_duplicate_chars_simple_n(s: &str) -> String {
     if s.len() < 64 {
-        debug_println_fileinfo!("remove_duplicate_chars_simple_n s.len() = {}\nможет нужно remove_duplicate_chars_simple_nm?",
-        s.len());
+        debug_println_fileinfo!(
+            "remove_duplicate_chars_simple_n s.len() = {}\nможет нужно remove_duplicate_chars_simple_nm?",
+            s.len()
+        );
     }
     let mut result = HashSet::new();
     s.chars().filter(|&c| result.insert(c)).collect()

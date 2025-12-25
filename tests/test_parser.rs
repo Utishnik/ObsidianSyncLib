@@ -1,6 +1,6 @@
 use obsidian_sync_lib::Parser::*;
 use obsidian_sync_lib::{
-    debug::{get_count_tests, get_test, result_list, TESTS},
+    debug::{TESTS, get_count_tests, get_test, result_list},
     tokinezed::Construction,
     *,
 };
