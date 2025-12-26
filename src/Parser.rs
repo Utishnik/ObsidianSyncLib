@@ -2,7 +2,7 @@ use crate::{
     AccTokCrypt::{self, SecurityParam},
     Config,
     DirCheck::full_check_directory,
-    abstract__tokinezer::skip_value_index,
+    abstract__tokinezer::{self, *},
     black_list_iterator::{self, AsciiSymbol},
     debug_eprintln_fileinfo, debug_println, debug_println_fileinfo,
     tokinezed::{self, *},
@@ -592,12 +592,67 @@ pub fn parse_time_commit_sync(
     //todo дописать
     let parse_res: Result<Time, ParseTimeError> = parse_time(str, index, file.to_string());
     error_abort(parse_res.clone())?;
-    let unwrap_parse_res: Time = unsafe{parse_res.unwrap_unchecked()};
+    let unwrap_parse_res: Time = unsafe { parse_res.unwrap_unchecked() };
 
     Ok(unwrap_parse_res)
 }
 
-pub fn parse_text_commit_iter_body(str: &str) {}
+pub enum ParseIterCommitBodyErr {
+    Time(ParseTimeError),
+}
+
+pub fn skip_sem_point(str: &str, index: &mut usize, transfers: Option<String>) -> Option<Pos> {
+    let res: bool = skip_symbol(str, index, ";".to_string());
+    let ret: Result<Pos, ()> = Pos::conver_to_pos(*index, str, transfers);
+    if ret.is_err() || !res {
+        None
+    } else {
+        Some(unsafe { ret.unwrap_unchecked() })
+    }
+}
+
+pub fn parse_text_commit_msg_iter_body(
+    str: &str,
+    index: &mut usize,
+    ignore_symbol_list: &str,
+    file: &str,
+    msg_tok: &str,
+) -> Option<String>{
+    let res_ret: Option<String>=None;
+    let mut skip_msg: Construction = Construction::default();
+    let res: Option<AbstractParseValue<String, TokinezedErrorLow>> = skip_construction_abstract_parse_value(
+        str,
+        index,
+        ignore_symbol_list,
+        msg_tok,//"msg" например
+        &mut skip_msg,
+        file,
+    );
+
+    res_ret
+}
+
+//let var: msg = "commit sync"
+//let mut iter_msg: num = 0
+//{{time:(d:,h:,...); msg:var + iter_msg; iter_msg+=1;}}
+pub fn parse_text_commit_iter_body(
+    str: &str,
+    index: &mut usize,
+    ignore_symbol_list: &str,
+    file: &str,
+) -> Result<(), ParseIterCommitBodyErr> {
+    let time_result: Result<Time, ParseTimeError> =
+        parse_time_commit_sync(str, index, ignore_symbol_list, file);
+    let time_result_unwrap: Time;
+    if let Err(err) = time_result {
+        return Err(ParseIterCommitBodyErr::Time(err));
+    } else if let Ok(ok) = time_result {
+        time_result_unwrap = ok;
+    }
+    skip_sem_point(str, index, None);
+
+    Ok(())
+}
 
 pub fn parse_text_commit_iterator(
     str: &str,
