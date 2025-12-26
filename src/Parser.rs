@@ -567,7 +567,8 @@ pub fn parse_time_commit_sync(
     str: &str,
     index: &mut usize,
     ignore_symbol_list: &str,
-) -> Result<(), ParseTimeError> {
+    file: &str,
+) -> Result<Time, ParseTimeError> {
     let mut parse_error_hand: ParseTimeError = ParseTimeError::None;
     let skip_time_iter: &mut Construction = &mut Construction::default();
     let skip_time: bool = skip_construction(str, index, ignore_symbol_list, "time", skip_time_iter);
@@ -589,7 +590,11 @@ pub fn parse_time_commit_sync(
         return Err(parse_error_hand);
     }
     //todo дописать
-    Ok(())
+    let parse_res: Result<Time, ParseTimeError> = parse_time(str, index, file.to_string());
+    error_abort(parse_res.clone())?;
+    let unwrap_parse_res: Time = unsafe{parse_res.unwrap_unchecked()};
+
+    Ok(unwrap_parse_res)
 }
 
 pub fn parse_text_commit_iter_body(str: &str) {}
