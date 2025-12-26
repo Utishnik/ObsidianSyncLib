@@ -117,3 +117,13 @@ pub fn gen_decimal_digits() -> String {
     let ret: String = gen_digit_or_number(0.0, 10.0, |x: f64| x + 1.0);
     ret
 }
+
+pub fn chunk_str_get(str: &str, start_idx: usize, end_idx: usize) -> String {
+    let result: String = str
+        .chars()
+        .into_iter()
+        .skip(start_idx)
+        .take(end_idx)
+        .collect();
+    result
+}

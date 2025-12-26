@@ -61,6 +61,28 @@ pub fn skip_symbol(str: &str, index: &mut usize, symbol_list: String) -> bool {
     false
 }
 
+pub fn cnt_chars(str: &str, index: &usize, symbol_list: String) -> usize {
+    let mut ret: usize = 0;
+    let mut counting = || {
+        'a: loop {
+            let next_res: Option<char> = str.chars().skip(*index).next();
+            if next_res.is_none() {
+                break;
+            }
+            let next_res_unwrap: char = unsafe { next_res.unwrap_unchecked() };
+            for item in symbol_list.chars() {
+                if next_res_unwrap == item {
+                    ret += 1;
+                    continue 'a;
+                }
+            }
+            break;
+        }
+    };
+    counting();
+    ret
+}
+
 // более низкоуровенвый аналог Tokinezed_Error
 #[derive(Clone)]
 pub enum TokinezedErrorLow {

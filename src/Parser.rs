@@ -562,6 +562,9 @@ pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<Time, P
     Ok(return_parse_time)
 }
 
+//почему такая непривычная проверка наличия : и то что ошибка : главнее остальных
+//дело в том что это чтоб этот код был таким же как и когда будет работа с переменными так как там не будет
+//четких keyword
 //todo тестировать не только с ascii
 pub fn parse_time_commit_sync(
     str: &str,
@@ -571,15 +574,20 @@ pub fn parse_time_commit_sync(
 ) -> Result<Time, ParseTimeError> {
     let mut parse_error_hand: ParseTimeError = ParseTimeError::None;
     let skip_time_iter: &mut Construction = &mut Construction::default();
+    //сколько пробелов
+    let start_idx: usize = index.clone();
+    let cnt_probels: usize = cnt_chars(str, &start_idx, " \n\t".to_string());
     let skip_time: bool = skip_construction(str, index, ignore_symbol_list, "time", skip_time_iter);
-    let find_s: Option<usize> = str.find(":"); //не skip так как неопредельшь при ошибки в key word time где начинать
+    let str_slice: String =
+        crate::str_utils::chunk_str_get(str, start_idx, start_idx + cnt_probels);
+    let find_s: Option<usize> = str_slice.find(":"); //не skip так как неопредельшь при ошибки в key word time где начинать
     if find_s.is_none() {
         parse_error_hand = ParseTimeError::KeyWord("syntax error: not find".to_string());
         return Err(parse_error_hand);
     }
     if !skip_time {
         let error_msg: Option<String> =
-            substr_by_char_end_start_idx_owned(str, find_s.unwrap(), *index);
+            substr_by_char_end_start_idx_owned(str, unsafe { find_s.unwrap_unchecked() }, *index);
         if error_msg.is_some() {
             debug_println_fileinfo!("error msg = {}", error_msg.clone().unwrap());
             parse_error_hand = ParseTimeError::KeyWord(error_msg.clone().unwrap());
@@ -617,17 +625,32 @@ pub fn parse_text_commit_msg_iter_body(
     ignore_symbol_list: &str,
     file: &str,
     msg_tok: &str,
-) -> Option<String>{
-    let res_ret: Option<String>=None;
+) -> Option<String> {
+    let res_ret: Option<String> = None;
+    let start_idx: usize = index.clone();
+    let cnt_probels: usize = cnt_chars(str, &start_idx, " \n\t".to_string());
+    let str_slice: String =
+        crate::str_utils::chunk_str_get(str, start_idx, start_idx + cnt_probels);
+    let find_s: Option<usize> = str_slice.find(":");
+    if find_s.is_none() {
+        debug_eprintln_fileinfo!("str_slice: {} not find ;", str_slice);
+        return None;
+    }
     let mut skip_msg: Construction = Construction::default();
-    let res: Option<AbstractParseValue<String, TokinezedErrorLow>> = skip_construction_abstract_parse_value(
-        str,
-        index,
-        ignore_symbol_list,
-        msg_tok,//"msg" например
-        &mut skip_msg,
-        file,
-    );
+    let res: Option<AbstractParseValue<String, TokinezedErrorLow>> =
+        skip_construction_abstract_parse_value(
+            str,
+            index,
+            ignore_symbol_list,
+            msg_tok, //"msg" например
+            &mut skip_msg,
+            file,
+        );
+
+    if res.is_none() || unsafe { res.unwrap_unchecked().is_err() } {
+        return None;
+    }
+    let find_s: Option<usize> = str.find(":");
 
     res_ret
 }

@@ -50,3 +50,7 @@ path = "tests/multi_thread_debug_test.rs"
 [[test]]
 name = "test_utils"
 path = "tests/test_utlis.rs"
+
+[[test]]
+name = "str_utils_test"
+path = "tests/str_utils_test.rs"
