@@ -319,6 +319,31 @@ where
     err: Option<Error<E>>,
 }
 
+pub enum AbstractValType {
+    Str,
+    Num,
+    Time,
+}
+
+pub struct AbstractParseExpr {
+    pos: Pos,
+    data: Vec<AbstractParseExpr>,
+    val: Option<String>,
+    val_type: Option<AbstractValType>,
+}
+
+impl AbstractParseExpr {
+    fn set_val(&mut self, val: String, val_type: AbstractValType) {
+        self.val = Some(val);
+        self.val_type = Some(val_type);
+    }
+
+    fn reset_val(&mut self) {
+        self.val = None;
+        self.val_type = None;
+    }
+}
+
 impl<T, E> fmt::Display for AbstractParseValue<T, E>
 where
     T: AbstractValue + std::clone::Clone + std::fmt::Display,

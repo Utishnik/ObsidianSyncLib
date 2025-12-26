@@ -619,6 +619,15 @@ pub fn skip_sem_point(str: &str, index: &mut usize, transfers: Option<String>) -
     }
 }
 
+pub fn parse_expr<T, E>(
+    str: &str,
+    index: &mut usize,
+    block_end: usize,
+    file: &str,
+) -> Option<AbstractParseExpr> {
+    None
+}
+
 pub fn parse_text_commit_msg_iter_body(
     str: &str,
     index: &mut usize,
@@ -636,6 +645,7 @@ pub fn parse_text_commit_msg_iter_body(
         debug_eprintln_fileinfo!("str_slice: {} not find ;", str_slice);
         return None;
     }
+    let find_s_unwrap: usize = unsafe { find_s.unwrap_unchecked() };
     let mut skip_msg: Construction = Construction::default();
     let res: Option<AbstractParseValue<String, TokinezedErrorLow>> =
         skip_construction_abstract_parse_value(
@@ -650,7 +660,7 @@ pub fn parse_text_commit_msg_iter_body(
     if res.is_none() || unsafe { res.unwrap_unchecked().is_err() } {
         return None;
     }
-    let find_s: Option<usize> = str.find(":");
+    *index = find_s_unwrap;
 
     res_ret
 }
