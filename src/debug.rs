@@ -463,11 +463,11 @@ pub fn add_test(test: Test) {
 }
 
 pub fn add_type_test() {
-    type_test.fetch_add(1, Ordering::Relaxed);
+    type_test.fetch_add(1, Ordering::Release);
 }
 
 pub fn get_type_test() -> usize {
-    type_test.load(Ordering::Relaxed)
+    type_test.load(Ordering::Acquire)
 }
 
 pub fn get_test(index: usize) -> Option<Test> {

@@ -1,5 +1,8 @@
 use std::fmt::format;
 use std::{cell::Cell, ops::Mul, u64::MAX};
+use std::sync::OnceLock;
+use std::sync::Arc;
+use std::sync::Mutex;
 
 use crate::abstract__tokinezer::{self, *};
 use crate::str_utils::safe_remove_chars;
@@ -38,6 +41,8 @@ impl Token {
         }
     }
 }
+
+pub static TOKENS: OnceLock<Arc<Mutex<Vec<String>>>> = OnceLock::new();
 
 pub fn get_symbol(str: &str, index: usize) -> Option<char> {
     str.chars().nth(index)
