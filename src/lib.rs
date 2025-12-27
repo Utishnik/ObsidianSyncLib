@@ -90,7 +90,7 @@ pub fn splitt_b_space(
         transfer_sym = t;
     }
     debug_println!("splitt_b_space transfer_sym: {}", transfer_sym);
-    let is_none_syms = syms.is_none();
+    let is_none_syms: bool = syms.is_none();
     if let Ok(cnt) = count_syms_b_str(&str, syms.clone().unwrap_or("".to_string()).to_string()) {
         debug_println!("CNT splitt_b_space  {}", cnt);
         let safe_cnt: usize = usize::try_from(cnt).map_err(|_| ())?;

@@ -1,12 +1,15 @@
 use std::fmt::format;
-use std::{cell::Cell, ops::Mul, u64::MAX};
-use std::sync::OnceLock;
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::sync::OnceLock;
+use std::sync::mpsc::channel;
+use std::{cell::Cell, ops::Mul, u64::MAX};
 
 use crate::abstract__tokinezer::{self, *};
 use crate::str_utils::safe_remove_chars;
-use crate::{debug, debug_println, debug_println_fileinfo};
+use crate::{
+    debug, debug_eprintln_fileinfo, debug_println, debug_println_fileinfo, splitt_b_space,
+};
 
 pub static MAX_TOKEN_CAPACITY: usize = 1000000;
 pub static CAPACITY_UP_SIZE: usize = 64;
@@ -23,6 +26,10 @@ pub enum Token {
     UserName,
     IteratorStart,
     IteratorEnd,
+    Let,
+    Msg,
+    Semiclnpnt,
+    Colon,
 }
 
 impl Token {
@@ -38,11 +45,64 @@ impl Token {
             Token::TextCommit => "Text",
             Token::IteratorStart => "{{",
             Token::IteratorEnd => "}}",
+            Token::Let => "let",
+            Token::Msg => "msg",
+            Token::Semiclnpnt => ";",
+            Token::Colon => ":",
         }
     }
 }
 
+#[derive(Clone)]
+pub struct TokenStruct {
+    pub tok_values: Vec<String>,
+    pub tok_lines_number: Vec<u64>,
+    tok_start_idx: Option<usize>,
+    tok_end_idx: Option<usize>,
+}
+
 pub static TOKENS: OnceLock<Arc<Mutex<Vec<String>>>> = OnceLock::new();
+pub static CONFIG: OnceLock<String> = OnceLock::new();
+pub static DEFAULT_SPLIT_CHARS: &str = "\t ";
+pub static DEFAULT_TRANSFER_CHARS: &str = "\n";
+
+pub fn get_and_init_config(cfg: String) -> String {
+    let res: &String = CONFIG.get_or_init(|| {
+        if !cfg.is_empty() {
+            cfg
+        } else {
+            debug_eprintln_fileinfo!("config is empty");
+            String::default()
+        }
+    });
+    res.to_string()
+}
+
+pub fn get_and_init_tokens(cfg: String) -> &'static Arc<Mutex<Vec<String>>> {
+    let config: String = get_and_init_config(cfg);
+    let res: &Arc<Mutex<Vec<String>>> = TOKENS.get_or_init(|| Arc::new(Mutex::new(Vec::new())));
+    let guard: Result<
+        std::sync::MutexGuard<'_, Vec<String>>,
+        std::sync::PoisonError<std::sync::MutexGuard<'_, Vec<String>>>,
+    > = res.lock();
+    if guard.is_err() {
+        debug_eprintln_fileinfo!("отравленный поток🤢; todo сделать восстановление");
+        return res;
+    }
+    let unwrap_guard: std::sync::MutexGuard<'_, Vec<String>> = unsafe { guard.unwrap_unchecked() };
+
+    let split_toks: Result<TokenStruct, ()> = splitt_b_space(
+        config,
+        Some(DEFAULT_SPLIT_CHARS.to_string()),
+        Some(DEFAULT_TRANSFER_CHARS.to_string()),
+    );
+    if split_toks.is_err(){
+        debug_eprintln_fileinfo!("split_toks error result");
+        
+    }
+    //unwrap_guard.push(value);
+    res
+}
 
 pub fn get_symbol(str: &str, index: usize) -> Option<char> {
     str.chars().nth(index)
@@ -481,18 +541,18 @@ pub struct Token_String {
     pub tok_val: String,
 }
 
-#[derive(Clone)]
-pub struct TokenStruct {
-    pub tok_values: Vec<String>,
-    pub tok_lines_number: Vec<u64>,
-}
-
 impl TokenStruct {
     pub fn new(size: usize) -> Self {
         Self {
             tok_values: vec![String::new(); size],
             tok_lines_number: Vec::<u64>::with_capacity(size),
+            tok_start_idx: None,
+            tok_end_idx: None,
         }
+    }
+    pub fn set_tok_pos(&mut self, start_idx: usize, end_idx: usize) {
+        self.tok_start_idx = Some(start_idx);
+        self.tok_end_idx = Some(end_idx);
     }
 
     pub fn get_size(&self) -> usize {

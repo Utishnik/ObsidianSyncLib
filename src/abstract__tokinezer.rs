@@ -337,8 +337,8 @@ pub struct AbstractParseExpr {
 //пока без разбра let var ...
 //предположим он уже равен 10
 //msg <- expr первый проход еще без типа, "var = " - expr str,
-//+ <- operation num -> expr значение которого 10 и тип num 
-//тоесть msg это выражения типа str равное сумме двух других 
+//+ <- operation num -> expr значение которого 10 и тип num
+//тоесть msg это выражения типа str равное сумме двух других
 impl AbstractParseExpr {
     fn set_val(&mut self, val: String, val_type: AbstractValType) {
         self.val = Some(val);
