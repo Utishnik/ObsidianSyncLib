@@ -53,7 +53,7 @@ impl Token {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct TokenStruct {
     pub tok_values: Vec<String>,
     pub tok_lines_number: Vec<u64>,
@@ -61,7 +61,7 @@ pub struct TokenStruct {
     tok_end_idx: Option<usize>,
 }
 
-pub static TOKENS: OnceLock<Arc<Mutex<Vec<String>>>> = OnceLock::new();
+pub static TOKENS: OnceLock<Arc<Mutex<TokenStruct>>> = OnceLock::new();
 pub static CONFIG: OnceLock<String> = OnceLock::new();
 pub static DEFAULT_SPLIT_CHARS: &str = "\t ";
 pub static DEFAULT_TRANSFER_CHARS: &str = "\n";
@@ -78,30 +78,33 @@ pub fn get_and_init_config(cfg: String) -> String {
     res.to_string()
 }
 
-pub fn get_and_init_tokens(cfg: String) -> &'static Arc<Mutex<Vec<String>>> {
+pub fn get_and_init_tokens(cfg: String) -> Result<&'static Arc<Mutex<TokenStruct>>, ()> {
     let config: String = get_and_init_config(cfg);
-    let res: &Arc<Mutex<Vec<String>>> = TOKENS.get_or_init(|| Arc::new(Mutex::new(Vec::new())));
+    let res: &Arc<Mutex<TokenStruct>> =
+        TOKENS.get_or_init(|| Arc::new(Mutex::new(TokenStruct::default())));
     let guard: Result<
-        std::sync::MutexGuard<'_, Vec<String>>,
-        std::sync::PoisonError<std::sync::MutexGuard<'_, Vec<String>>>,
+        std::sync::MutexGuard<'_, TokenStruct>,
+        std::sync::PoisonError<std::sync::MutexGuard<'_, TokenStruct>>,
     > = res.lock();
     if guard.is_err() {
         debug_eprintln_fileinfo!("отравленный поток🤢; todo сделать восстановление");
-        return res;
+        return Ok(res);
     }
-    let unwrap_guard: std::sync::MutexGuard<'_, Vec<String>> = unsafe { guard.unwrap_unchecked() };
+    let mut unwrap_guard: std::sync::MutexGuard<'_, TokenStruct> =
+        unsafe { guard.unwrap_unchecked() };
 
     let split_toks: Result<TokenStruct, ()> = splitt_b_space(
         config,
         Some(DEFAULT_SPLIT_CHARS.to_string()),
         Some(DEFAULT_TRANSFER_CHARS.to_string()),
     );
-    if split_toks.is_err(){
+    if split_toks.is_err() {
         debug_eprintln_fileinfo!("split_toks error result");
-        
+        return Err(());
     }
-    //unwrap_guard.push(value);
-    res
+    let split_toks_unwrap: TokenStruct = unsafe { split_toks.unwrap_unchecked() };
+    *unwrap_guard = split_toks_unwrap;
+    Ok(res)
 }
 
 pub fn get_symbol(str: &str, index: usize) -> Option<char> {
