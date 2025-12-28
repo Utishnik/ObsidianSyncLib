@@ -577,9 +577,20 @@ pub fn parse_time_commit_sync(
     //сколько пробелов
     let start_idx: usize = index.clone();
     let cnt_probels: usize = cnt_chars(str, &start_idx, " \n\t".to_string());
-    let skip_time: bool = skip_construction(str, index, ignore_symbol_list, "time", skip_time_iter);
-    let str_slice: String =
-        crate::str_utils::chunk_str_get(str, start_idx, start_idx + cnt_probels);
+    let time_commit_tok: &str = Token::TimeCommit.as_str();
+    let time_commit_tok_len: usize = time_commit_tok.len();
+    let skip_time: bool = skip_construction(
+        str,
+        index,
+        ignore_symbol_list,
+        time_commit_tok,
+        skip_time_iter,
+    );
+    let str_slice: String = crate::str_utils::chunk_str_get(
+        str,
+        start_idx,
+        start_idx + cnt_probels + time_commit_tok_len,
+    );
     let find_s: Option<usize> = str_slice.find(":"); //не skip так как неопредельшь при ошибки в key word time где начинать
     if find_s.is_none() {
         parse_error_hand = ParseTimeError::KeyWord("syntax error: not find".to_string());
@@ -639,8 +650,8 @@ pub fn parse_text_commit_msg_iter_body(
     let start_idx: usize = index.clone();
     let cnt_probels: usize = cnt_chars(str, &start_idx, " \n\t".to_string());
     let str_slice: String =
-        crate::str_utils::chunk_str_get(str, start_idx, start_idx + cnt_probels);
-    let find_s: Option<usize> = str_slice.find(":");
+        crate::str_utils::chunk_str_get(str, start_idx, start_idx + msg_tok.len());
+    let find_s: Option<usize> = str_slice.find(Token::Colon.as_str());
     if find_s.is_none() {
         debug_eprintln_fileinfo!("str_slice: {} not find ;", str_slice);
         return None;

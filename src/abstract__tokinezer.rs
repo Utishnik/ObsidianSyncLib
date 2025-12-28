@@ -319,14 +319,16 @@ where
     err: Option<Error<E>>,
 }
 
+#[derive(Clone)]
 pub enum AbstractValType {
     Str,
     Num,
     Time,
 }
 
+#[derive(Clone,Default)]
 pub struct AbstractParseExpr {
-    pos: Pos,
+    pos: Option<Pos>,
     data: Vec<AbstractParseExpr>,
     val: Option<String>,
     val_type: Option<AbstractValType>,
@@ -340,14 +342,32 @@ pub struct AbstractParseExpr {
 //+ <- operation num -> expr значение которого 10 и тип num
 //тоесть msg это выражения типа str равное сумме двух других
 impl AbstractParseExpr {
-    fn set_val(&mut self, val: String, val_type: AbstractValType) {
+    fn set_val(&mut self, val: String, val_type: AbstractValType, pos: Pos) {
         self.val = Some(val);
         self.val_type = Some(val_type);
+        self.pos = Some(pos);
     }
 
     fn reset_val(&mut self) {
         self.val = None;
         self.val_type = None;
+        self.pos = None;
+    }
+
+    fn push_data(&mut self,data: AbstractParseExpr){
+        self.data.push(data);
+    }
+
+    fn pop_data(&mut self) -> Option<AbstractParseExpr>{
+        self.data.pop()
+    }
+
+    fn get_data(&self) -> &Vec<AbstractParseExpr>{
+        &self.data
+    }
+
+    fn get_mut_data(&mut self) -> &mut Vec<AbstractParseExpr>{
+        &mut self.data
     }
 }
 

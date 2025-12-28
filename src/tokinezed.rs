@@ -41,7 +41,7 @@ impl Token {
             Token::RemoteRepAddr => "Remote",
             Token::SetVal => "=",
             Token::PathObsidian => "Path",
-            Token::TimeCommit => "Time",
+            Token::TimeCommit => "time",
             Token::TextCommit => "Text",
             Token::IteratorStart => "{{",
             Token::IteratorEnd => "}}",
