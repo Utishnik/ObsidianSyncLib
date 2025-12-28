@@ -1,10 +1,10 @@
-pub enum OptionErr {
-    Err(Box<dyn std::error::Error>),
+pub enum OptionErr<T> {
+    Err(T),
     None,
 }
 
-impl OptionErr {
-    fn Some(&mut self, err: Box<dyn std::error::Error>) {
+impl<T> OptionErr<T> {
+    fn Some(&mut self, err: T) {
         *self = OptionErr::Err(err);
     }
     fn None(&mut self) {
