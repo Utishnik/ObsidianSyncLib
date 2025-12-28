@@ -132,7 +132,10 @@ pub fn get_var_slice(start_idx: usize, end_idx: usize) -> Option<Vec<Var>> {
 }
 
 //todo проверки не выхода
-pub fn take_var_slice(start_idx: usize, end_idx: usize) {
+pub fn take_var_slice(start_idx: usize, end_idx: usize) -> bool {
+    if !take_idxes_valid(start_idx, end_idx) {
+        return false;
+    }
     let pack_vars: Result<&Arc<Mutex<Vec<Var>>>, ()> = get_or_init_vars();
     let unwrap_vars: &Arc<Mutex<Vec<Var>>> = unsafe { pack_vars.unwrap_unchecked() };
     let mut guard: std::sync::MutexGuard<'_, Vec<Var>> =
@@ -141,10 +144,53 @@ pub fn take_var_slice(start_idx: usize, end_idx: usize) {
     let taked_vec_var_iter = guard
         .iter()
         .enumerate()
-        .filter(|x: &(usize, _)| start_idx <= x.0 && x.0 <= end_idx);
+        .filter(|x: &(usize, _)| !(start_idx <= x.0 && x.0 <= end_idx));
 
     let vec: Vec<Var> = taked_vec_var_iter.map(|x: (_, &Var)| x.1.clone()).collect();
     *guard = vec;
+    true
 }
 
-pub fn take_var(index: usize) {}
+pub fn take_var(index: usize) -> bool {
+    if !take_idxes_valid(index, index) {
+        return false;
+    }
+    let pack_vars: Result<&Arc<Mutex<Vec<Var>>>, ()> = get_or_init_vars();
+    let unwrap_vars: &Arc<Mutex<Vec<Var>>> = unsafe { pack_vars.unwrap_unchecked() };
+    let mut guard: std::sync::MutexGuard<'_, Vec<Var>> =
+        unsafe { unwrap_vars.lock().unwrap_unchecked() };
+    let taked_vec_var_iter = guard
+        .iter()
+        .enumerate()
+        .filter(|x: &(usize, _)| x.0 != index);
+
+    let vec: Vec<Var> = taked_vec_var_iter.map(|x: (_, &Var)| x.1.clone()).collect();
+    *guard = vec;
+    true
+}
+
+fn take_idxes_valid(start_idx: usize, end_idx: usize) -> bool {
+    let pack_vars: Result<&Arc<Mutex<Vec<Var>>>, ()> = get_or_init_vars();
+    let unwrap_vars: &Arc<Mutex<Vec<Var>>> = unsafe { pack_vars.unwrap_unchecked() };
+    let guard: std::sync::MutexGuard<'_, Vec<Var>> =
+        unsafe { unwrap_vars.lock().unwrap_unchecked() };
+    let vars_len: usize = guard.len();
+    if !(start_idx < vars_len && start_idx > 0) {
+        debug_eprintln_fileinfo!(
+            "take_idxes_valid false: start_idx = {}  vars_len = {}",
+            start_idx,
+            vars_len
+        );
+        return false;
+    }
+    if !(end_idx >= start_idx && end_idx < vars_len) {
+        debug_eprintln_fileinfo!(
+            "take_idxes_valid false: end_idx = {}  start_idx = {}  vars_len = {}",
+            end_idx,
+            start_idx,
+            vars_len
+        );
+        return false;
+    }
+    true
+}
