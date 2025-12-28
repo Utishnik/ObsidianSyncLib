@@ -326,7 +326,7 @@ pub enum AbstractValType {
     Time,
 }
 
-#[derive(Clone,Default)]
+#[derive(Clone, Default)]
 pub struct AbstractParseExpr {
     pos: Option<Pos>,
     data: Vec<AbstractParseExpr>,
@@ -354,19 +354,19 @@ impl AbstractParseExpr {
         self.pos = None;
     }
 
-    fn push_data(&mut self,data: AbstractParseExpr){
+    fn push_data(&mut self, data: AbstractParseExpr) {
         self.data.push(data);
     }
 
-    fn pop_data(&mut self) -> Option<AbstractParseExpr>{
+    fn pop_data(&mut self) -> Option<AbstractParseExpr> {
         self.data.pop()
     }
 
-    fn get_data(&self) -> &Vec<AbstractParseExpr>{
+    fn get_data(&self) -> &Vec<AbstractParseExpr> {
         &self.data
     }
 
-    fn get_mut_data(&mut self) -> &mut Vec<AbstractParseExpr>{
+    fn get_mut_data(&mut self) -> &mut Vec<AbstractParseExpr> {
         &mut self.data
     }
 }
