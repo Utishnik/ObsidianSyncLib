@@ -1,5 +1,6 @@
 use crate::debug_eprintln_fileinfo;
 use crate::display_vec;
+use crate::optional_error::OptionErr;
 use crate::splitt_b_space;
 use crate::tokinezed::*;
 use crate::{abstract__tokinezer::*, debug_println, utils::TimePoint};
@@ -90,8 +91,32 @@ pub struct Var {
 
 pub static VARS: OnceLock<Arc<Mutex<Vec<Var>>>> = OnceLock::new();
 
-pub fn parse_decl_vars() {
-    //get_and_init_tokens(cfg)
+fn parse_decl_vars_in_tok_struct(tok_struct: &TokenStruct){
+
+}
+
+pub fn parse_decl_vars() -> OptionErr<()> {
+    let res: Result<&Arc<Mutex<TokenStruct>>, ()> = get_and_init_tokens();
+    if res.is_err() {
+        return OptionErr::Err(());
+    }
+    let unwrap_res: &Arc<Mutex<TokenStruct>> = unsafe { res.unwrap_unchecked() };
+    let unwrap_lock: Result<
+        std::sync::MutexGuard<'_, TokenStruct>,
+        std::sync::PoisonError<std::sync::MutexGuard<'_, TokenStruct>>,
+    > = unwrap_res.lock();
+    match unwrap_lock {
+        Ok(guard) => {
+            parse_decl_vars_in_tok_struct(&guard);
+        }
+        Err(_) => {
+            debug_eprintln_fileinfo!(
+                "parse_decl_vars отравленный поток🤢; todo сделать восстановление"
+            );
+            return OptionErr::Err(());
+        }
+    }
+    OptionErr::None
 }
 
 pub fn get_or_init_vars() -> Result<&'static Arc<Mutex<Vec<Var>>>, ()> {

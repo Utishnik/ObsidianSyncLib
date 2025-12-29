@@ -100,9 +100,12 @@ pub fn set_config(cfg: String) {
     *unwrap_write_res = cfg;
 }
 
-//todo нужно без cfg нужно функцию
 pub fn get_and_init_tokens() -> Result<&'static Arc<Mutex<TokenStruct>>, ()> {
     let config: String = get_or_init_config();
+    if config.is_empty() {
+        debug_println_fileinfo!("config empty");
+        return Err(());
+    }
     let res: &Arc<Mutex<TokenStruct>> =
         TOKENS.get_or_init(|| Arc::new(Mutex::new(TokenStruct::default())));
     let guard: Result<
