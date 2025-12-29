@@ -12,6 +12,7 @@ pub struct SecurityParam {
     env_path: String,
 }
 
+//todo добавить через dotenvy var запись в переменнные(именно системный) директорию с конфигами
 pub const ENV_DIR: &str = "ObsidianSyncEnv";
 
 fn make_path() -> String {

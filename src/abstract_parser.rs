@@ -1,5 +1,6 @@
 use crate::debug_eprintln_fileinfo;
 use crate::{abstract__tokinezer::*, debug_println, utils::TimePoint};
+use core::slice;
 use std::marker::PhantomData;
 use std::slice::SliceIndex;
 use std::sync::Arc;
@@ -118,6 +119,7 @@ pub fn get_var(index: usize) -> Option<Var> {
     guard.get(index).cloned()
 }
 
+#[derive(Clone, Default)]
 pub struct Slice {
     start_index: usize,
     end_index: usize,
@@ -128,6 +130,10 @@ impl Slice {
         self.start_index = start_idx;
         self.end_index = end_idx;
     }
+    fn set_zero_dimensional(&mut self, index: usize) {
+        self.start_index = index;
+        self.end_index = index;
+    }
     fn get(&self) -> Self {
         Self {
             start_index: self.start_index,
@@ -135,20 +141,19 @@ impl Slice {
         }
     }
     fn is_zero_dimensional(&self) -> bool {
-        if self.start_index == self.end_index {
-            true
-        } else {
-            false
-        }
+        if self.len() == 1 { true } else { false }
+    }
+    fn len(&self) -> usize {
+        self.end_index - self.start_index + 1 // проверка того что например end index меньше уже на стророне валидатора
     }
 }
 
-pub fn get_var_slice(start_idx: usize, end_idx: usize) -> Option<Vec<Var>> {
+pub fn get_var_slice(slice: Slice) -> Option<Vec<Var>> {
     let pack_vars: Result<&Arc<Mutex<Vec<Var>>>, ()> = get_or_init_vars();
     let unwrap_vars: &Arc<Mutex<Vec<Var>>> = unsafe { pack_vars.unwrap_unchecked() };
     let guard: std::sync::MutexGuard<'_, Vec<Var>> =
         unsafe { unwrap_vars.lock().unwrap_unchecked() };
-    let slice_give: Option<&[Var]> = guard.get(start_idx..=end_idx);
+    let slice_give: Option<&[Var]> = guard.get(slice.start_index..=slice.end_index);
     if slice_give.is_none() {
         None
     } else {
@@ -157,8 +162,8 @@ pub fn get_var_slice(start_idx: usize, end_idx: usize) -> Option<Vec<Var>> {
 }
 
 //todo проверки не выхода
-pub fn take_var_slice(start_idx: usize, end_idx: usize) -> bool {
-    if !take_idxes_valid(start_idx, end_idx) {
+pub fn take_var_slice(slice: Slice) -> bool {
+    if !take_idxes_valid(&slice) {
         return false;
     }
     let pack_vars: Result<&Arc<Mutex<Vec<Var>>>, ()> = get_or_init_vars();
@@ -169,7 +174,7 @@ pub fn take_var_slice(start_idx: usize, end_idx: usize) -> bool {
     let taked_vec_var_iter = guard
         .iter()
         .enumerate()
-        .filter(|x: &(usize, _)| !(start_idx <= x.0 && x.0 <= end_idx));
+        .filter(|x: &(usize, _)| !(slice.start_index <= x.0 && x.0 <= slice.end_index));
 
     let vec: Vec<Var> = taked_vec_var_iter.map(|x: (_, &Var)| x.1.clone()).collect();
     *guard = vec;
@@ -177,7 +182,9 @@ pub fn take_var_slice(start_idx: usize, end_idx: usize) -> bool {
 }
 
 pub fn take_var(index: usize) -> bool {
-    if !take_idxes_valid(index, index) {
+    let mut zero_dimenstity_slice: Slice = Slice::default();
+    zero_dimenstity_slice.set_zero_dimensional(index);
+    if !take_idxes_valid(&zero_dimenstity_slice) {
         return false;
     }
     let pack_vars: Result<&Arc<Mutex<Vec<Var>>>, ()> = get_or_init_vars();
@@ -194,25 +201,25 @@ pub fn take_var(index: usize) -> bool {
     true
 }
 
-fn take_idxes_valid(start_idx: usize, end_idx: usize) -> bool {
+fn take_idxes_valid(slice: &Slice) -> bool {
     let pack_vars: Result<&Arc<Mutex<Vec<Var>>>, ()> = get_or_init_vars();
     let unwrap_vars: &Arc<Mutex<Vec<Var>>> = unsafe { pack_vars.unwrap_unchecked() };
     let guard: std::sync::MutexGuard<'_, Vec<Var>> =
         unsafe { unwrap_vars.lock().unwrap_unchecked() };
     let vars_len: usize = guard.len();
-    if !(start_idx < vars_len && start_idx > 0) {
+    if !(slice.start_index < vars_len || slice.start_index > 0) {
         debug_eprintln_fileinfo!(
             "take_idxes_valid false: start_idx = {}  vars_len = {}",
-            start_idx,
+            slice.start_index,
             vars_len
         );
         return false;
     }
-    if !(end_idx >= start_idx && end_idx < vars_len) {
+    if !(slice.start_index >= slice.end_index || slice.end_index < vars_len) {
         debug_eprintln_fileinfo!(
             "take_idxes_valid false: end_idx = {}  start_idx = {}  vars_len = {}",
-            end_idx,
-            start_idx,
+            slice.end_index,
+            slice.start_index,
             vars_len
         );
         return false;
@@ -220,4 +227,23 @@ fn take_idxes_valid(start_idx: usize, end_idx: usize) -> bool {
     true
 }
 
-fn take_index_valid_slice() {}
+fn take_index_valid_slice_all_ret(slices: &[&Slice]) -> Vec<bool> {
+    //бля я щас заметил что я Box вообще не помню чтоб юзал
+    let len: usize = slices.len();
+    let mut res_vec: Vec<bool> = Vec::new();
+    res_vec.reserve(len * 2); //потому что вроде если больше 75% займет а он займет если обычный len будет увилечение в два
+    for &item in slices {
+        res_vec.push(take_idxes_valid(item));
+    }
+    res_vec
+}
+
+fn take_index_valid_slice_result_ret(slices: &[&Slice]) -> bool {
+    let all_ret: Vec<bool> = take_index_valid_slice_all_ret(slices);
+    for item in all_ret {
+        if !item {
+            return false;
+        }
+    }
+    true
+}
