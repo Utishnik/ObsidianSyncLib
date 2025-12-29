@@ -1,11 +1,8 @@
 use crate::debug_eprintln_fileinfo;
 use crate::display_vec;
+use crate::splitt_b_space;
+use crate::tokinezed::*;
 use crate::{abstract__tokinezer::*, debug_println, utils::TimePoint};
-use core::slice;
-use std::any::Any;
-use std::marker::PhantomData;
-use std::ops::Deref;
-use std::slice::SliceIndex;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::OnceLock;
@@ -92,6 +89,10 @@ pub struct Var {
 }
 
 pub static VARS: OnceLock<Arc<Mutex<Vec<Var>>>> = OnceLock::new();
+
+pub fn parse_decl_vars() {
+    //get_and_init_tokens(cfg)
+}
 
 pub fn get_or_init_vars() -> Result<&'static Arc<Mutex<Vec<Var>>>, ()> {
     let res: &Arc<Mutex<Vec<Var>>> = VARS.get_or_init(|| Arc::new(Mutex::new(Vec::new())));
@@ -200,7 +201,7 @@ pub fn take_var_slice(slice: Slice) -> bool {
     true
 }
 
-pub static tiny_vec_size: usize = 128;
+pub static TINY_VEC_SIZE: usize = 128;
 
 #[derive(PartialEq)]
 pub enum SliceErr {
@@ -210,8 +211,8 @@ pub enum SliceErr {
 
 #[doc = "проверка пересечений slice (только для мальньких массивов)"]
 pub fn check_slice_collision(slices: &[&Slice]) -> crate::optional_error::OptionErr<SliceErr> {
-    let mut tiny_vec: ArrayVec<[usize; tiny_vec_size * 2]> = ArrayVec::default(); //2кб
-    if slices.len() >= tiny_vec_size {
+    let mut tiny_vec: ArrayVec<[usize; TINY_VEC_SIZE * 2]> = ArrayVec::default(); //2кб
+    if slices.len() >= TINY_VEC_SIZE {
         return crate::optional_error::OptionErr::Err(SliceErr::Overflow);
     }
     for &item in slices {

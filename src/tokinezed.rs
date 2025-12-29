@@ -2,6 +2,7 @@ use std::fmt::format;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::OnceLock;
+use std::sync::RwLock;
 use std::sync::mpsc::channel;
 use std::{cell::Cell, ops::Mul, u64::MAX};
 
@@ -62,24 +63,46 @@ pub struct TokenStruct {
 }
 
 pub static TOKENS: OnceLock<Arc<Mutex<TokenStruct>>> = OnceLock::new();
-pub static CONFIG: OnceLock<String> = OnceLock::new();
+pub static CONFIG: OnceLock<RwLock<String>> = OnceLock::new();
 pub static DEFAULT_SPLIT_CHARS: &str = "\t ";
 pub static DEFAULT_TRANSFER_CHARS: &str = "\n";
 
-pub fn get_and_init_config(cfg: String) -> String {
-    let res: &String = CONFIG.get_or_init(|| {
-        if !cfg.is_empty() {
-            cfg
-        } else {
-            debug_eprintln_fileinfo!("config is empty");
-            String::default()
-        }
-    });
-    res.to_string()
+pub fn get_or_init_config() -> String {
+    let res: &RwLock<String> = CONFIG.get_or_init(|| RwLock::new(String::default()));
+    let read_result: Result<
+        std::sync::RwLockReadGuard<'_, String>,
+        std::sync::PoisonError<std::sync::RwLockReadGuard<'_, String>>,
+    > = res.read();
+    if read_result.is_err() {
+        debug_eprintln_fileinfo!("get_or_init_config read error");
+        return "".to_string();
+    }
+    unsafe { read_result.unwrap_unchecked().to_string() }
 }
 
-pub fn get_and_init_tokens(cfg: String) -> Result<&'static Arc<Mutex<TokenStruct>>, ()> {
-    let config: String = get_and_init_config(cfg);
+pub fn set_config(cfg: String) {
+    let res: Option<&RwLock<String>> = CONFIG.get();
+    if res.is_none() {
+        debug_println!("set_config res is uninit");
+        return ();
+    }
+    let unwrap_res: &RwLock<String> = unsafe { res.unwrap_unchecked() };
+    let write_res: Result<
+        std::sync::RwLockWriteGuard<'_, String>,
+        std::sync::PoisonError<std::sync::RwLockWriteGuard<'_, String>>,
+    > = unwrap_res.write();
+    if write_res.is_err() {
+        debug_eprintln_fileinfo!("отравленный поток🤢; todo сделать восстановление");
+        return ();
+    }
+    let mut unwrap_write_res: std::sync::RwLockWriteGuard<'_, String> =
+        unsafe { write_res.unwrap_unchecked() };
+    *unwrap_write_res = cfg;
+}
+
+//todo нужно без cfg нужно функцию
+pub fn get_and_init_tokens() -> Result<&'static Arc<Mutex<TokenStruct>>, ()> {
+    let config: String = get_or_init_config();
     let res: &Arc<Mutex<TokenStruct>> =
         TOKENS.get_or_init(|| Arc::new(Mutex::new(TokenStruct::default())));
     let guard: Result<
