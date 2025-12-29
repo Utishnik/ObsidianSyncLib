@@ -15,7 +15,7 @@ use std::marker::PhantomData;
 
 static CAPASITY_MIN: usize = 10;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Pos {
     col: usize,
     line: usize,
@@ -92,12 +92,6 @@ impl Pos {
             }
         }
         Ok(ret_pos)
-    }
-}
-
-impl Default for Pos {
-    fn default() -> Self {
-        Self { col: 0, line: 0 }
     }
 }
 
@@ -185,15 +179,13 @@ where
             find_start = true;
             let unwrap_ch: char = unsafe { val.val.unwrap_unchecked() };
             curr_str.push(unwrap_ch);
+        } else if !find_start {
+            return Err(ParseIntError::SkipError(format!(
+                "index: {}, curr_str: {}",
+                index, curr_str
+            )));
         } else {
-            if !find_start {
-                return Err(ParseIntError::SkipError(format!(
-                    "index: {}, curr_str: {}",
-                    index, curr_str
-                )));
-            } else {
-                break;
-            }
+            break;
         }
     }
     let ret_val: T = unsafe { curr_str.parse().unwrap_unchecked() };

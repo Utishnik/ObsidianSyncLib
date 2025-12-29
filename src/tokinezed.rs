@@ -479,11 +479,10 @@ pub fn skip_construction(
         if len_str < fix_construction.len() {
             return false;
         }
-    } else {
-        if len_str < len_construction {
-            return false;
-        }
+    } else if len_str < len_construction {
+        return false;
     }
+
     crate::debug_println!("\n\n\n");
     loop {
         if !skip_symbol(str, index, ignore_symbol_list.to_string())

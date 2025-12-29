@@ -118,6 +118,31 @@ pub fn get_var(index: usize) -> Option<Var> {
     guard.get(index).cloned()
 }
 
+pub struct Slice {
+    start_index: usize,
+    end_index: usize,
+}
+
+impl Slice {
+    fn set(&mut self, start_idx: usize, end_idx: usize) {
+        self.start_index = start_idx;
+        self.end_index = end_idx;
+    }
+    fn get(&self) -> Self {
+        Self {
+            start_index: self.start_index,
+            end_index: self.end_index,
+        }
+    }
+    fn is_zero_dimensional(&self) -> bool {
+        if self.start_index == self.end_index {
+            true
+        } else {
+            false
+        }
+    }
+}
+
 pub fn get_var_slice(start_idx: usize, end_idx: usize) -> Option<Vec<Var>> {
     let pack_vars: Result<&Arc<Mutex<Vec<Var>>>, ()> = get_or_init_vars();
     let unwrap_vars: &Arc<Mutex<Vec<Var>>> = unsafe { pack_vars.unwrap_unchecked() };
@@ -194,3 +219,5 @@ fn take_idxes_valid(start_idx: usize, end_idx: usize) -> bool {
     }
     true
 }
+
+fn take_index_valid_slice() {}

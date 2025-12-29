@@ -340,9 +340,7 @@ impl PartialOrd for TimePoint {
         self_mils < other_self_mils
     }
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        let self_mils: u128 = self.time_point_to_miliseconds();
-        let other_self_mils: u128 = other.time_point_to_miliseconds();
-        self_mils.partial_cmp(&other_self_mils)
+        Some(self.cmp(other))
     }
 }
 

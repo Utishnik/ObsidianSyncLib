@@ -119,11 +119,6 @@ pub fn gen_decimal_digits() -> String {
 }
 
 pub fn chunk_str_get(str: &str, start_idx: usize, end_idx: usize) -> String {
-    let result: String = str
-        .chars()
-        .into_iter()
-        .skip(start_idx)
-        .take(end_idx)
-        .collect();
+    let result: String = str.chars().skip(start_idx).take(end_idx).collect();
     result
 }
