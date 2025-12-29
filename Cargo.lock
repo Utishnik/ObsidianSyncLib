@@ -359,6 +359,7 @@ dependencies = [
  "backtrace",
  "dotenvy",
  "git2",
+ "tinyvec",
  "validator",
 ]
 

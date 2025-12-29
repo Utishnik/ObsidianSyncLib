@@ -1,11 +1,14 @@
 use crate::debug_eprintln_fileinfo;
+use crate::display_vec;
 use crate::{abstract__tokinezer::*, debug_println, utils::TimePoint};
 use core::slice;
 use std::marker::PhantomData;
+use std::ops::Deref;
 use std::slice::SliceIndex;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::OnceLock;
+use tinyvec::{ArrayVec, array_vec};
 
 pub enum BinOp {
     Plus,
@@ -103,6 +106,7 @@ pub fn get_or_init_vars() -> Result<&'static Arc<Mutex<Vec<Var>>>, ()> {
     Ok(res)
 }
 
+#[inline] //такие же как и оригинальный пуш атрибут
 pub fn push_var(var: Var) {
     let pack_vars: Result<&Arc<Mutex<Vec<Var>>>, ()> = get_or_init_vars();
     let unwrap_vars: &Arc<Mutex<Vec<Var>>> = unsafe { pack_vars.unwrap_unchecked() };
@@ -111,6 +115,7 @@ pub fn push_var(var: Var) {
     guard.push(var);
 }
 
+#[inline]
 pub fn get_var(index: usize) -> Option<Var> {
     let pack_vars: Result<&Arc<Mutex<Vec<Var>>>, ()> = get_or_init_vars();
     let unwrap_vars: &Arc<Mutex<Vec<Var>>> = unsafe { pack_vars.unwrap_unchecked() };
@@ -148,6 +153,17 @@ impl Slice {
     }
 }
 
+pub fn slice_borrow_transform<'a>(slices: &'a [Slice]) -> Vec<&'a Slice> {
+    let mut res: Vec<&Slice> = Vec::new();
+    let mut iterator = slices.iter().map(|x| res.push(x));
+    loop {
+        if !iterator.next().is_some() {
+            break;
+        }
+    }
+    res
+}
+
 pub fn get_var_slice(slice: Slice) -> Option<Vec<Var>> {
     let pack_vars: Result<&Arc<Mutex<Vec<Var>>>, ()> = get_or_init_vars();
     let unwrap_vars: &Arc<Mutex<Vec<Var>>> = unsafe { pack_vars.unwrap_unchecked() };
@@ -161,7 +177,9 @@ pub fn get_var_slice(slice: Slice) -> Option<Vec<Var>> {
     }
 }
 
-//todo проверки не выхода
+#[inline(never)]
+#[cold]
+//не юзай в цикле syka
 pub fn take_var_slice(slice: Slice) -> bool {
     if !take_idxes_valid(&slice) {
         return false;
@@ -177,6 +195,74 @@ pub fn take_var_slice(slice: Slice) -> bool {
         .filter(|x: &(usize, _)| !(slice.start_index <= x.0 && x.0 <= slice.end_index));
 
     let vec: Vec<Var> = taked_vec_var_iter.map(|x: (_, &Var)| x.1.clone()).collect();
+    *guard = vec;
+    true
+}
+
+pub static tiny_vec_size: usize = 128;
+
+pub enum SliceErr{
+    Overflow,
+    Collsion,
+}
+
+#[doc = "проверка пересечений slice (только для мальньких массивов)"]
+pub fn check_slice_collision(
+    slices: &[&Slice],
+) -> crate::optional_error::OptionErr<SliceErr> {
+    let mut tiny_vec: ArrayVec<[Var; tiny_vec_size]>;
+    if slices.len() >= tiny_vec_size {
+        return crate::optional_error::OptionErr::Err(SliceErr::Overflow);
+    }
+
+    crate::optional_error::OptionErr::None
+}
+
+pub fn take_var_slices(slices: &[&Slice]) -> bool {
+    //нужно дебаг ветку
+    if !take_index_valid_slice_result_ret(slices) {
+        #[cfg(debug_assertions)]
+        {
+            debug_println!(
+                "take_var_slices !take_index_valid_slice_result_ret vec res: \n{}",
+                display_vec(&take_index_valid_slice_all_ret(slices), " ,".to_string())
+            )
+        }
+        return false;
+    }
+    let pack_vars: Result<&Arc<Mutex<Vec<Var>>>, ()> = get_or_init_vars();
+    let unwrap_vars: &Arc<Mutex<Vec<Var>>> = unsafe { pack_vars.unwrap_unchecked() };
+    let mut guard: std::sync::MutexGuard<'_, Vec<Var>> =
+        unsafe { unwrap_vars.lock().unwrap_unchecked() };
+    let mut vec: Vec<Var> = Vec::new();
+    vec.reserve(slices.len() * 2);
+    let guard_len: usize = guard.len();
+    let slices_len: usize = slices.len();
+    if guard_len < slices_len {
+        debug_eprintln_fileinfo!(
+            "take_var_slices g.uard.len = {}\tslices.len = {}",
+            guard_len,
+            slices_len
+        );
+        return false;
+    }
+    if slices_len * 4 > guard_len * 3 {
+        guard.reserve(guard_len * 2 + 10);
+    }
+
+    for item in slices.iter() {
+        unsafe {
+            let slice: &Slice = *item;
+            let mut iter_slice: usize = slice.start_index;
+            let mut give: &Var;
+            while iter_slice <= slice.end_index {
+                //c like
+                give = guard.get_unchecked(iter_slice);
+                vec.push(give.clone());
+                iter_slice += 1;
+            }
+        }
+    }
     *guard = vec;
     true
 }
@@ -227,6 +313,7 @@ fn take_idxes_valid(slice: &Slice) -> bool {
     true
 }
 
+#[inline(always)]
 fn take_index_valid_slice_all_ret(slices: &[&Slice]) -> Vec<bool> {
     //бля я щас заметил что я Box вообще не помню чтоб юзал
     let len: usize = slices.len();
@@ -238,12 +325,18 @@ fn take_index_valid_slice_all_ret(slices: &[&Slice]) -> Vec<bool> {
     res_vec
 }
 
-fn take_index_valid_slice_result_ret(slices: &[&Slice]) -> bool {
-    let all_ret: Vec<bool> = take_index_valid_slice_all_ret(slices);
-    for item in all_ret {
+#[inline(always)]
+fn internal_result_res(vec_all_ret: Vec<bool>) -> bool {
+    for item in vec_all_ret {
         if !item {
             return false;
         }
     }
     true
+}
+
+#[inline(always)]
+fn take_index_valid_slice_result_ret(slices: &[&Slice]) -> bool {
+    let all_ret: Vec<bool> = take_index_valid_slice_all_ret(slices);
+    internal_result_res(all_ret)
 }
