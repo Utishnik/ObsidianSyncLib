@@ -5,6 +5,8 @@ use obsidian_sync_lib::{
     *,
 };
 
+use tinyvec::*;
+
 #[test]
 fn test_parse_text_commit_iterator() {
     let start_iter: String = "{{".to_string();

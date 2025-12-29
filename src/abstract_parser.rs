@@ -2,6 +2,7 @@ use crate::debug_eprintln_fileinfo;
 use crate::display_vec;
 use crate::{abstract__tokinezer::*, debug_println, utils::TimePoint};
 use core::slice;
+use std::any::Any;
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::slice::SliceIndex;
@@ -201,25 +202,34 @@ pub fn take_var_slice(slice: Slice) -> bool {
 
 pub static tiny_vec_size: usize = 128;
 
-pub enum SliceErr{
+#[derive(PartialEq)]
+pub enum SliceErr {
     Overflow,
-    Collsion,
+    Collision,
 }
 
 #[doc = "проверка пересечений slice (только для мальньких массивов)"]
-pub fn check_slice_collision(
-    slices: &[&Slice],
-) -> crate::optional_error::OptionErr<SliceErr> {
-    let mut tiny_vec: ArrayVec<[Var; tiny_vec_size]>;
+pub fn check_slice_collision(slices: &[&Slice]) -> crate::optional_error::OptionErr<SliceErr> {
+    let mut tiny_vec: ArrayVec<[usize; tiny_vec_size * 2]> = ArrayVec::default(); //2кб
     if slices.len() >= tiny_vec_size {
         return crate::optional_error::OptionErr::Err(SliceErr::Overflow);
+    }
+    for &item in slices {
+        tiny_vec.push(item.start_index);
+        tiny_vec.push(item.end_index);
+    }
+    for item1 in tiny_vec {
+        for item2 in tiny_vec {
+            if item1 == item2 {
+                return crate::optional_error::OptionErr::Err(SliceErr::Collision);
+            }
+        }
     }
 
     crate::optional_error::OptionErr::None
 }
 
 pub fn take_var_slices(slices: &[&Slice]) -> bool {
-    //нужно дебаг ветку
     if !take_index_valid_slice_result_ret(slices) {
         #[cfg(debug_assertions)]
         {
@@ -229,6 +239,19 @@ pub fn take_var_slices(slices: &[&Slice]) -> bool {
             )
         }
         return false;
+    }
+    let err_res: crate::optional_error::OptionErr<SliceErr> = check_slice_collision(slices);
+    if err_res != crate::optional_error::OptionErr::None {
+        let err_msg: String = match err_res {
+            //да нет blyat ebанoго None сука факинг раст
+            crate::optional_error::OptionErr::Err(SliceErr::Collision) => "Collision".to_string(),
+            crate::optional_error::OptionErr::Err(SliceErr::Overflow) => "Overflow".to_string(),
+            _ => "".to_string(),
+        };
+        debug_println!(
+            "take_var_slices !check_slice_collision check_slice_collision: \n{}",
+            err_msg
+        );
     }
     let pack_vars: Result<&Arc<Mutex<Vec<Var>>>, ()> = get_or_init_vars();
     let unwrap_vars: &Arc<Mutex<Vec<Var>>> = unsafe { pack_vars.unwrap_unchecked() };

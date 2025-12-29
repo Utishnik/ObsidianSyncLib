@@ -1,3 +1,4 @@
+#[derive(PartialEq)]
 pub enum OptionErr<T> {
     Err(T),
     None,
