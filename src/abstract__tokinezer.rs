@@ -91,6 +91,7 @@ impl Pos {
         }
         let mut it: usize = 0;
         if let Err(err) = ret_res {
+            debug_eprintln!("conver_to_pos ret_res is error");
             return Err(err);
         } else if let Ok(ok) = ret_res {
             for item in ok.tok_values.iter().enumerate() {
@@ -313,7 +314,7 @@ impl AbstractValue for String {
         let var_chars: String = VAR_CHARS.with(|x: &LazyCell<String>| x.as_str().to_string());
 
         loop {
-            debug_println!("var_chars: {}",var_chars);
+            debug_println!("var_chars: {}", var_chars);
             let res_skip: Option<AbstractParseValue<char, tokinezed::TokinezedErrorLow>> =
                 skip_symbol_abstract_parse_value(str, index, &var_chars, true, "".to_string());
             if res_skip.is_none() {

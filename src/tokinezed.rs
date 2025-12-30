@@ -275,6 +275,7 @@ pub fn skip_symbol_abstract_parse_value(
     if let Ok(ok) = convert_res {
         ret.set_pos(ok, err_cor);
     } else {
+        debug_eprintln_fileinfo!("convert_res error");
         return None;
     }
     if !skip_res {

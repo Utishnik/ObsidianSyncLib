@@ -160,6 +160,22 @@ impl Colors {
     }
 }
 
+pub fn set_color_print(color: Colors) {
+    print!("{}", color.as_str());
+}
+
+pub fn reset_color_print() {
+    print!("{}", "\x1b[0m");
+}
+
+pub fn set_color_eprint(color: Colors) {
+    eprint!("{}", color.as_str());
+}
+
+pub fn reset_color_eprint() {
+    eprint!("{}", "\x1b[0m");
+}
+
 pub struct ParseCntColor {
     //todo инкапсуляция
     cnt: Vec<i64>,
