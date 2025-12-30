@@ -8,6 +8,9 @@ use std::sync::mpsc::channel;
 use std::{cell::Cell, ops::Mul, u64::MAX};
 
 use crate::abstract__tokinezer::{self, *};
+use crate::debug_eprintln;
+use crate::reset_color_eprint;
+use crate::set_color_eprint;
 use crate::str_utils::safe_remove_chars;
 use crate::{
     debug, debug_eprintln_fileinfo, debug_println, debug_println_fileinfo, splitt_b_space,
@@ -275,7 +278,10 @@ pub fn skip_symbol_abstract_parse_value(
     if let Ok(ok) = convert_res {
         ret.set_pos(ok, err_cor);
     } else {
+        set_color_eprint(crate::Colors::Red);
         debug_eprintln_fileinfo!("convert_res error");
+        debug_eprintln!("idx: {} str: {}", index, str);
+        reset_color_eprint();
         return None;
     }
     if !skip_res {

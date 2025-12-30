@@ -3,6 +3,10 @@ use crate::black_list_iterator::*;
 use crate::debug_eprintln;
 use crate::debug_eprintln_fileinfo;
 use crate::debug_println;
+use crate::reset_color_eprint;
+use crate::reset_color_print;
+use crate::set_color_eprint;
+use crate::set_color_print;
 use crate::splitt_b_space;
 use crate::str_utils::gen_decimal_digits;
 use crate::tokinezed;
@@ -77,12 +81,19 @@ impl Pos {
         let mut ret_pos: Pos = Pos::default();
         let ret_res: Result<tokinezed::TokenStruct, ()>;
         if idx > cfg.len() {
+            set_color_eprint(crate::Colors::Red);
             debug_eprintln_fileinfo!("idx > cfg.len()\tidx: {}  cfg.len(): {}", idx, cfg.len());
+            reset_color_eprint();
             return Err(());
         }
         if transfers == None {
             ret_res = splitt_b_space(cfg.to_string(), None, Some("\n".to_string()));
         } else if unsafe { transfers.clone().unwrap_unchecked().is_empty() } {
+            set_color_print(crate::Colors::Blue);
+            debug_println!(
+                "conver_to_pos transfers.is_empty() это случай только если одна строкой без переноса"
+            );
+            reset_color_print();
             ret_res = splitt_b_space(cfg.to_string(), None, None);
         } else {
             ret_res = splitt_b_space(cfg.to_string(), None, unsafe {
@@ -91,7 +102,9 @@ impl Pos {
         }
         let mut it: usize = 0;
         if let Err(err) = ret_res {
+            set_color_eprint(crate::Colors::Yellow);
             debug_eprintln!("conver_to_pos ret_res is error");
+            reset_color_eprint();
             return Err(err);
         } else if let Ok(ok) = ret_res {
             for item in ok.tok_values.iter().enumerate() {
@@ -328,11 +341,13 @@ impl AbstractValue for String {
                     unsafe { unwrap_res_skip.err.unwrap_unchecked() };
                 let err_msg: String = unwrap_res_skip_err.msg;
                 let err_file: String = unwrap_res_skip_err.file;
+                set_color_eprint(crate::Colors::Red);
                 debug_eprintln_fileinfo!(
                     "parse_value impl AbstractValue for String unwrap_res_skip.is_err() msg: {} file: {}",
                     err_msg,
                     err_file
                 );
+                reset_color_eprint();
                 return Err(ParseExprError::KeyWord(format!(
                     "parse_value impl AbstractValue for String unwrap_res_skip.is_err() msg: {} file: {}",
                     err_msg, err_file

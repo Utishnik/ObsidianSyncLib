@@ -147,17 +147,24 @@ pub fn splitt_b_space(
             {
                 toks.tok_values.insert(idx, c.to_string());
             }
+            set_color_print(Colors::Blue);
             debug_println!("value:\t{}",toks.tok_values[idx]);
+            reset_color_print();
             let res: Result<(), String> = toks.safe_add_ln_num(idx, line);
             if let Err(e) = res
             {
+                set_color_eprint(Colors::Red);
                 debug_eprintln_fileinfo!("{}",e);
+                reset_color_eprint();
                 return Err(());
             }
             //toks.tok_lines_number[idx]=line;//тут тоже паника
         }
         Ok(toks)
     } else {
+        set_color_eprint(Colors::Red);
+        debug_eprintln_fileinfo!("count_syms_b_str error return");//
+        reset_color_eprint();
         Err(())
     }
 }
