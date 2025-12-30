@@ -7,9 +7,9 @@ use std::path::Path;
 //use std::error::Error;
 use std::usize;
 pub mod tokinezed;
+use tokinezed::DEFAULT_SPLIT_CHARS;
 use tokinezed::Token;
 use tokinezed::TokenStruct;
-
 pub mod Parser;
 use Parser::*;
 pub mod AccTokCrypt;
@@ -70,10 +70,10 @@ fn count_syms_b_str(str: &String, syms: String) -> Result<u64, ()> {
         debug_eprintln!("--------------------------------------");
         reset_color_eprint();
         set_color_eprint(Colors::Red);
-        if str.is_empty(){
+        if str.is_empty() {
             debug_eprintln!("count_syms_b_str str_is_empty");
         }
-        if syms.is_empty(){
+        if syms.is_empty() {
             debug_eprintln!("count_syms_b_str syms is empty");
         }
         set_color_eprint(Colors::Blue);
@@ -107,12 +107,17 @@ pub fn splitt_b_space(
     }
     debug_println!("splitt_b_space transfer_sym: {}", transfer_sym);
     let is_none_syms: bool = syms.is_none();
-    if str.is_empty(){
+    if str.is_empty() {
         set_color_print(Colors::Red);
         debug_eprintln!("splitt_b_space str is_empty");
         reset_color_print();
-    }
-    if let Ok(cnt) = count_syms_b_str(&str, syms.clone().unwrap_or("".to_string()).to_string()) {
+    } //todo backtrace вместо этого
+    if let Ok(cnt) = count_syms_b_str(
+        &str,
+        syms.clone()
+            .unwrap_or(DEFAULT_SPLIT_CHARS.to_string())
+            .to_string(),
+    ) {
         debug_println!("CNT splitt_b_space  {}", cnt);
         let safe_cnt: usize = usize::try_from(cnt).map_err(|_| ())?;
         let mut toks: TokenStruct = TokenStruct::new(safe_cnt);
@@ -182,7 +187,7 @@ pub fn splitt_b_space(
         Ok(toks)
     } else {
         set_color_eprint(Colors::Red);
-        debug_eprintln_fileinfo!("count_syms_b_str error return");//
+        debug_eprintln_fileinfo!("count_syms_b_str error return"); //
         reset_color_eprint();
         Err(())
     }

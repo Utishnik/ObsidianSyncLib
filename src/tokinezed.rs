@@ -18,6 +18,7 @@ use crate::{
 
 pub static MAX_TOKEN_CAPACITY: usize = 1000000;
 pub static CAPACITY_UP_SIZE: usize = 64;
+pub static DEFAULT_WHITESPACE_CHARS: &str = " \n\t";
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
