@@ -66,6 +66,20 @@ pub fn last_commit_message<P: AsRef<std::path::Path>>(repo_path: P) -> Result<St
 
 fn count_syms_b_str(str: &String, syms: String) -> Result<u64, ()> {
     if str.is_empty() || syms.is_empty() {
+        set_color_eprint(Colors::Blue);
+        debug_eprintln!("--------------------------------------");
+        reset_color_eprint();
+        set_color_eprint(Colors::Red);
+        if str.is_empty(){
+            debug_eprintln!("count_syms_b_str str_is_empty");
+        }
+        if syms.is_empty(){
+            debug_eprintln!("count_syms_b_str syms is empty");
+        }
+        set_color_eprint(Colors::Blue);
+        debug_eprintln!("--------------------------------------");
+        reset_color_eprint();
+        println!();
         return Err(());
     }
     let mut cnt: u64 = 0;
@@ -93,6 +107,11 @@ pub fn splitt_b_space(
     }
     debug_println!("splitt_b_space transfer_sym: {}", transfer_sym);
     let is_none_syms: bool = syms.is_none();
+    if str.is_empty(){
+        set_color_print(Colors::Red);
+        debug_eprintln!("splitt_b_space str is_empty");
+        reset_color_print();
+    }
     if let Ok(cnt) = count_syms_b_str(&str, syms.clone().unwrap_or("".to_string()).to_string()) {
         debug_println!("CNT splitt_b_space  {}", cnt);
         let safe_cnt: usize = usize::try_from(cnt).map_err(|_| ())?;
