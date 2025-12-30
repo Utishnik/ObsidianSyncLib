@@ -33,7 +33,7 @@ struct SignupData {
 }
 
 #[derive(Clone, PartialEq)]
-pub enum ParseTimeError {
+pub enum ParseExprError {
     None,
     KeyWord(String),
     Time(String),
@@ -416,7 +416,7 @@ pub fn skip_time_type_and_value(
     construction: &str,
     mut_construct: &mut Construction,
     time_set: &mut u128,
-) -> Result<crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>, ParseTimeError>
+) -> Result<crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>, ParseExprError>
 {
     let time_construct: &mut Construction = &mut Construction::default();
     #[rustfmt::skip]
@@ -441,7 +441,7 @@ pub fn skip_time_type_and_value(
                     );
                 }
                 debug_eprintln_fileinfo!("{}", err_msg);
-                return Err(ParseTimeError::Time(err_msg));
+                return Err(ParseExprError::Time(err_msg));
             }
         };
     let val_d: Result<u128, crate::abstract__tokinezer::ParseIntError> =
@@ -479,7 +479,7 @@ impl Time {
 
 //mili seconds
 //{{time:(d:,h:,...)}}
-pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<Time, ParseTimeError> {
+pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<Time, ParseExprError> {
     let d_construct: &mut Construction = &mut Construction::default();
     let h_construct: &mut Construction = &mut Construction::default();
     let m_construct: &mut Construction = &mut Construction::default();
@@ -491,11 +491,11 @@ pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<Time, P
     error_abort(skip_symbol_result(
         state1,
         (),
-        ParseTimeError::KeyWord("(".to_string()),
+        ParseExprError::KeyWord("(".to_string()),
     ))?;
     let res_d: Result<
         crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>,
-        ParseTimeError,
+        ParseExprError,
     > = skip_time_type_and_value(
         time,
         index,
@@ -507,7 +507,7 @@ pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<Time, P
     error_abort(res_d)?;
     let res_h: Result<
         crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>,
-        ParseTimeError,
+        ParseExprError,
     > = skip_time_type_and_value(
         time,
         index,
@@ -519,7 +519,7 @@ pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<Time, P
     error_abort(res_h)?;
     let res_m: Result<
         crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>,
-        ParseTimeError,
+        ParseExprError,
     > = skip_time_type_and_value(
         time,
         index,
@@ -531,7 +531,7 @@ pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<Time, P
     error_abort(res_m)?;
     let res_s: Result<
         crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>,
-        ParseTimeError,
+        ParseExprError,
     > = skip_time_type_and_value(
         time,
         index,
@@ -543,7 +543,7 @@ pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<Time, P
     error_abort(res_s)?;
     let res_ms: Result<
         crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>,
-        ParseTimeError,
+        ParseExprError,
     > = skip_time_type_and_value(
         time,
         index,
@@ -557,7 +557,7 @@ pub fn parse_time(time: &str, index: &mut usize, file: String) -> Result<Time, P
     error_abort(skip_symbol_result(
         state2,
         (),
-        ParseTimeError::KeyWord("(".to_string()),
+        ParseExprError::KeyWord("(".to_string()),
     ))?;
     Ok(return_parse_time)
 }
@@ -571,8 +571,8 @@ pub fn parse_time_commit_sync(
     index: &mut usize,
     ignore_symbol_list: &str,
     file: &str,
-) -> Result<Time, ParseTimeError> {
-    let mut parse_error_hand: ParseTimeError = ParseTimeError::None;
+) -> Result<Time, ParseExprError> {
+    let mut parse_error_hand: ParseExprError = ParseExprError::None;
     let skip_time_iter: &mut Construction = &mut Construction::default();
     //сколько пробелов
     let start_idx: usize = index.clone();
@@ -593,7 +593,7 @@ pub fn parse_time_commit_sync(
     );
     let find_s: Option<usize> = str_slice.find(":"); //не skip так как неопредельшь при ошибки в key word time где начинать
     if find_s.is_none() {
-        parse_error_hand = ParseTimeError::KeyWord("syntax error: not find".to_string());
+        parse_error_hand = ParseExprError::KeyWord("syntax error: not find".to_string());
         return Err(parse_error_hand);
     }
     if !skip_time {
@@ -601,15 +601,15 @@ pub fn parse_time_commit_sync(
             substr_by_char_end_start_idx_owned(str, unsafe { find_s.unwrap_unchecked() }, *index);
         if error_msg.is_some() {
             debug_println_fileinfo!("error msg = {}", error_msg.clone().unwrap());
-            parse_error_hand = ParseTimeError::KeyWord(error_msg.clone().unwrap());
+            parse_error_hand = ParseExprError::KeyWord(error_msg.clone().unwrap());
         }
         return Err(parse_error_hand);
     } else if find_s.unwrap_or(0) < skip_time_iter.end.unwrap_or(0) {
-        parse_error_hand = ParseTimeError::KeyWord("syntax error: time ... -> \':\'".to_string());
+        parse_error_hand = ParseExprError::KeyWord("syntax error: time ... -> \':\'".to_string());
         return Err(parse_error_hand);
     }
     //todo дописать
-    let parse_res: Result<Time, ParseTimeError> = parse_time(str, index, file.to_string());
+    let parse_res: Result<Time, ParseExprError> = parse_time(str, index, file.to_string());
     error_abort(parse_res.clone())?;
     let unwrap_parse_res: Time = unsafe { parse_res.unwrap_unchecked() };
 
@@ -617,7 +617,7 @@ pub fn parse_time_commit_sync(
 }
 
 pub enum ParseIterCommitBodyErr {
-    Time(ParseTimeError),
+    Time(ParseExprError),
 }
 
 pub fn skip_sem_point(str: &str, index: &mut usize, transfers: Option<String>) -> Option<Pos> {
@@ -685,7 +685,7 @@ pub fn parse_text_commit_iter_body(
     ignore_symbol_list: &str,
     file: &str,
 ) -> Result<(), ParseIterCommitBodyErr> {
-    let time_result: Result<Time, ParseTimeError> =
+    let time_result: Result<Time, ParseExprError> =
         parse_time_commit_sync(str, index, ignore_symbol_list, file);
     let time_result_unwrap: Time;
     if let Err(err) = time_result {

@@ -1,3 +1,4 @@
+use std::ffi::os_str::Display;
 use std::fmt::format;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -64,9 +65,51 @@ pub struct TokenStruct {
 
 pub static TOKENS: OnceLock<Arc<Mutex<TokenStruct>>> = OnceLock::new();
 pub static CONFIG: OnceLock<RwLock<String>> = OnceLock::new();
+pub static CONFIG_PATH: OnceLock<RwLock<String>> = OnceLock::new();
 pub static DEFAULT_SPLIT_CHARS: &str = "\t ";
 pub static DEFAULT_TRANSFER_CHARS: &str = "\n";
 
+#[doc = "иницилизрует или возвращает сам CONFIG и CONFIG_PATH"]
+pub fn full_init_config() {
+    get_or_init_config_path();
+    get_or_init_config();
+}
+
+pub fn get_or_init_config_path() -> String {
+    let res: &RwLock<String> = CONFIG_PATH.get_or_init(|| RwLock::new(String::default()));
+    let read_result: Result<
+        std::sync::RwLockReadGuard<'_, String>,
+        std::sync::PoisonError<std::sync::RwLockReadGuard<'_, String>>,
+    > = res.read();
+    if read_result.is_err() {
+        debug_eprintln_fileinfo!("get_or_init_config_path read error");
+        return "".to_string();
+    }
+    unsafe { read_result.unwrap_unchecked().to_string() }
+}
+
+pub fn set_config_path(path: String) {
+    let res: Option<&RwLock<String>> = CONFIG_PATH.get();
+    if res.is_none() {
+        debug_println!("set_config_path res is uninit");
+        return ();
+    }
+    let unwrap_res: &RwLock<String> = unsafe { res.unwrap_unchecked() };
+    let write_res: Result<
+        std::sync::RwLockWriteGuard<'_, String>,
+        std::sync::PoisonError<std::sync::RwLockWriteGuard<'_, String>>,
+    > = unwrap_res.write();
+    if write_res.is_err() {
+        debug_eprintln_fileinfo!("отравленный поток🤢; todo сделать восстановление");
+        return ();
+    }
+    let mut unwrap_write_res: std::sync::RwLockWriteGuard<'_, String> =
+        unsafe { write_res.unwrap_unchecked() };
+    *unwrap_write_res = path;
+}
+
+//не Option<String> для обработки ошибки напримр из за того что
+// если конфиг пустой это такая же проблема примерно
 pub fn get_or_init_config() -> String {
     let res: &RwLock<String> = CONFIG.get_or_init(|| RwLock::new(String::default()));
     let read_result: Result<
@@ -177,6 +220,11 @@ pub fn cnt_chars(str: &str, index: &usize, symbol_list: String) -> usize {
     ret
 }
 
+#[doc = "нужно для TokinezedErrorLow сопоставлять результаты as_str с enum_format_err"]
+pub fn enum_format_err(msg: &str, val: &str, separator: &str) -> String {
+    format!("{msg}{separator}{val}")
+}
+
 // более низкоуровенвый аналог Tokinezed_Error
 #[derive(Clone)]
 pub enum TokinezedErrorLow {
@@ -189,6 +237,26 @@ impl Default for TokinezedErrorLow {
     fn default() -> Self {
         Self::NoneErr
     }
+}
+
+impl TokinezedErrorLow {
+    fn as_str(&self) -> String {
+        match self {
+            Self::NoneErr => "none".to_string(),
+            Self::SkipSymbolErr(val) => enum_format_err("skip symbol error", val, ": "),
+            Self::SkipConstructionErr(val) => enum_format_err("skip construction error", val, ": "),
+        }
+    }
+}
+
+pub fn skip_symbol_abstract_parse_value_auto_file(
+    str: &str,
+    index: &mut usize,
+    symbol_list: &str,
+    err_cor: bool,
+    file: String,
+) -> Option<AbstractParseValue<char, TokinezedErrorLow>> {
+    skip_symbol_abstract_parse_value(str, index, symbol_list, err_cor, "".to_string())
 }
 
 pub fn skip_symbol_abstract_parse_value(

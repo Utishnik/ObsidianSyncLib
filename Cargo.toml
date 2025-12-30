@@ -55,3 +55,7 @@ path = "tests/test_utlis.rs"
 [[test]]
 name = "str_utils_test"
 path = "tests/str_utils_test.rs"
+
+[[test]]
+name = "abstract_parser_test"
+path = "tests/test_abstract_parser.rs"

@@ -1,19 +1,32 @@
-use crate::ParseTimeError;
+use crate::ParseExprError;
+use crate::black_list_iterator::*;
+use crate::debug_eprintln;
 use crate::debug_eprintln_fileinfo;
+use crate::debug_println;
 use crate::splitt_b_space;
 use crate::str_utils::gen_decimal_digits;
 use crate::tokinezed;
 use crate::tokinezed::skip_symbol_abstract_parse_value;
+use crate::tokinezed::*;
 use crate::utils::DEFAULT_HEURISTICS_VAL;
 use crate::utils::TimePointErr;
 use crate::utils::clean_capasity_heuristics;
 use core::fmt;
+use std::cell::LazyCell;
 use std::default;
 use std::error::Error as OtherError;
 use std::ffi::os_str::Display;
 use std::marker::PhantomData;
+use tinyvec;
 
 static CAPASITY_MIN: usize = 10;
+
+thread_local! {
+    pub static VAR_CHARS: LazyCell<String> = LazyCell::new(||{
+        let ignored_symbols: String = AsciiSymbol::new("\"<>{}[],./*%!?-+()".to_string()).collect();
+        ignored_symbols
+    });
+}
 
 #[derive(Clone, Debug, Default)]
 pub struct Pos {
@@ -207,7 +220,7 @@ pub trait AbstractValue {
     fn get_idx(&self) -> Option<usize>;
     fn size_of(&self) -> usize;
     fn size(&self) -> usize;
-    fn parse_value(str: &str, index: &mut usize) -> Result<Self::Item, ParseTimeError>;
+    fn parse_value(str: &str, index: &mut usize) -> Result<Self::Item, ParseExprError>;
 }
 
 impl AbstractValue for u128 {
@@ -233,7 +246,7 @@ impl AbstractValue for u128 {
     fn size(&self) -> usize {
         1
     }
-    fn parse_value(str: &str, index: &mut usize) -> Result<u128, ParseTimeError> {
+    fn parse_value(str: &str, index: &mut usize) -> Result<u128, ParseExprError> {
         let ret_val: u128 = 0;
 
         Ok(ret_val)
@@ -263,7 +276,7 @@ impl AbstractValue for char {
     fn size(&self) -> usize {
         1
     }
-    fn parse_value(str: &str, index: &mut usize) -> Result<char, ParseTimeError> {
+    fn parse_value(str: &str, index: &mut usize) -> Result<char, ParseExprError> {
         let ret_val = ' ';
 
         Ok(ret_val)
@@ -293,8 +306,45 @@ impl AbstractValue for String {
     fn size(&self) -> usize {
         self.len()
     }
-    fn parse_value(str: &str, index: &mut usize) -> Result<String, ParseTimeError> {
-        let ret_val: String = String::default();
+    //сюда надо передать кусок строки и индекс для этого отдельный метод нужен
+    #[inline]
+    fn parse_value(str: &str, index: &mut usize) -> Result<String, ParseExprError> {
+        let mut ret_val: String = String::default();
+        let var_chars: String = VAR_CHARS.with(|x: &LazyCell<String>| x.as_str().to_string());
+
+        loop {
+            debug_println!("var_chars: {}",var_chars);
+            let res_skip: Option<AbstractParseValue<char, tokinezed::TokinezedErrorLow>> =
+                skip_symbol_abstract_parse_value(str, index, &var_chars, true, "".to_string());
+            if res_skip.is_none() {
+                debug_eprintln!("parse_value impl AbstractValue for String res skip is none");
+                return Err(ParseExprError::None);
+            }
+            let unwrap_res_skip: AbstractParseValue<char, tokinezed::TokinezedErrorLow> =
+                unsafe { res_skip.unwrap_unchecked() };
+            if unwrap_res_skip.is_err() {
+                let unwrap_res_skip_err: Error<tokinezed::TokinezedErrorLow> =
+                    unsafe { unwrap_res_skip.err.unwrap_unchecked() };
+                let err_msg: String = unwrap_res_skip_err.msg;
+                let err_file: String = unwrap_res_skip_err.file;
+                debug_eprintln_fileinfo!(
+                    "parse_value impl AbstractValue for String unwrap_res_skip.is_err() msg: {} file: {}",
+                    err_msg,
+                    err_file
+                );
+                return Err(ParseExprError::KeyWord(format!(
+                    "parse_value impl AbstractValue for String unwrap_res_skip.is_err() msg: {} file: {}",
+                    err_msg, err_file
+                )));
+            }
+
+            let unwrap_val: char = unsafe { unwrap_res_skip.val.unwrap_unchecked() };
+            if unwrap_val.is_ascii_whitespace() {
+                break;
+            } else {
+                ret_val.push(unwrap_val);
+            }
+        }
 
         Ok(ret_val)
     }
