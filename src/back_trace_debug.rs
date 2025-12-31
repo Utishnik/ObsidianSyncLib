@@ -1,4 +1,3 @@
-
 use backtrace::Backtrace;
 use std::path::PathBuf;
 

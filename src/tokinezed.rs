@@ -11,9 +11,7 @@ use crate::reset_color_print;
 use crate::set_color_eprint;
 use crate::set_color_print;
 use crate::str_utils::safe_remove_chars;
-use crate::{
-    debug_eprintln_fileinfo, debug_println, debug_println_fileinfo, splitt_b_space,
-};
+use crate::{debug_eprintln_fileinfo, debug_println, debug_println_fileinfo, splitt_b_space};
 
 pub static MAX_TOKEN_CAPACITY: usize = 1000000;
 pub static CAPACITY_UP_SIZE: usize = 64;

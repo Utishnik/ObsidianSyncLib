@@ -1,4 +1,3 @@
-
 pub struct AsciiSymbol {
     current: u8, //number
     black_list: String,

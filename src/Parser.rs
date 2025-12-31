@@ -9,8 +9,8 @@ use crate::{
     utils::{self, *},
 };
 
-use std::sync::LazyLock;
 use std::fmt;
+use std::sync::LazyLock;
 use validator::Validate;
 
 #[derive(Clone)]
