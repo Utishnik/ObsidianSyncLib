@@ -1,19 +1,18 @@
-use std::ffi::os_str::Display;
-use std::fmt::format;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::OnceLock;
 use std::sync::RwLock;
-use std::sync::mpsc::channel;
-use std::{cell::Cell, ops::Mul, u64::MAX};
 
-use crate::abstract__tokinezer::{self, *};
+use crate::Colors;
+use crate::abstract__tokinezer::*;
 use crate::debug_eprintln;
 use crate::reset_color_eprint;
+use crate::reset_color_print;
 use crate::set_color_eprint;
+use crate::set_color_print;
 use crate::str_utils::safe_remove_chars;
 use crate::{
-    debug, debug_eprintln_fileinfo, debug_println, debug_println_fileinfo, splitt_b_space,
+    debug_eprintln_fileinfo, debug_println, debug_println_fileinfo, splitt_b_space,
 };
 
 pub static MAX_TOKEN_CAPACITY: usize = 1000000;
@@ -185,20 +184,33 @@ pub fn get_symbol(str: &str, index: usize) -> Option<char> {
 }
 
 pub fn skip_symbol(str: &str, index: &mut usize, symbol_list: String) -> bool {
+    set_color_print(Colors::Green);
+    debug_println!(
+        "\nskip_symbol str: {}\nindex: {}\nsymbol_list: {}",
+        str,
+        index,
+        symbol_list
+    );
+    reset_color_print();
     let chr: Option<char> = get_symbol(str, *index);
     let value: char = match chr {
         None => {
+            set_color_print(Colors::Yellow);
+            debug_println!("skip_symbol: get_symbol None result");
+            reset_color_print();
             return false;
         }
         Some(x) => x,
     };
-
     for s in symbol_list.chars() {
         if value == s {
             *index += 1;
             return true;
         }
     }
+    set_color_print(Colors::Yellow);
+    debug_println!("skip_symbol: символ не из symbol_list sym: {}", value);
+    reset_color_print();
     false
 }
 
@@ -258,7 +270,7 @@ pub fn skip_symbol_abstract_parse_value_auto_file(
     index: &mut usize,
     symbol_list: &str,
     err_cor: bool,
-    file: String,
+    _file: String,
 ) -> Option<AbstractParseValue<char, TokinezedErrorLow>> {
     skip_symbol_abstract_parse_value(str, index, symbol_list, err_cor, "".to_string())
 }
@@ -270,6 +282,10 @@ pub fn skip_symbol_abstract_parse_value(
     err_cor: bool,
     file: String,
 ) -> Option<AbstractParseValue<char, TokinezedErrorLow>> {
+    set_color_print(Colors::Green);
+    #[rustfmt::skip]
+        debug_println!("index: {}\tstr: {}",index,str);
+    reset_color_print();
     let mut err: Error<TokinezedErrorLow> = Error::default();
     let pos: Pos = Pos::default();
     let skip_res: bool = skip_symbol(str, index, symbol_list.to_string());
@@ -279,10 +295,14 @@ pub fn skip_symbol_abstract_parse_value(
     if let Ok(ok) = convert_res {
         ret.set_pos(ok, err_cor);
     } else {
-        set_color_eprint(crate::Colors::Red);
-        debug_eprintln_fileinfo!("convert_res error");
-        debug_eprintln!("idx: {} str: {}", index, str);
-        reset_color_eprint();
+        //todo нужно написать для подобного что то чтоб не нужно было везде
+        //потому что у rust fmt не работает на скобки пишет что он
+        {
+            set_color_eprint(crate::Colors::Red);
+            debug_eprintln_fileinfo!("convert_res error");
+            debug_eprintln!("idx: {} str: {}", index, str);
+            reset_color_eprint();
+        }
         return None;
     }
     if !skip_res {

@@ -21,7 +21,7 @@ fn test() {
     }
     let r_unwrap: String = unsafe { r.unwrap_unchecked() };
     println!("test: {}", r_unwrap);
-    /* 
+    /*
     let test: String = "аааа? ".to_string();
     let r: Result<String, obsidian_sync_lib::Parser::ParseExprError> =
         String::parse_value(&test, &mut 2);

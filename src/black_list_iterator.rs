@@ -1,4 +1,3 @@
-use crate::black_list_iterator;
 
 pub struct AsciiSymbol {
     current: u8, //number

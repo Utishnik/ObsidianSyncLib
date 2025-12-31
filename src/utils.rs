@@ -1,13 +1,8 @@
 use std::cell::RefCell;
 use std::collections::HashSet;
-use std::default;
 use std::fmt;
-use std::result;
 use std::time::Instant;
-use std::u32::MAX;
-use std::u128::MAX as OtherMAX;
 
-use git2::Submodule;
 
 use crate::debug_eprintln_fileinfo;
 use crate::debug_println;
@@ -41,7 +36,7 @@ pub fn substr_by_char_start_idx_owned(str: &str, start_idx: usize) -> String {
     let start_byte: &str = str
         .char_indices()
         .nth(start_idx)
-        .map(|(i, _)| &str[start_idx..])
+        .map(|(_i, _)| &str[start_idx..])
         .unwrap_or("");
     let owned: String = start_byte.to_string();
     owned
@@ -51,7 +46,7 @@ pub fn substr_by_char_end_idx_owned(str: &str, end_idx: usize) -> String {
     let end_byte: &str = str
         .char_indices()
         .nth(end_idx)
-        .map(|(i, _)| &str[..end_idx])
+        .map(|(_i, _)| &str[..end_idx])
         .unwrap_or("");
     let owned: String = end_byte.to_string();
     owned
@@ -60,14 +55,14 @@ pub fn substr_by_char_end_idx_owned(str: &str, end_idx: usize) -> String {
 pub fn substr_by_char_start_idx_ref(str: &str, start_idx: usize) -> &str {
     str.char_indices()
         .nth(start_idx)
-        .map(|(i, _)| &str[start_idx..])
+        .map(|(_i, _)| &str[start_idx..])
         .unwrap_or("")
 }
 
 pub fn substr_by_char_end_idx_ref(str: &str, end_idx: usize) -> &str {
     str.char_indices()
         .nth(end_idx)
-        .map(|(i, _)| &str[..end_idx])
+        .map(|(_i, _)| &str[..end_idx])
         .unwrap_or("")
 }
 

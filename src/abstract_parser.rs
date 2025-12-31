@@ -1,13 +1,12 @@
 use crate::debug_eprintln_fileinfo;
 use crate::display_vec;
 use crate::optional_error::OptionErr;
-use crate::splitt_b_space;
 use crate::tokinezed::*;
-use crate::{abstract__tokinezer::*, debug_println, utils::TimePoint};
+use crate::{debug_println, utils::TimePoint};
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::OnceLock;
-use tinyvec::{ArrayVec, array_vec};
+use tinyvec::ArrayVec;
 
 pub enum BinOp {
     Plus,
@@ -95,7 +94,7 @@ fn parse_decl_vars_in_tok_struct(tok_struct: &TokenStruct) {
     let mut iter_item: usize = 0;
     for item in &tok_struct.tok_values {
         if item == Token::Let.as_str() {
-            let idx: usize = iter_item;
+            let _idx: usize = iter_item;
             //в AbstractValue должна быть реализация
         }
         iter_item += 1;

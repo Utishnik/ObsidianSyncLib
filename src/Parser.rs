@@ -2,19 +2,16 @@ use crate::{
     AccTokCrypt::{self, SecurityParam},
     Config,
     DirCheck::full_check_directory,
-    abstract__tokinezer::{self, *},
-    black_list_iterator::{self, AsciiSymbol},
+    abstract__tokinezer::*,
+    black_list_iterator::AsciiSymbol,
     debug_eprintln_fileinfo, debug_println, debug_println_fileinfo,
-    tokinezed::{self, *},
+    tokinezed::*,
     utils::{self, *},
 };
 
-use std::path::Path;
 use std::sync::LazyLock;
-use std::sync::Once;
-use std::{error::Error, ops::Deref};
-use std::{fmt, sync::RwLock};
-use validator::{Validate, ValidationError};
+use std::fmt;
+use validator::Validate;
 
 #[derive(Clone)]
 pub enum ParserError {
@@ -415,7 +412,7 @@ pub fn skip_time_type_and_value(
     file: &str,
     construction: &str,
     mut_construct: &mut Construction,
-    time_set: &mut u128,
+    _time_set: &mut u128,
 ) -> Result<crate::abstract__tokinezer::AbstractParseValue<String, TokinezedErrorLow>, ParseExprError>
 {
     let time_construct: &mut Construction = &mut Construction::default();
@@ -444,7 +441,7 @@ pub fn skip_time_type_and_value(
                 return Err(ParseExprError::Time(err_msg));
             }
         };
-    let val_d: Result<u128, crate::abstract__tokinezer::ParseIntError> =
+    let _val_d: Result<u128, crate::abstract__tokinezer::ParseIntError> =
         crate::abstract__tokinezer::parse_int_value::<u128>(time_parse, index, &file);
     *mut_construct = time_construct.clone();
     Ok(unwrap)
@@ -631,10 +628,10 @@ pub fn skip_sem_point(str: &str, index: &mut usize, transfers: Option<String>) -
 }
 
 pub fn parse_expr<T, E>(
-    str: &str,
-    index: &mut usize,
-    block_end: usize,
-    file: &str,
+    _str: &str,
+    _index: &mut usize,
+    _block_end: usize,
+    _file: &str,
 ) -> Option<AbstractParseExpr> {
     None
 }
@@ -648,7 +645,7 @@ pub fn parse_text_commit_msg_iter_body(
 ) -> Option<String> {
     let res_ret: Option<String> = None;
     let start_idx: usize = index.clone();
-    let cnt_probels: usize = cnt_chars(str, &start_idx, " \n\t".to_string());
+    let _cnt_probels: usize = cnt_chars(str, &start_idx, " \n\t".to_string());
     let str_slice: String =
         crate::str_utils::chunk_str_get(str, start_idx, start_idx + msg_tok.len());
     let find_s: Option<usize> = str_slice.find(Token::Colon.as_str());
@@ -706,11 +703,11 @@ pub fn parse_text_commit_iterator(
 ) -> Option<Vec<IteratorCommit>> {
     let mut iterators: Vec<IteratorCommit> = Vec::new();
     let mut index_clone: usize = index;
-    let str_len: usize = str.len();
+    let _str_len: usize = str.len();
     let len_end_commit_iter: usize = end_commit_iter.len();
 
-    let mut find_decl = |str: String| -> Option<IteratorDecl> {
-        let mut decl: IteratorDecl = IteratorDecl {
+    let _find_decl = |_str: String| -> Option<IteratorDecl> {
+        let decl: IteratorDecl = IteratorDecl {
             start: 0,
             end: 0,
             init: false,

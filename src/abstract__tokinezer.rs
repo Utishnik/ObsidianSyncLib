@@ -1,7 +1,7 @@
 use crate::ParseExprError;
 use crate::black_list_iterator::*;
-use crate::debug_eprintln;
 use crate::clear_console;
+use crate::debug_eprintln;
 use crate::debug_eprintln_fileinfo;
 use crate::debug_println;
 use crate::reset_color_eprint;
@@ -12,17 +12,11 @@ use crate::splitt_b_space;
 use crate::str_utils::gen_decimal_digits;
 use crate::tokinezed;
 use crate::tokinezed::skip_symbol_abstract_parse_value;
-use crate::tokinezed::*;
 use crate::utils::DEFAULT_HEURISTICS_VAL;
-use crate::utils::TimePointErr;
 use crate::utils::clean_capasity_heuristics;
 use core::fmt;
 use std::cell::LazyCell;
-use std::default;
-use std::error::Error as OtherError;
-use std::ffi::os_str::Display;
 use std::marker::PhantomData;
-use tinyvec;
 
 static CAPASITY_MIN: usize = 10;
 
@@ -261,7 +255,7 @@ impl AbstractValue for u128 {
     fn size(&self) -> usize {
         1
     }
-    fn parse_value(str: &str, index: &mut usize) -> Result<u128, ParseExprError> {
+    fn parse_value(_str: &str, _index: &mut usize) -> Result<u128, ParseExprError> {
         let ret_val: u128 = 0;
 
         Ok(ret_val)
@@ -291,7 +285,7 @@ impl AbstractValue for char {
     fn size(&self) -> usize {
         1
     }
-    fn parse_value(str: &str, index: &mut usize) -> Result<char, ParseExprError> {
+    fn parse_value(_str: &str, _index: &mut usize) -> Result<char, ParseExprError> {
         let ret_val = ' ';
 
         Ok(ret_val)
@@ -351,7 +345,7 @@ impl AbstractValue for String {
                 );
                 reset_color_eprint();
                 set_color_eprint(crate::Colors::Yellow);
-                debug_eprintln!("error ret_val: {}",ret_val);
+                debug_eprintln!("error ret_val: {}", ret_val);
                 reset_color_eprint();
                 return Err(ParseExprError::KeyWord(format!(
                     "parse_value impl AbstractValue for String unwrap_res_skip.is_err() msg: {} file: {}",
@@ -365,6 +359,9 @@ impl AbstractValue for String {
             } else {
                 ret_val.push(unwrap_val);
             }
+            set_color_print(crate::Colors::Green);
+            debug_println!("parse_value skip char");
+            reset_color_print();
         }
 
         Ok(ret_val)

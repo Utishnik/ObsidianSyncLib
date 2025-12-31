@@ -1,14 +1,11 @@
-use std::path::Path;
 
-use crate::{debug::*, debug_println};
 use backtrace::Backtrace;
-use backtrace::SymbolName;
 use std::path::PathBuf;
 
-pub fn is_crate(symbol: String) {}
+pub fn is_crate(_symbol: String) {}
 
 pub fn get_caller_info() {
-    let bt: Backtrace = Backtrace::new();
+    let _bt: Backtrace = Backtrace::new();
     let mut vec_sym: Vec<String> = Vec::new();
     let mut vec_file: Vec<PathBuf> = Vec::new();
     let mut sym: Option<String> = None;

@@ -1,7 +1,4 @@
-use std::error::Error;
 use std::fs;
-use std::io::Write;
-use std::os::unix::fs::PermissionsExt;
 
 pub fn check_directory(path: String) -> Result<bool, std::io::Error> {
     let metadata = fs::metadata(path)?;

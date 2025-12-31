@@ -1,8 +1,5 @@
-use git2::Error;
 use git2::{PushOptions, RemoteCallbacks, Repository};
-use std::fmt::format;
 use std::fs;
-use std::panic;
 use std::path::Path;
 //use std::error::Error;
 use std::usize;
@@ -13,13 +10,9 @@ use tokinezed::TokenStruct;
 pub mod Parser;
 use Parser::*;
 pub mod AccTokCrypt;
-use AccTokCrypt::*;
 pub mod DirCheck;
-use DirCheck::*;
 pub mod Config;
-use Config::*;
 pub mod debug;
-use debug::*;
 pub use debug::*;
 pub mod abstract__tokinezer;
 pub mod abstract_parser;
@@ -163,7 +156,7 @@ pub fn splitt_b_space(
             let res: Result<(), String> = toks.add_ch(idx, c);
             if res.is_ok()
             {
-                let size: usize = toks.tok_values.len();
+                let _size: usize = toks.tok_values.len();
                 //todo надо сделать типо вместо len количество иницилизированых если больше 75% уже занято увеличить в два раза
             }
             else
@@ -226,14 +219,14 @@ pub fn tokinezed(config: String) -> Result<Vec<String>, Tokinezed_Error> {
     }
 }
 
-fn config_parser(config: String) -> Result<String, Cfg_Error> {
+fn config_parser(_config: String) -> Result<String, Cfg_Error> {
     Ok("Ok".to_string())
 }
 
 fn get_config<P: AsRef<Path>>(path: P) -> std::io::Result<()> {
-    let path: &Path = path.as_ref();
+    let _path: &Path = path.as_ref();
 
-    if let Ok(contents) = fs::read_to_string("file.txt") {
+    if let Ok(_contents) = fs::read_to_string("file.txt") {
     } else {
         let e: Result<String, std::io::Error> = fs::read_to_string("file.txt");
         println!("{:#?}", e);

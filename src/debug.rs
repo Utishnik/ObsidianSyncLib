@@ -1,17 +1,12 @@
 use crate::debug_println;
 use crate::debug_println_fileinfo;
 use std::fmt;
-use std::fmt::Debug;
 use std::fs::File;
-use std::i64::MAX;
 use std::io::Write;
 use std::num::ParseIntError;
-use std::ops::Deref;
-use std::path::Display;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::OnceLock;
-use std::sync::atomic::AtomicU64;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 
@@ -322,7 +317,7 @@ fn iterate_pattern_parse(args: &[String]) -> Option<Vec<String>> {
 
 pub fn iterate_parse(args: &[String]) -> Result<(), IterateParseError> {
     let patter_result: Option<Vec<String>> = iterate_pattern_parse(args);
-    let match_pattern: Vec<String> = match patter_result {
+    let _match_pattern: Vec<String> = match patter_result {
         Some(x) => x,
         None => {
             return Err(IterateParseError::PatternErr(
@@ -358,10 +353,10 @@ pub fn fmt_args_parse(args: &[String]) -> Result<(), String> {
 fn private_printing_manage(args: fmt::Arguments) {
     //let patern: String = args.as_str().unwrap().to_string();//contains
     let argsfmt: ArgsFmt = argsfmt!(args);
-    let args: Vec<String> = argsfmt.get_args_owned();
+    let _args: Vec<String> = argsfmt.get_args_owned();
     let patern: String = " ".to_string();
-    let str_args: String = patern.to_string();
-    let find_state: bool = false;
+    let _str_args: String = patern.to_string();
+    let _find_state: bool = false;
 }
 
 #[macro_export]
