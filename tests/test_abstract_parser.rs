@@ -32,7 +32,7 @@ fn test() {
     let r_unwrap: String = unsafe { r.unwrap_unchecked() };
     println!("test: {}", r_unwrap);
     */
-    let test: String = "122аааа12+21 ".to_string();
+    let test: String = "122aaaa12+21 ".to_string();
     let r: Result<String, obsidian_sync_lib::Parser::ParseExprError> =
         String::parse_value(&test, &mut 2);
     if r.is_err() {
