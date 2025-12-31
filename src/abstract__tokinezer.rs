@@ -1,6 +1,7 @@
 use crate::ParseExprError;
 use crate::black_list_iterator::*;
 use crate::debug_eprintln;
+use crate::clear_console;
 use crate::debug_eprintln_fileinfo;
 use crate::debug_println;
 use crate::reset_color_eprint;
@@ -342,11 +343,15 @@ impl AbstractValue for String {
                 let err_msg: String = unwrap_res_skip_err.msg;
                 let err_file: String = unwrap_res_skip_err.file;
                 set_color_eprint(crate::Colors::Red);
+                clear_console();
                 debug_eprintln_fileinfo!(
                     "parse_value impl AbstractValue for String unwrap_res_skip.is_err() msg: {} file: {}",
                     err_msg,
                     err_file
                 );
+                reset_color_eprint();
+                set_color_eprint(crate::Colors::Yellow);
+                debug_eprintln!("error ret_val: {}",ret_val);
                 reset_color_eprint();
                 return Err(ParseExprError::KeyWord(format!(
                     "parse_value impl AbstractValue for String unwrap_res_skip.is_err() msg: {} file: {}",

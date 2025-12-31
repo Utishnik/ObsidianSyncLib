@@ -134,7 +134,6 @@ pub fn splitt_b_space(
             //типо тут сложность O(n*m) а через хэш мапы O(n)
             for t in transfer_sym.chars()
             {
-                debug_println!("transfer_sym iterator зашел");
                 if c==t && pred_is_empty
                 {
                     debug_println!("перенос splitt_b_space  ");//todo надо сделать через поиск подстроки отключать
