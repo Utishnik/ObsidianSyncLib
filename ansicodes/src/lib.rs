@@ -56,7 +56,7 @@ impl fmt::Display for CursorMove {
             CursorMove::Y(y) if y < 0 => write!(f, "\x1B[{}A", -y),
             CursorMove::Y(_) => fmt::Result::Ok(()),
         }
-    }
+    } 
 }
 
 /// Move cursor up a specific amount of rows.
