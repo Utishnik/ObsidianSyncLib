@@ -10,3 +10,7 @@ publish = false
 [lib]
 name = "ansicodes"
 path = "src/lib.rs"
+
+[[test]]
+name = "test_escape_codes"
+path = "ansicodes/tests/test_escape_codes.rs"
