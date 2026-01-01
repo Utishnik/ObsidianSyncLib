@@ -27,6 +27,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "ansicodes"
+version = "0.1.0"
+
+[[package]]
 name = "backtrace"
 version = "0.3.76"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -356,6 +360,7 @@ dependencies = [
 name = "obsidian_sync_lib"
 version = "0.1.0"
 dependencies = [
+ "ansicodes",
  "backtrace",
  "dotenvy",
  "git2",

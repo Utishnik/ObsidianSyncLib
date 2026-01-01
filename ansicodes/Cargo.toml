@@ -1,0 +1,12 @@
+[package]
+name = "ansicodes"
+version = "0.1.0"
+edition = "2021"
+authors = [""]
+description = "ANSI codes utility"
+license = "MIT"
+publish = false
+
+[lib]
+name = "ansicodes"
+path = "src/lib.rs"
