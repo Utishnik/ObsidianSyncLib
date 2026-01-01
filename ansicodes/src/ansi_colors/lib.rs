@@ -232,19 +232,17 @@
 //! [`on`]: struct.Style.html#method.on
 
 #![cfg_attr(not(any(test, feature = "std")), no_std)]
-#![crate_name = "nu_ansi_term"]
+#![crate_name = "ansicodes"]
 #![crate_type = "rlib"]
 #![warn(missing_copy_implementations)]
 // #![warn(missing_docs)]
 #![warn(trivial_casts, trivial_numeric_casts)]
 // #![warn(unused_extern_crates, unused_qualifications)]
 
-#[cfg(test)]
-doc_comment::doctest!("../README.md");
-
 extern crate alloc;
 
 pub mod ansi;
+pub mod mod_control_code;
 pub use ansi::{Infix, Prefix, Suffix};
 
 mod style;

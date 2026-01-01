@@ -1,10 +1,10 @@
-#![no_std]
-
 use core::fmt;
 
 macro_rules! escape_code {
     ($doc:expr, $name:ident, $value:expr) => {
         #[doc = $doc]
+
+        #[derive(Debug, Clone, Copy)]
         pub struct $name;
 
         impl fmt::Display for $name {
@@ -16,6 +16,7 @@ macro_rules! escape_code {
 }
 
 /// Set the absolute position of the cursor. x=0 y=0 is the top left of the screen.
+#[derive(Debug, Clone, Copy)]
 pub enum CursorTo {
     TopLeft,
     AbsoluteX(u16),
@@ -33,6 +34,7 @@ impl fmt::Display for CursorTo {
 }
 
 /// Set the position of the cursor relative to its current position.
+#[derive(Debug, Clone, Copy)]
 pub enum CursorMove {
     X(i16),
     XY(i16, i16),
@@ -60,6 +62,7 @@ impl fmt::Display for CursorMove {
 }
 
 /// Move cursor up a specific amount of rows.
+#[derive(Debug, Clone, Copy)]
 pub struct CursorUp(pub u16);
 
 impl fmt::Display for CursorUp {
@@ -69,6 +72,7 @@ impl fmt::Display for CursorUp {
 }
 
 /// Move cursor down a specific amount of rows.
+#[derive(Debug, Clone, Copy)]
 pub struct CursorDown(pub u16);
 
 impl fmt::Display for CursorDown {
@@ -78,6 +82,7 @@ impl fmt::Display for CursorDown {
 }
 
 /// Move cursor forward a specific amount of rows.
+#[derive(Debug, Clone, Copy)]
 pub struct CursorForward(pub u16);
 
 impl fmt::Display for CursorForward {
@@ -87,6 +92,7 @@ impl fmt::Display for CursorForward {
 }
 
 /// Move cursor backward a specific amount of rows.
+#[derive(Debug, Clone, Copy)]
 pub struct CursorBackward(pub u16);
 
 impl fmt::Display for CursorBackward {
@@ -105,6 +111,7 @@ escape_code!("Hide cursor.", CursorHide, "\x1B[?25l");
 escape_code!("Show cursor.", CursorShow, "\x1B[?25h");
 
 /// Erase from the current cursor position up the specified amount of rows.
+#[derive(Debug, Clone, Copy)]
 pub struct EraseLines(pub u16);
 
 impl fmt::Display for EraseLines {
