@@ -38,3 +38,7 @@ path = "tests/test_escape_codes.rs"
 [[test]]
 name = "test_style"
 path = "tests/test_style.rs"
+
+[[test]]
+name = "test"
+path = "tests/test.rs"

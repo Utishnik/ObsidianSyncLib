@@ -1,8 +1,7 @@
 use ansicodes::Color::*;
 use ansicodes::Style;
-use ansicodes::difference::Difference::*;
 use ansicodes::difference::Difference;
-
+use ansicodes::difference::Difference::*;
 
 fn style() -> Style {
     Style::new()
