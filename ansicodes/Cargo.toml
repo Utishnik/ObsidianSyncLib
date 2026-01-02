@@ -37,4 +37,8 @@ serde_json = "1.0.94"
 
 [[test]]
 name = "test_escape_codes"
-path = "ansicodes/tests/test_escape_codes.rs"
+path = "tests/test_escape_codes.rs"
+
+[[test]]
+name = "test_style"
+path = "tests/test_style.rs"
