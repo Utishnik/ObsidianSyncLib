@@ -9,11 +9,8 @@
 /// let style = Style::new().bold().on(Color::Black);
 /// println!("{}", style.paint("Bold on black"));
 /// ```
-#[derive(Eq, PartialEq, Clone, Copy)]
-#[cfg_attr(
-    feature = "derive_serde_style",
-    derive(serde::Deserialize, serde::Serialize)
-)]
+use serde::Serializer;
+#[derive(Eq, PartialEq, Clone, Copy,serde::Serialize)]
 pub struct Style {
     /// The style's foreground color, if it has one.
     pub foreground: Option<Color>,
@@ -301,11 +298,7 @@ impl Default for Style {
 ///
 /// These use the standard numeric sequences.
 /// See <http://invisible-island.net/xterm/ctlseqs/ctlseqs.html>
-#[derive(Eq, PartialEq, Clone, Copy, Debug, Default)]
-#[cfg_attr(
-    feature = "derive_serde_style",
-    derive(serde::Deserialize, serde::Serialize)
-)]
+#[derive(Eq, PartialEq, Clone, Copy, Debug, Default, serde::Serialize,serde::Deserialize)]
 pub enum Color {
     /// Color #0 (foreground code `30`, background code `40`).
     ///

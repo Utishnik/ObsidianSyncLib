@@ -418,9 +418,9 @@ macro_rules! test {
 #[cfg(all(not(feature = "gnu_legacy"), feature = "std"))]
 mod test {
 
+    use crate::Color;
     use crate::style::Color::*;
     use crate::style::Style;
-    use crate::Color;
     use std::default::Default;
 
     test!(plain:                 Style::default();                  "text/plain" => "text/plain");
@@ -495,9 +495,9 @@ mod test {
 #[cfg(test)]
 #[cfg(feature = "gnu_legacy")]
 mod gnu_legacy_test {
+    use crate::Color;
     use crate::style::Color::*;
     use crate::style::Style;
-    use crate::Color;
     use std::default::Default;
 
     test!(plain:                 Style::default();                  "text/plain" => "text/plain");

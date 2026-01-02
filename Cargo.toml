@@ -18,7 +18,13 @@ validator = { version = "0.16", features = ["derive"] }
 dotenvy = "0.15.7"
 backtrace = "0.3"
 tinyvec = "1.8"
-ansicodes = { path = "ansicodes", version = "0.1.0" }
+
+[workspace]
+members = ["ansicodes"]
+resolver = "2"
+
+[workspace.dependencies]
+serde = { version = "1.0.90", features = ["derive"] }
 
 [[test]]
 name = "test_tokinezer"  

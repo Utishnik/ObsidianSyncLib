@@ -9,7 +9,6 @@
 #[cfg(windows)]
 pub fn enable_ansi_support() -> Result<(), u32> {
     // ref: https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#EXAMPLE_OF_ENABLING_VIRTUAL_TERMINAL_PROCESSING @@ https://archive.is/L7wRJ#76%
-    use windows::w;
     use windows::Win32::Foundation::GetLastError;
     use windows::Win32::Foundation::INVALID_HANDLE_VALUE;
     use windows::Win32::Storage::FileSystem::{CreateFileW, OPEN_EXISTING};
@@ -18,6 +17,7 @@ pub fn enable_ansi_support() -> Result<(), u32> {
     };
     use windows::Win32::System::Console::ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     use windows::Win32::System::Console::{GetConsoleMode, SetConsoleMode};
+    use windows::w;
 
     unsafe {
         // ref: https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew

@@ -3,7 +3,6 @@ use core::fmt;
 macro_rules! escape_code {
     ($doc:expr, $name:ident, $value:expr) => {
         #[doc = $doc]
-
         #[derive(Debug, Clone, Copy)]
         pub struct $name;
 
@@ -58,7 +57,7 @@ impl fmt::Display for CursorMove {
             CursorMove::Y(y) if y < 0 => write!(f, "\x1B[{}A", -y),
             CursorMove::Y(_) => fmt::Result::Ok(()),
         }
-    } 
+    }
 }
 
 /// Move cursor up a specific amount of rows.
@@ -103,10 +102,18 @@ impl fmt::Display for CursorBackward {
 
 escape_code!("Move cursor to the left side.", CursorLeft, "\x1B[1000D");
 escape_code!("Save cursor position.", CursorSavePosition, "\x1B[s");
-escape_code!("Restore saved cursor position.", CursorRestorePosition, "\x1B[u");
+escape_code!(
+    "Restore saved cursor position.",
+    CursorRestorePosition,
+    "\x1B[u"
+);
 escape_code!("Get cursor position.", CursorGetPosition, "\x1B[6n");
 escape_code!("Move cursor to the next line.", CursorNextLine, "\x1B[E");
-escape_code!("Move cursor to the previous line.", CursorPrevLine, "\x1B[F");
+escape_code!(
+    "Move cursor to the previous line.",
+    CursorPrevLine,
+    "\x1B[F"
+);
 escape_code!("Hide cursor.", CursorHide, "\x1B[?25l");
 escape_code!("Show cursor.", CursorShow, "\x1B[?25h");
 
@@ -129,18 +136,45 @@ impl fmt::Display for EraseLines {
     }
 }
 
-escape_code!("Erase from the current cursor position to the end of the current line.", EraseEndLine, "\x1B[K");
-escape_code!("Erase from the current cursor position to the start of the current line.", EraseStartLine, "\x1B[1K");
+escape_code!(
+    "Erase from the current cursor position to the end of the current line.",
+    EraseEndLine,
+    "\x1B[K"
+);
+escape_code!(
+    "Erase from the current cursor position to the start of the current line.",
+    EraseStartLine,
+    "\x1B[1K"
+);
 escape_code!("Erase the entire current line.", EraseLine, "\x1B[2K");
 
-escape_code!("Erase the screen from the current line down to the bottom of the screen.", EraseDown, "\x1B[J");
-escape_code!("Erase the screen from the current line up to the top of the screen.", EraseUp, "\x1B[1J");
-escape_code!("Erase the screen and move the cursor the top left position.", EraseScreen, "\x1B[2J");
+escape_code!(
+    "Erase the screen from the current line down to the bottom of the screen.",
+    EraseDown,
+    "\x1B[J"
+);
+escape_code!(
+    "Erase the screen from the current line up to the top of the screen.",
+    EraseUp,
+    "\x1B[1J"
+);
+escape_code!(
+    "Erase the screen and move the cursor the top left position.",
+    EraseScreen,
+    "\x1B[2J"
+);
 escape_code!("Scroll display up one line.", ScrollUp, "\x1B[S");
 escape_code!("Scroll display down one line.", ScrollDown, "\x1B[T");
 
 escape_code!("Clear the terminal screen.", ClearScreen, "\u{001b}c");
-escape_code!("Enter the [alternative screen](https://terminalguide.namepad.de/mode/p47/).", EnterAlternativeScreen, "\x1B[?1049h");
-escape_code!("Exit the [alternative screen](https://terminalguide.namepad.de/mode/p47/).", ExitAlternativeScreen, "\x1B[?1049l");
+escape_code!(
+    "Enter the [alternative screen](https://terminalguide.namepad.de/mode/p47/).",
+    EnterAlternativeScreen,
+    "\x1B[?1049h"
+);
+escape_code!(
+    "Exit the [alternative screen](https://terminalguide.namepad.de/mode/p47/).",
+    ExitAlternativeScreen,
+    "\x1B[?1049l"
+);
 escape_code!("Output a beeping sound.", Beep, "\u{0007}");
-

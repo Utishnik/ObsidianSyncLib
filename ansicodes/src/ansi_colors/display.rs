@@ -483,29 +483,69 @@ mod tests {
         // Assemble with link by itself
         let joined = AnsiStrings(&[link.clone()]).to_string();
         #[cfg(feature = "gnu_legacy")]
-        assert_eq!(joined, format!("\x1B[04;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m"));
+        assert_eq!(
+            joined,
+            format!(
+                "\x1B[04;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m"
+            )
+        );
         #[cfg(not(feature = "gnu_legacy"))]
-        assert_eq!(joined, format!("\x1B[4;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m"));
+        assert_eq!(
+            joined,
+            format!(
+                "\x1B[4;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m"
+            )
+        );
 
         // Assemble with link in the middle
         let joined = AnsiStrings(&[before.clone(), link.clone(), after.clone()]).to_string();
         #[cfg(feature = "gnu_legacy")]
-        assert_eq!(joined, format!("\x1B[32mBefore link. \x1B[04;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m\x1B[32m After link.\x1B[0m"));
+        assert_eq!(
+            joined,
+            format!(
+                "\x1B[32mBefore link. \x1B[04;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m\x1B[32m After link.\x1B[0m"
+            )
+        );
         #[cfg(not(feature = "gnu_legacy"))]
-        assert_eq!(joined, format!("\x1B[32mBefore link. \x1B[4;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m\x1B[32m After link.\x1B[0m"));
+        assert_eq!(
+            joined,
+            format!(
+                "\x1B[32mBefore link. \x1B[4;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m\x1B[32m After link.\x1B[0m"
+            )
+        );
 
         // Assemble with link first
         let joined = AnsiStrings(&[link.clone(), after.clone()]).to_string();
         #[cfg(feature = "gnu_legacy")]
-        assert_eq!(joined, format!("\x1B[04;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m\x1B[32m After link.\x1B[0m"));
+        assert_eq!(
+            joined,
+            format!(
+                "\x1B[04;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m\x1B[32m After link.\x1B[0m"
+            )
+        );
         #[cfg(not(feature = "gnu_legacy"))]
-        assert_eq!(joined, format!("\x1B[4;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m\x1B[32m After link.\x1B[0m"));
+        assert_eq!(
+            joined,
+            format!(
+                "\x1B[4;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m\x1B[32m After link.\x1B[0m"
+            )
+        );
 
         // Assemble with link at the end
         let joined = AnsiStrings(&[before.clone(), link.clone()]).to_string();
         #[cfg(feature = "gnu_legacy")]
-        assert_eq!(joined, format!("\x1B[32mBefore link. \x1B[04;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m"));
+        assert_eq!(
+            joined,
+            format!(
+                "\x1B[32mBefore link. \x1B[04;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m"
+            )
+        );
         #[cfg(not(feature = "gnu_legacy"))]
-        assert_eq!(joined, format!("\x1B[32mBefore link. \x1B[4;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m"));
+        assert_eq!(
+            joined,
+            format!(
+                "\x1B[32mBefore link. \x1B[4;34m\x1B]8;;https://example.com\x1B\\Link to example.com.\x1B]8;;\x1B\\\x1B[0m"
+            )
+        );
     }
 }
