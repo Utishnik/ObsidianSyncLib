@@ -10,7 +10,7 @@
 /// println!("{}", style.paint("Bold on black"));
 /// ```
 use serde::Serializer;
-#[derive(Eq, PartialEq, Clone, Copy,serde::Serialize)]
+#[derive(Eq, PartialEq, Clone, Copy, serde::Serialize)]
 pub struct Style {
     /// The style's foreground color, if it has one.
     pub foreground: Option<Color>,
@@ -298,7 +298,7 @@ impl Default for Style {
 ///
 /// These use the standard numeric sequences.
 /// See <http://invisible-island.net/xterm/ctlseqs/ctlseqs.html>
-#[derive(Eq, PartialEq, Clone, Copy, Debug, Default, serde::Serialize,serde::Deserialize)]
+#[derive(Eq, PartialEq, Clone, Copy, Debug, Default, serde::Serialize, serde::Deserialize)]
 pub enum Color {
     /// Color #0 (foreground code `30`, background code `40`).
     ///

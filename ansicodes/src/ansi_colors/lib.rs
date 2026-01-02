@@ -248,8 +248,8 @@ pub use ansi::{Infix, Prefix, Suffix};
 mod style;
 pub use style::{Color, Style};
 
-mod difference;
-mod display;
+pub mod difference;
+pub mod display;
 pub use display::*;
 
 mod write;
