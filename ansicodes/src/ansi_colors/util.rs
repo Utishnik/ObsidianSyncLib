@@ -4,12 +4,12 @@ use core::ops::Deref;
 
 /// Return a substring of the given AnsiStrings sequence, while keeping the formatting.
 pub fn sub_string(start: usize, len: usize, strs: &AnsiStrings) -> Vec<AnsiString<'static>> {
-    let mut vec = Vec::new();
-    let mut pos = start;
-    let mut len_rem = len;
+    let mut vec: Vec<crate::AnsiGenericString<'_, str>> = Vec::new();
+    let mut pos: usize = start;
+    let mut len_rem: usize = len;
 
     for i in strs.0.iter() {
-        let frag_len = i.string.len();
+        let frag_len: usize = i.string.len();
         if pos >= frag_len {
             pos -= frag_len;
             continue;
@@ -18,8 +18,8 @@ pub fn sub_string(start: usize, len: usize, strs: &AnsiStrings) -> Vec<AnsiStrin
             break;
         }
 
-        let end = pos + len_rem;
-        let pos_end = if end >= frag_len { frag_len } else { end };
+        let end: usize = pos + len_rem;
+        let pos_end: usize = if end >= frag_len { frag_len } else { end };
 
         vec.push(i.style_ref().paint(String::from(&i.string[pos..pos_end])));
 
@@ -36,7 +36,7 @@ pub fn sub_string(start: usize, len: usize, strs: &AnsiStrings) -> Vec<AnsiStrin
 
 /// Return a concatenated copy of `strs` without the formatting, as an allocated `String`.
 pub fn unstyle(strs: &AnsiStrings) -> String {
-    let mut s = String::new();
+    let mut s: String = String::new();
 
     for i in strs.0.iter() {
         s += i.string.deref();
@@ -45,9 +45,15 @@ pub fn unstyle(strs: &AnsiStrings) -> String {
     s
 }
 
+pub fn unstyle_ref(strs: &AnsiStrings, s: &mut String) {
+    for i in strs.0.iter() {
+        *s += i.string.deref();
+    }
+}
+
 /// Return the unstyled length of AnsiStrings. This is equaivalent to `unstyle(strs).len()`.
 pub fn unstyled_len(strs: &AnsiStrings) -> usize {
-    let mut l = 0;
+    let mut l: usize = 0;
     for i in strs.0.iter() {
         l += i.string.len();
     }
@@ -70,7 +76,8 @@ mod test {
         assert_eq!(unstyle(&a), "first-second-third");
         assert_eq!(unstyled_len(&a), 18);
 
-        let l2 = [Black.paint("st"), Red.paint("-second"), White.paint("-t")];
+        let l2: [crate::AnsiGenericString<'_, str>; 3] =
+            [Black.paint("st"), Red.paint("-second"), White.paint("-t")];
         assert_eq!(sub_string(3, 11, &a), l2);
     }
 }

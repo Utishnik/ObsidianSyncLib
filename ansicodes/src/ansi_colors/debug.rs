@@ -10,7 +10,7 @@ use core::fmt;
 ///     use nu_ansi_term::Color::{Red, Blue};
 ///     assert_eq!("Style { fg(Red), on(Blue), bold, italic }",
 ///                format!("{:?}", Red.on(Blue).bold().italic()));
-impl fmt::Debug for Style {
+impl fmt::Display for Style {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         if fmt.alternate() {
             fmt.debug_struct("Style")
@@ -30,7 +30,7 @@ impl fmt::Debug for Style {
         } else {
             fmt.write_str("Style { ")?;
 
-            let mut written_anything = false;
+            let mut written_anything: bool = false;
 
             if let Some(fg) = self.foreground {
                 if written_anything {

@@ -245,7 +245,7 @@ pub mod ansi;
 pub mod mod_control_code;
 pub use ansi::{Infix, Prefix, Suffix};
 
-mod style;
+pub mod style;
 pub use style::{Color, Style};
 
 pub mod difference;

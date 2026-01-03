@@ -139,6 +139,11 @@ where
         &mut self.style
     }
 
+    //ну если нам нужно просто получить стиль для своих использований
+    pub fn style_owned(&self) -> Style {
+        self.style.clone()
+    }
+
     /// Directly access the underlying string
     pub fn as_str(&self) -> &S {
         self.string.as_ref()

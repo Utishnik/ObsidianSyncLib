@@ -1,8 +1,8 @@
 // ---- tests ----
 
-pub use ansicodes::{AnsiGenericString, AnsiStrings};
 pub use ansicodes::Color::*;
 pub use ansicodes::Style;
+pub use ansicodes::{AnsiGenericString, AnsiStrings};
 
 #[test]
 fn no_control_codes_for_plain() {
@@ -54,7 +54,8 @@ fn idempotent(unstyled: AnsiGenericString<'_, str>) {
         "{:?} does contain \\x1B[",
         joined
     );
-    let joined: String = AnsiStrings(&[before.clone(), unstyled.clone(), after.clone()]).to_string();
+    let joined: String =
+        AnsiStrings(&[before.clone(), unstyled.clone(), after.clone()]).to_string();
     assert!(
         !joined.contains("\x1B["),
         "{:?} does contain \\x1B[",
