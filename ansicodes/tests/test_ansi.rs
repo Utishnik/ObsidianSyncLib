@@ -1,3 +1,4 @@
+use ansicodes::display::AnsiGenericStrings;
 
 #[allow(unused)]
 macro_rules! test {
@@ -7,21 +8,27 @@ macro_rules! test {
             assert_eq!($style.paint($input).to_string(), $result.to_string());
             
             let mut v = Vec::new();
-            $style.paint($input.as_bytes()).write_to(&mut v).unwrap();
+            ansicodes::AnsiGenericStrings(&[$style.paint($input.as_bytes())]).write_to(&mut v).unwrap();
             assert_eq!(v.as_slice(), $result.as_bytes());
         }
     };
 }
 
 mod test_no_gnu{
+use ansicodes::AnsiGenericString;
+use ansicodes::AnsiGenericStrings;
 #[cfg(all(not(feature = "gnu_legacy"), feature = "std"))]
 
     use ansicodes::Color;
     use ansicodes::style::Color::*;
     use ansicodes::style::Style;
+    use ansicodes::AnsiByteStrings;
 
     fn t(){
-        let r: ansicodes::AnsiGenericString<'_, str> = Black.normal().paint("test");
+        let str: String = "test".to_string();
+        let r: AnsiGenericString<'_, [u8]>  = Black.paint(str.as_bytes());
+        let t:AnsiGenericStrings<'_,[u8]> = ansicodes::AnsiGenericStrings(&[r]);
+
         
 
     }
@@ -83,7 +90,10 @@ mod test_no_gnu{
 
     #[test]
     fn test_write_prefix_no_gnu_compat_order() {
-        let style = Style {
+        use ansicodes::Color;
+        use ansicodes::Style;
+        use std::default::Default;
+        let style: Style = Style {
             foreground: Some(Color::Red),
             background: Some(Color::Blue),
             ..Default::default()
