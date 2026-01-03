@@ -392,7 +392,7 @@ mod tests {
     #[test]
     fn no_control_codes_for_plain() {
         let one = Style::default().paint("one");
-        let two = Style::default().paint("two");
+        let two: AnsiGenericString<'_, str> = Style::default().paint("two");
         let output = AnsiStrings(&[one, two]).to_string();
         assert_eq!(output, "onetwo");
     }

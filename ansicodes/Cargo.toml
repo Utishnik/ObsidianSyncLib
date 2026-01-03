@@ -42,3 +42,7 @@ path = "tests/test_style.rs"
 [[test]]
 name = "test"
 path = "tests/test.rs"
+
+[[test]]
+name = "test_difference"
+path = "tests/test_difference.rs"
