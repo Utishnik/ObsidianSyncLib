@@ -46,3 +46,7 @@ path = "tests/test.rs"
 [[test]]
 name = "test_difference"
 path = "tests/test_difference.rs"
+
+[[test]]
+name = "test_gradient"
+path = "tests/test_display.rs"
