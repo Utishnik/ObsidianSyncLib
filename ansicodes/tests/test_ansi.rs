@@ -23,12 +23,17 @@ use ansicodes::AnsiGenericStrings;
     use ansicodes::style::Color::*;
     use ansicodes::style::Style;
     use ansicodes::AnsiByteStrings;
+    use ansicodes::AnsiByteString;
 
     fn t(){
         let str: String = "test".to_string();
         let r: AnsiGenericString<'_, [u8]>  = Black.paint(str.as_bytes());
-        let t:AnsiGenericStrings<'_,[u8]> = ansicodes::AnsiGenericStrings(&[r]);
-
+        let t:AnsiGenericStrings<'_,[u8]> = ansicodes::AnsiGenericStrings(&[r.clone()]);
+        let bs:AnsiByteString=r.clone();
+        let b:AnsiByteStrings = t;
+        let mut v: Vec<u8> = Vec::new();
+        b.write_to(&mut v);
+        
         
 
     }
