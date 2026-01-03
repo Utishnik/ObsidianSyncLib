@@ -340,7 +340,7 @@ impl<'a> AnsiByteStrings<'a> {
     /// Write `AnsiByteStrings` to an `io::Write`.  This writes the minimal
     /// escape sequences for the associated `Style`s around each set of
     /// bytes.
-    //#[cfg(feature = "std")]
+    #[cfg(feature = "std")]
     pub fn write_to<W: std::io::Write>(&self, w: &mut W) -> std::io::Result<()> {
         let w: &mut dyn std::io::Write = w;
         self.write_to_any(w)
@@ -354,7 +354,6 @@ where
 {
     fn write_to_any<W: AnyWrite<Wstr = S> + ?Sized>(&self, w: &mut W) -> Result<(), W::Error> {
         use self::Difference::*;
-
         let first = match self.0.first() {
             None => return Ok(()),
             Some(f) => f,
