@@ -6,36 +6,34 @@ macro_rules! test {
         #[test]
         fn $name() {
             assert_eq!($style.paint($input).to_string(), $result.to_string());
-            
+
             let mut v = Vec::new();
-            ansicodes::AnsiGenericStrings(&[$style.paint($input.as_bytes())]).write_to(&mut v).unwrap();
+            ansicodes::AnsiGenericStrings(&[$style.paint($input.as_bytes())])
+                .write_to(&mut v)
+                .unwrap();
             assert_eq!(v.as_slice(), $result.as_bytes());
         }
     };
 }
 
-mod test_no_gnu{
-use ansicodes::AnsiGenericString;
-use ansicodes::AnsiGenericStrings;
-#[cfg(all(not(feature = "gnu_legacy"), feature = "std"))]
-
+mod test_no_gnu {
+    use ansicodes::AnsiByteString;
+    use ansicodes::AnsiByteStrings;
+    use ansicodes::AnsiGenericString;
+    use ansicodes::AnsiGenericStrings;
+    #[cfg(all(not(feature = "gnu_legacy"), feature = "std"))]
     use ansicodes::Color;
     use ansicodes::style::Color::*;
     use ansicodes::style::Style;
-    use ansicodes::AnsiByteStrings;
-    use ansicodes::AnsiByteString;
 
-    fn t(){
+    fn t() {
         let str: String = "test".to_string();
-        let r: AnsiGenericString<'_, [u8]>  = Black.paint(str.as_bytes());
-        let t:AnsiGenericStrings<'_,[u8]> = ansicodes::AnsiGenericStrings(&[r.clone()]);
-        let bs:AnsiByteString=r.clone();
-        let b:AnsiByteStrings = t;
+        let r: AnsiGenericString<'_, [u8]> = Black.paint(str.as_bytes());
+        let t: AnsiGenericStrings<'_, [u8]> = ansicodes::AnsiGenericStrings(&[r.clone()]);
+        let bs: AnsiByteString = r.clone();
+        let b: AnsiByteStrings = t;
         let mut v: Vec<u8> = Vec::new();
         b.write_to(&mut v);
-        
-        
-
     }
 
     test!(plain:                 Style::default();                  "text/plain" => "text/plain");
@@ -109,7 +107,7 @@ use ansicodes::AnsiGenericStrings;
         );
     }
 }
-mod test_gnu{
+mod test_gnu {
 
     use ansicodes::Color;
     use ansicodes::style::Color::*;

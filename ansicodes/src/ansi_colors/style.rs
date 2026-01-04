@@ -10,7 +10,7 @@
 /// println!("{}", style.paint("Bold on black"));
 /// ```
 use serde::Serializer;
-#[derive(Eq, PartialEq, Clone,Debug,Copy, serde::Serialize)]
+#[derive(Eq, PartialEq, Clone, Debug, Copy, serde::Serialize)]
 pub struct Style {
     /// The style's foreground color, if it has one.
     pub foreground: Option<Color>,
