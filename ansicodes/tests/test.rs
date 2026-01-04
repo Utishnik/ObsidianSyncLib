@@ -21,6 +21,7 @@ impl NonIdleBarrier {
     }
 }
 
+
 #[test]
 pub fn barrier_non_idle() {
     let size: Arc<usize> = Arc::new(3);
@@ -42,20 +43,24 @@ pub fn barrier_non_idle() {
         guard.barrier_out.fetch_add(1, Ordering::Acquire);
         let mut give_curr: usize = guard.barrier_out.load(Ordering::Acquire);
         while give_curr != *size {
+            println!("give curr : {}",give_curr);
             let timesleep: std::time::Duration = std::time::Duration::from_millis(1);
             sleep(timesleep);
             give_curr = guard.barrier_out.load(Ordering::Acquire);
         }
         println!("конец");
     });
-    let handles: Arc<Mutex<Vec<std::thread::JoinHandle<()>>>> = Arc::new(Mutex::new(Vec::new()));
+    let mut handles: Vec<std::thread::JoinHandle<()>>  = Vec::new();
     for i in 0..*clone_size {
-        let clone_handles: Arc<Mutex<Vec<std::thread::JoinHandle<()>>>> = Arc::clone(&handles);
-        let mut guard: std::sync::MutexGuard<'_, Vec<std::thread::JoinHandle<()>>> =
-            clone_handles.lock().unwrap();
         let test_block_clone = Arc::clone(&test_block);
-        guard.push(std::thread::spawn(move || {
-            test_block_clone().clone();
+        handles.push(std::thread::spawn(move || {
+            let _ = test_block_clone().clone();
         }));
+        println!("поток {}",i);
+    }
+
+    for handl in handles.into_iter()
+    {
+        handl.join().expect("test");
     }
 }

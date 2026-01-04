@@ -23,7 +23,7 @@ impl<'a> AnyWrite for dyn fmt::Write + 'a {
 }
 
 #[cfg(feature = "std")]
-impl<'a> AnyWrite for dyn std::io::Write + 'a {
+impl<'a> AnyWrite for dyn std::io::Write + 'a{
     type Wstr = [u8];
     type Error = std::io::Error;
 

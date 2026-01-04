@@ -354,7 +354,7 @@ where
 {
     fn write_to_any<W: AnyWrite<Wstr = S> + ?Sized>(&self, w: &mut W) -> Result<(), W::Error> {
         use self::Difference::*;
-        let first = match self.0.first() {
+        let first: &AnsiGenericString<'_, S> = match self.0.first() {
             None => return Ok(()),
             Some(f) => f,
         };
