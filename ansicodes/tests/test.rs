@@ -6,6 +6,8 @@ use std::{
     thread::sleep,
 };
 
+use rand::random;
+
 //todo https://github.com/rust-threadpool/rust-threadpool/blob/master/src/lib.rs
 pub struct NonIdleBarrier {
     barrier_size: AtomicUsize,
@@ -21,17 +23,16 @@ impl NonIdleBarrier {
     }
 }
 
-
 #[test]
 pub fn barrier_non_idle() {
     let size: Arc<usize> = Arc::new(3);
     let barrier: Arc<Mutex<NonIdleBarrier>> = Arc::new(Mutex::new(NonIdleBarrier::build(*size)));
     let clone_size: Arc<usize> = Arc::clone(&size);
 
-    let test_block = Arc::new(move || {
+    let test_block = Arc::new(move |x: u64| {
         let barrier_clone: Arc<Mutex<NonIdleBarrier>> = Arc::clone(&barrier);
         /////// сложный код
-        let timesleep: std::time::Duration = std::time::Duration::from_millis(1);
+        let timesleep: std::time::Duration = std::time::Duration::from_millis(x);
         sleep(timesleep);
         /////
 
@@ -42,25 +43,36 @@ pub fn barrier_non_idle() {
         let guard: std::sync::MutexGuard<'_, NonIdleBarrier> = guard_pack.unwrap();
         guard.barrier_out.fetch_add(1, Ordering::Acquire);
         let mut give_curr: usize = guard.barrier_out.load(Ordering::Acquire);
+        drop(guard);
         while give_curr != *size {
-            println!("give curr : {}",give_curr);
+            println!("give curr : {}  size : {}", give_curr,*size);
             let timesleep: std::time::Duration = std::time::Duration::from_millis(1);
             sleep(timesleep);
+            let guard_pack: Result<
+                std::sync::MutexGuard<'_, NonIdleBarrier>,
+                std::sync::PoisonError<std::sync::MutexGuard<'_, NonIdleBarrier>>,
+            > = barrier_clone.lock();
+            let guard: std::sync::MutexGuard<'_, NonIdleBarrier> = guard_pack.unwrap();
             give_curr = guard.barrier_out.load(Ordering::Acquire);
+            if give_curr != *size{
+                guard.barrier_out.fetch_add(1, Ordering::Acquire);
+            }
+            drop(guard);
         }
         println!("конец");
     });
-    let mut handles: Vec<std::thread::JoinHandle<()>>  = Vec::new();
+    let mut handles: Vec<std::thread::JoinHandle<()>> = Vec::new();
     for i in 0..*clone_size {
         let test_block_clone = Arc::clone(&test_block);
+        let rnd: u64 = random::<u64>();
+        let rnd_rem: u64 = rnd % 100;
         handles.push(std::thread::spawn(move || {
-            let _ = test_block_clone().clone();
+            let _ = test_block_clone(rnd_rem).clone();
         }));
-        println!("поток {}",i);
+        println!("поток {}", i);
     }
 
-    for handl in handles.into_iter()
-    {
+    for handl in handles.into_iter() {
         handl.join().expect("test");
     }
 }
