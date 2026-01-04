@@ -25,7 +25,7 @@ impl NonIdleBarrier {
 
 #[test]
 pub fn barrier_non_idle() {
-    let size: Arc<usize> = Arc::new(8);
+    let size: Arc<usize> = Arc::new(3);
     let barrier: Arc<Mutex<NonIdleBarrier>> = Arc::new(Mutex::new(NonIdleBarrier::build(*size)));
     let clone_size: Arc<usize> = Arc::clone(&size);
 
@@ -45,7 +45,7 @@ pub fn barrier_non_idle() {
         let mut give_curr: usize = guard.barrier_out.load(Ordering::Acquire);
         drop(guard);
         while give_curr != *size {
-            println!("give curr : {}  size : {}", give_curr,*size);
+            println!("give curr : {}  size : {}", give_curr, *size);
             let timesleep: std::time::Duration = std::time::Duration::from_millis(1);
             sleep(timesleep);
             let guard_pack: Result<
@@ -62,8 +62,8 @@ pub fn barrier_non_idle() {
     for i in 0..*clone_size {
         let test_block_clone = Arc::clone(&test_block);
         let rnd: u64 = random::<u64>();
-        let rnd_rem: u64 = rnd % 1;
-        println!("rnd: {}",rnd_rem);
+        let rnd_rem: u64 = rnd % 2;
+        println!("rnd: {}", rnd_rem);
         handles.push(std::thread::spawn(move || {
             let _ = test_block_clone(rnd_rem).clone();
         }));

@@ -90,15 +90,22 @@ pub struct Var {
 
 pub static VARS: OnceLock<Arc<Mutex<Vec<Var>>>> = OnceLock::new();
 
-fn parse_decl_vars_in_tok_struct(tok_struct: &TokenStruct) {
+fn parse_decl_vars_in_tok_struct(tok_struct: &TokenStruct) -> OptionErr<String> {
     let mut iter_item: usize = 0;
     for item in &tok_struct.tok_values {
         if item == Token::Let.as_str() {
-            let _idx: usize = iter_item;
+            let idx: usize = iter_item;
+            let nxt_tok: Option<&String> = tok_struct.tok_values.get(idx + 1);
+            if nxt_tok.is_none() {
+                return OptionErr::Err("let .....".to_string());
+            }
+            let nxt_tok_unwrap: &String = unsafe { nxt_tok.unwrap_unchecked() };
+
             //в AbstractValue должна быть реализация
         }
         iter_item += 1;
     }
+    OptionErr::None
 }
 
 pub fn parse_decl_vars() -> OptionErr<()> {

@@ -9,7 +9,7 @@ pub trait AnyWrite {
     fn write_str(&mut self, s: &Self::Wstr) -> Result<(), Self::Error>;
 }
 
-impl<'a> AnyWrite for dyn fmt::Write + 'a {
+impl AnyWrite for dyn fmt::Write + '_ {
     type Wstr = str;
     type Error = fmt::Error;
 
@@ -23,7 +23,8 @@ impl<'a> AnyWrite for dyn fmt::Write + 'a {
 }
 
 #[cfg(feature = "std")]
-impl<'a> AnyWrite for dyn std::io::Write + 'a {
+impl AnyWrite for dyn std::io::Write + '_ {
+    //я бля сперва не так прочитал и подумал что это какой то необычный аналог for<'a>
     type Wstr = [u8];
     type Error = std::io::Error;
 
