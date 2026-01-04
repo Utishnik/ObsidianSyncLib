@@ -25,7 +25,7 @@ impl NonIdleBarrier {
 
 #[test]
 pub fn barrier_non_idle() {
-    let size: Arc<usize> = Arc::new(3);
+    let size: Arc<usize> = Arc::new(8);
     let barrier: Arc<Mutex<NonIdleBarrier>> = Arc::new(Mutex::new(NonIdleBarrier::build(*size)));
     let clone_size: Arc<usize> = Arc::clone(&size);
 
@@ -41,7 +41,7 @@ pub fn barrier_non_idle() {
             std::sync::PoisonError<std::sync::MutexGuard<'_, NonIdleBarrier>>,
         > = barrier_clone.lock();
         let guard: std::sync::MutexGuard<'_, NonIdleBarrier> = guard_pack.unwrap();
-        guard.barrier_out.fetch_add(1, Ordering::Acquire);
+        guard.barrier_out.fetch_add(1, Ordering::Release);
         let mut give_curr: usize = guard.barrier_out.load(Ordering::Acquire);
         drop(guard);
         while give_curr != *size {
@@ -54,9 +54,6 @@ pub fn barrier_non_idle() {
             > = barrier_clone.lock();
             let guard: std::sync::MutexGuard<'_, NonIdleBarrier> = guard_pack.unwrap();
             give_curr = guard.barrier_out.load(Ordering::Acquire);
-            if give_curr != *size{
-                guard.barrier_out.fetch_add(1, Ordering::Acquire);
-            }
             drop(guard);
         }
         println!("конец");
@@ -65,7 +62,8 @@ pub fn barrier_non_idle() {
     for i in 0..*clone_size {
         let test_block_clone = Arc::clone(&test_block);
         let rnd: u64 = random::<u64>();
-        let rnd_rem: u64 = rnd % 100;
+        let rnd_rem: u64 = rnd % 1;
+        println!("rnd: {}",rnd_rem);
         handles.push(std::thread::spawn(move || {
             let _ = test_block_clone(rnd_rem).clone();
         }));

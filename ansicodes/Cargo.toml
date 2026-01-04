@@ -38,8 +38,8 @@ std = []
 gnu_legacy = []
 
 [[test]]
-name = "test_escape_codes"
-path = "tests/test_escape_codes.rs"
+name = "test_escape_code"
+path = "tests/test_escape_code.rs"
 
 [[test]]
 name = "test_style"
