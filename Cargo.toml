@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 description = "A Rust library for Git sync obsidian using libgit2"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/yourname/my_git_tool"
+repository = "https://github.com/Utishnik/ObsidianSyncLib"
 keywords = ["git", "libgit2", "vcs"]
 categories = ["development-tools::version-control"]
 
@@ -20,7 +20,9 @@ backtrace = "0.3"
 tinyvec = "1.8"
 
 [workspace]
-members = ["ansicodes"]
+members = ["ansicodes",
+"barrier_not_idle"]
+
 resolver = "2"
 
 [workspace.dependencies]

@@ -1,0 +1,15 @@
+[package]
+name = "BarrierNotIdle"          
+version = "0.1.0"
+edition = "2024"
+description = ""
+license = "MIT OR Apache-2.0"
+repository = ""
+
+
+[lib]
+name = "BarrierNotIdle"          
+path = "src/lib.rs"
+
+[dependencies]
+rand = "0.8"
