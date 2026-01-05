@@ -1,4 +1,4 @@
-trait Zero {
+pub trait Zero {
     fn zero() -> Self;
 }
 impl Zero for u8 {

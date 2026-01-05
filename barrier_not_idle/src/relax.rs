@@ -9,7 +9,7 @@ pub trait Relax: Default {
     fn relax(&mut self);
 }
 use core::ops::BitAnd;
-use crate::zerotrait;
+use crate::zerotrait::{self, Zero};
 
 /// Rapid spinning.
 ///
@@ -39,18 +39,26 @@ impl Backoff {
     const PARK: u8 = 0xf0;
     const IS_LIMIT_EXCEEDED: u8 = 0x0f;
 }
-
+//todo перенести zero utils и c битами в micro utils crate или типо того
+#[inline]
+#[must_use]
 fn check_bits<T,TT>(val: T,mask: T) -> bool
 where T: core::ops::BitAnd,
-TT: Sized,
+TT: Sized + Zero,
 <T as BitAnd>::Output: PartialEq<TT>,
 {
-    if (val & mask) != 0 {
+    if (val & mask) != TT::zero(){
         true
     }
     else {
         false
     }
+}
+#[inline]
+fn add_bits<T>(val: &mut T,mask: T)
+where T: core::ops::BitOrAssign,
+{
+    *val |= mask;
 }
 
 impl Relax for Backoff {
@@ -64,8 +72,8 @@ impl Relax for Backoff {
             self.step += 1;
         }
         else{
-            self.msg |= Self::IS_LIMIT_EXCEEDED;
-            check_bits(self.msg, Self::PARK);
+            add_bits(&mut self.msg, Self::IS_LIMIT_EXCEEDED);
+            let park_state: bool = check_bits(self.msg, Self::PARK);
         }
     }
 }
