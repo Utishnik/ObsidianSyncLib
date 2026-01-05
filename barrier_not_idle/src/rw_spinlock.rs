@@ -41,7 +41,7 @@ impl<R: Relax> RawRwSpinlock<R> {
     /// Acquire a shared lock, returning the new lock value.
     #[inline]
     fn acquire_shared(&self) -> usize {
-        let value = self.lock.fetch_add(SHARED, Ordering::Acquire);
+        let value: usize = self.lock.fetch_add(SHARED, Ordering::Acquire);
 
         // An arbitrary cap that allows us to catch overflows long before they happen
         if value > usize::MAX / 2 {
@@ -277,9 +277,9 @@ pub type ArcBackoffRwSpinlockWriteGuard<T> =
 // Adapted from `spin::rwlock`.
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::mpsc::channel;
-    use std::sync::Arc;
     use std::{mem, thread};
 
     use lock_api::{RwLockUpgradableReadGuard, RwLockWriteGuard};
