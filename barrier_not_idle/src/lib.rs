@@ -84,5 +84,6 @@ pub mod guard {
 pub mod relax;
 mod rw_spinlock;
 mod spinlock;
+pub mod zerotrait;
 //pub mod barrier_std_mutex;
 //pub mod barrier_spinlock_mutex;

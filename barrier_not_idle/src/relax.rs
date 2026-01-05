@@ -1,7 +1,6 @@
 //! Relax strategies.
 //!
 //! Relax strategies are used when the thread cannot acquire a spinlock.
-
 /// A relax strategy.
 ///
 /// `Relax` types are used to relax the current thread during contention.
@@ -9,6 +8,8 @@ pub trait Relax: Default {
     /// Relaxes the current thread.
     fn relax(&mut self);
 }
+use core::ops::BitAnd;
+use crate::zerotrait;
 
 /// Rapid spinning.
 ///
@@ -30,10 +31,26 @@ impl Relax for Spin {
 #[derive(Default, Debug)]
 pub struct Backoff {
     step: u8,
+    msg: u8,
 }
 
 impl Backoff {
     const YIELD_LIMIT: u8 = 10;
+    const PARK: u8 = 0xf0;
+    const IS_LIMIT_EXCEEDED: u8 = 0x0f;
+}
+
+fn check_bits<T,TT>(val: T,mask: T) -> bool
+where T: core::ops::BitAnd,
+TT: Sized,
+<T as BitAnd>::Output: PartialEq<TT>,
+{
+    if (val & mask) != 0 {
+        true
+    }
+    else {
+        false
+    }
 }
 
 impl Relax for Backoff {
@@ -45,6 +62,10 @@ impl Relax for Backoff {
 
         if self.step <= Self::YIELD_LIMIT {
             self.step += 1;
+        }
+        else{
+            self.msg |= Self::IS_LIMIT_EXCEEDED;
+            check_bits(self.msg, Self::PARK);
         }
     }
 }
