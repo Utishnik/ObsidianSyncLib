@@ -4,7 +4,7 @@ pub mod std_mutex {
     use std::{
         sync::{
             Arc, Mutex,
-            atomic::{AtomicBool, AtomicUsize, Ordering},
+            atomic::{AtomicUsize, Ordering},
         },
         thread::sleep,
     };
