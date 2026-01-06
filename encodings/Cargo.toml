@@ -1,0 +1,11 @@
+[package]
+name = "tiny_encodings_utils_lib"          
+version = "0.1.0"
+edition = "2024"
+description = "A Rust tiny library for impl utils encodings"
+license = "MIT"
+repository = ""
+
+[lib]
+name = "tiny_encodings_utils_lib"          
+path = "src/lib.rs"

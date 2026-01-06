@@ -21,7 +21,9 @@ tinyvec = "1.8"
 
 [workspace]
 members = ["ansicodes",
-"barrier_not_idle"]
+"barrier_not_idle",
+"encodings"
+]
 
 resolver = "2"
 
