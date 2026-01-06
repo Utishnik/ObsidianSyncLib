@@ -29,3 +29,13 @@ fn test_time() {
     println!("ms = {}", ms);
     test_assert!(12200000 == ms, true);
 }
+
+#[test]
+fn хзкакназвать()
+{
+    for i in 1..4{
+        let m: u32 = (1 << (6 * i)) - 1;
+        let nem: u32 = !m;
+        println!("{:032b}\t{:032b}",m,nem);
+    }
+}

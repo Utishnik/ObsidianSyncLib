@@ -323,6 +323,7 @@ impl Utf8Sequences {
     }
 }
 
+//todo u32 -> usize
 struct ScalarRange {
     start: u32,
     end: u32,
@@ -350,7 +351,7 @@ impl Iterator for Utf8Sequences {
                     continue 'TOP;
                 }
                 for i in 1..MAX_UTF8_BYTES {
-                    let max = max_scalar_value(i);
+                    let max: u32 = max_scalar_value(i);
                     if r.start <= max && max < r.end {
                         self.push(max + 1, r.end);
                         r.end = max;

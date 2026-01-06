@@ -1,5 +1,8 @@
+use crate::bits_utils::size_bits;
+use crate::bits_utils::size_bytes;
 use crate::debug_println;
 use crate::debug_println_fileinfo;
+use crate::bits_utils;
 use std::fmt;
 use std::fs::File;
 use std::io::Write;
@@ -561,6 +564,44 @@ pub fn dump_result_list(path: String) -> Result<(), std::io::Error> //todo: сд
     }
     Ok(()) //TODO доделать там нумерацию фаилов пред проверки всякие и тд и наверное чтоб он автоматически взависомти от
     //теста в нужную директорию
+}
+
+pub fn print_bits_detailed<T>(value: T, label: &str) 
+where
+    T: std::fmt::Binary + std::fmt::Display + Copy + std::fmt::UpperHex,
+{
+    let size_bytes: usize = size_bytes::<T>();
+    let size_bits: usize = size_bits::<T>();
+    
+    debug_println!("{}:", label);
+    debug_println!("  DEC: {}", value);
+    debug_println!("  HEX: 0x{:X}", value);
+    debug_println!("  BIN: {:0width$b}", value, width = size_bits);
+}
+
+pub fn print_bits_formating<T>(value: T, label: &str,split_width: usize,separator: &str) 
+where
+    T: std::fmt::Binary + std::fmt::Display + Copy + std::fmt::UpperHex,
+{
+    let size_bytes: usize = size_bytes::<T>();
+    let size_bits: usize = size_bits::<T>();
+
+    if split_width >= size_bits{
+        set_color_eprint(Colors::Red);
+        debug_eprintln_fileinfo!("print_bits_detailed  split_width >= size_bits");
+        reset_color_eprint();
+    }
+    let binary_str: String = format!("{:0width$b}", value, width = size_bits);
+    let with_spaces: String = binary_str
+        .chars()
+        .enumerate()
+        .map(|(i, c)| {
+            if i > 0 && i % split_width == 0 { format!("{separator}{}", c) } else { c.to_string() }
+        })
+        .collect();
+    
+    debug_println!("  С разделителями: {}", with_spaces);
+    debug_println!("  Размер: {} байт ({} бит)", size_bytes, size_bits);
 }
 
 //todo: pub fn dump_list_print
