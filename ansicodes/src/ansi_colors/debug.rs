@@ -7,7 +7,7 @@ use core::fmt;
 /// This behaviour gets bypassed when using the alternate formatting mode
 /// `format!("{:#?}")`.
 ///
-///     use nu_ansi_term::Color::{Red, Blue};
+///     use ansicodes::Color::{Red, Blue};
 ///     assert_eq!("Style { fg(Red), on(Blue), bold, italic }",
 ///                format!("{:?}", Red.on(Blue).bold().italic()));
 impl fmt::Display for Style {
