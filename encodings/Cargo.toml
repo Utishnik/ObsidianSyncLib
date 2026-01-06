@@ -9,3 +9,29 @@ repository = ""
 [lib]
 name = "tiny_encodings_utils_lib"          
 path = "src/lib.rs"
+
+[dependencies]
+arbitrary = { version = "1.3.0", features = ["derive"], optional = true }
+
+[features]
+default = ["std", "unicode"]
+std = []
+arbitrary = ["dep:arbitrary"]
+
+
+unicode = [
+  "unicode-age",
+  "unicode-bool",
+  "unicode-case",
+  "unicode-gencat",
+  "unicode-perl",
+  "unicode-script",
+  "unicode-segment",
+]
+unicode-age = []
+unicode-bool = []
+unicode-case = []
+unicode-gencat = []
+unicode-perl = []
+unicode-script = []
+unicode-segment = []
