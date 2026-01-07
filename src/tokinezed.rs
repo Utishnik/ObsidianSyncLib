@@ -3,13 +3,13 @@ use std::sync::Mutex;
 use std::sync::OnceLock;
 use std::sync::RwLock;
 
-use crate::Colors;
+use super::debug::debug::Colors;
+use super::debug::debug::reset_color_eprint;
+use super::debug::debug::reset_color_print;
+use super::debug::debug::set_color_eprint;
+use super::debug::debug::set_color_print;
 use crate::abstract__tokinezer::*;
 use crate::debug_eprintln;
-use crate::reset_color_eprint;
-use crate::reset_color_print;
-use crate::set_color_eprint;
-use crate::set_color_print;
 use crate::str_utils::safe_remove_chars;
 use crate::{debug_eprintln_fileinfo, debug_println, debug_println_fileinfo, splitt_b_space};
 
@@ -296,7 +296,7 @@ pub fn skip_symbol_abstract_parse_value(
         //todo нужно написать для подобного что то чтоб не нужно было везде
         //потому что у rust fmt не работает на скобки пишет что он
         {
-            set_color_eprint(crate::Colors::Red);
+            set_color_eprint(super::debug::debug::Colors::Red);
             debug_eprintln_fileinfo!("convert_res error");
             debug_eprintln!("idx: {} str: {}", index, str);
             reset_color_eprint();

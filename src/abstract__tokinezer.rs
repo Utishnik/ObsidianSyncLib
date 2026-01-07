@@ -1,13 +1,13 @@
+use super::debug::debug::clear_console;
+use super::debug::debug::reset_color_eprint;
+use super::debug::debug::reset_color_print;
+use super::debug::debug::set_color_eprint;
+use super::debug::debug::set_color_print;
 use crate::ParseExprError;
 use crate::black_list_iterator::*;
-use crate::clear_console;
 use crate::debug_eprintln;
 use crate::debug_eprintln_fileinfo;
 use crate::debug_println;
-use crate::reset_color_eprint;
-use crate::reset_color_print;
-use crate::set_color_eprint;
-use crate::set_color_print;
 use crate::splitt_b_space;
 use crate::str_utils::gen_decimal_digits;
 use crate::tokinezed;
@@ -76,7 +76,7 @@ impl Pos {
         let mut ret_pos: Pos = Pos::default();
         let ret_res: Result<tokinezed::TokenStruct, ()>;
         if idx > cfg.len() {
-            set_color_eprint(crate::Colors::Red);
+            set_color_eprint(super::debug::debug::Colors::Red);
             debug_eprintln_fileinfo!("idx > cfg.len()\tidx: {}  cfg.len(): {}", idx, cfg.len());
             reset_color_eprint();
             return Err(());
@@ -84,7 +84,7 @@ impl Pos {
         if transfers == None {
             ret_res = splitt_b_space(cfg.to_string(), None, Some("\n".to_string()));
         } else if unsafe { transfers.clone().unwrap_unchecked().is_empty() } {
-            set_color_print(crate::Colors::Blue);
+            set_color_print(super::debug::debug::Colors::Blue);
             debug_println!(
                 "conver_to_pos transfers.is_empty() это случай только если одна строкой без переноса"
             );
@@ -97,7 +97,7 @@ impl Pos {
         }
         let mut it: usize = 0;
         if let Err(err) = ret_res {
-            set_color_eprint(crate::Colors::Yellow);
+            set_color_eprint(super::debug::debug::Colors::Yellow);
             debug_eprintln!("conver_to_pos ret_res is error");
             reset_color_eprint();
             return Err(err);
@@ -336,7 +336,7 @@ impl AbstractValue for String {
                     unsafe { unwrap_res_skip.err.unwrap_unchecked() };
                 let err_msg: String = unwrap_res_skip_err.msg;
                 let err_file: String = unwrap_res_skip_err.file;
-                set_color_eprint(crate::Colors::Red);
+                set_color_eprint(super::debug::debug::Colors::Red);
                 clear_console();
                 debug_eprintln_fileinfo!(
                     "parse_value impl AbstractValue for String unwrap_res_skip.is_err() msg: {} file: {}",
@@ -344,7 +344,7 @@ impl AbstractValue for String {
                     err_file
                 );
                 reset_color_eprint();
-                set_color_eprint(crate::Colors::Yellow);
+                set_color_eprint(super::debug::debug::Colors::Yellow);
                 debug_eprintln!("error ret_val: {}", ret_val);
                 reset_color_eprint();
                 return Err(ParseExprError::KeyWord(format!(
@@ -359,7 +359,7 @@ impl AbstractValue for String {
             } else {
                 ret_val.push(unwrap_val);
             }
-            set_color_print(crate::Colors::Green);
+            set_color_print(super::debug::debug::Colors::Green);
             debug_println!("parse_value skip char");
             reset_color_print();
         }

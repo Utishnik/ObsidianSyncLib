@@ -12,13 +12,12 @@ use Parser::*;
 pub mod AccTokCrypt;
 pub mod Config;
 pub mod DirCheck;
-pub mod debug;
-pub use debug::*;
 pub mod abstract__tokinezer;
 pub mod abstract_parser;
 pub mod back_trace_debug;
 pub mod bits_utils;
 pub mod black_list_iterator;
+pub mod debug;
 pub mod debug_multi_thread;
 pub mod number_utils;
 pub mod optional_error;
@@ -60,19 +59,19 @@ pub fn last_commit_message<P: AsRef<std::path::Path>>(repo_path: P) -> Result<St
 
 fn count_syms_b_str(str: &String, syms: String) -> Result<u64, ()> {
     if str.is_empty() || syms.is_empty() {
-        set_color_eprint(Colors::Blue);
+        debug::debug::set_color_eprint(debug::debug::Colors::Blue);
         debug_eprintln!("--------------------------------------");
-        reset_color_eprint();
-        set_color_eprint(Colors::Red);
+        debug::debug::reset_color_eprint();
+        debug::debug::set_color_eprint(debug::debug::Colors::Red);
         if str.is_empty() {
             debug_eprintln!("count_syms_b_str str_is_empty");
         }
         if syms.is_empty() {
             debug_eprintln!("count_syms_b_str syms is empty");
         }
-        set_color_eprint(Colors::Blue);
+        debug::debug::set_color_eprint(debug::debug::Colors::Blue);
         debug_eprintln!("--------------------------------------");
-        reset_color_eprint();
+        debug::debug::reset_color_eprint();
         println!();
         return Err(());
     }
@@ -102,9 +101,9 @@ pub fn splitt_b_space(
     debug_println!("splitt_b_space transfer_sym: {}", transfer_sym);
     let is_none_syms: bool = syms.is_none();
     if str.is_empty() {
-        set_color_print(Colors::Red);
+        debug::debug::set_color_print(debug::debug::Colors::Red);
         debug_eprintln!("splitt_b_space str is_empty");
-        reset_color_print();
+        debug::debug::reset_color_print();
     } //todo backtrace вместо этого
     if let Ok(cnt) = count_syms_b_str(
         &str,
@@ -164,24 +163,24 @@ pub fn splitt_b_space(
             {
                 toks.tok_values.insert(idx, c.to_string());
             }
-            set_color_print(Colors::Blue);
+            debug::debug::set_color_print(debug::debug::Colors::Blue);
             debug_println!("value:\t{}",toks.tok_values[idx]);
-            reset_color_print();
+            debug::debug::reset_color_print();
             let res: Result<(), String> = toks.safe_add_ln_num(idx, line);
             if let Err(e) = res
             {
-                set_color_eprint(Colors::Red);
+                debug::debug::set_color_eprint(debug::debug::Colors::Red);
                 debug_eprintln_fileinfo!("{}",e);
-                reset_color_eprint();
+                debug::debug::reset_color_eprint();
                 return Err(());
             }
             //toks.tok_lines_number[idx]=line;//тут тоже паника
         }
         Ok(toks)
     } else {
-        set_color_eprint(Colors::Red);
+        debug::debug::set_color_eprint(debug::debug::Colors::Red);
         debug_eprintln_fileinfo!("count_syms_b_str error return"); //
-        reset_color_eprint();
+        debug::debug::reset_color_eprint();
         Err(())
     }
 }

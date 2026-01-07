@@ -1,3 +1,3 @@
 #![no_std]
-pub mod utf8;
+pub mod unic_scalar_to_utf8;
 extern crate alloc;
