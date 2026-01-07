@@ -1,3 +1,10 @@
+pub mod display_utils{  
+    pub fn display_vec<T: std::fmt::Display>(vec: &[T], separator: String) -> String {
+        let items: Vec<String> = vec.iter().map(|x| x.to_string()).collect();
+        format!("[{}]", items.join(&separator))
+    }
+}
+
 pub mod debug_and_test_utils {
     use crate::bits_utils;
     use crate::bits_utils::size_bits;
@@ -530,11 +537,6 @@ pub mod debug_and_test_utils {
             i += 1;
         }
         successfully
-    }
-
-    pub fn display_vec<T: std::fmt::Display>(vec: &[T], separator: String) -> String {
-        let items: Vec<String> = vec.iter().map(|x| x.to_string()).collect();
-        format!("[{}]", items.join(&separator))
     }
 
     pub fn dump_result_list(path: String) -> Result<(), std::io::Error> //todo: сделать асинхронной? типо тестов может быть очень много

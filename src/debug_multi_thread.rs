@@ -1,4 +1,7 @@
+use crate::debug::debug_and_test_utils::reset_color_eprint;
+use crate::debug::debug_and_test_utils::set_color_eprint;
 use crate::debug_eprintln_fileinfo;
+use crate::debug::debug_and_test_utils::Colors;
 use std::any::Any;
 use std::any::TypeId;
 
@@ -109,7 +112,9 @@ impl TypedResult {
             match self.value.downcast::<T>() {
                 Ok(box_t) => Ok(*box_t),
                 Err(value) => {
+                    set_color_eprint(Colors::Red);
                     debug_eprintln_fileinfo!("fn downcast\ttype_name: {}", self.type_name);
+                    reset_color_eprint();
                     Err(Self {
                         value,
                         type_id: self.type_id,

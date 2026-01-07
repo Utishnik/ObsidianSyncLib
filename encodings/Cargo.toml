@@ -12,6 +12,7 @@ path = "src/lib.rs"
 
 [dependencies]
 arbitrary = { version = "1.3.0", features = ["derive"], optional = true }
+obsidian_sync_lib = { path = ".." }  
 
 [features]
 default = ["std", "unicode"]
