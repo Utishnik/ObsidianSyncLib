@@ -1,9 +1,10 @@
 use obsidian_sync_lib::Parser::*;
 use obsidian_sync_lib::{
-    debug::debug::{TESTS, get_count_tests, get_test, result_list},
+    debug::debug_and_test_utils::{TESTS, get_count_tests, get_test, result_list},
     tokinezed::Construction,
     *,
 };
+use obsidian_sync_lib::test_assert;
 
 use tinyvec::*;
 

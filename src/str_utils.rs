@@ -1,7 +1,7 @@
 use std::char;
 
-use super::debug::debug::display_vec;
 use crate::debug_eprintln_fileinfo;
+use super::debug::debug_and_test_utils::display_vec;
 
 #[derive(Clone)]
 pub struct InsertChar {

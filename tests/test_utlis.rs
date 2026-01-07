@@ -1,7 +1,7 @@
 use git2::opts::get_server_timeout_in_milliseconds;
 use obsidian_sync_lib::argsfmt;
-use obsidian_sync_lib::debug::debug::BitsDisplay;
-use obsidian_sync_lib::debug::debug::print_bits_detailed;
+use obsidian_sync_lib::debug::debug_and_test_utils::BitsDisplay;
+use obsidian_sync_lib::debug::debug_and_test_utils::print_bits_detailed;
 use obsidian_sync_lib::utils::*;
 use obsidian_sync_lib::{debug::*, tokinezed::Construction, *};
 

@@ -1,4 +1,4 @@
-pub mod debug {
+pub mod debug_and_test_utils {
     use crate::bits_utils;
     use crate::bits_utils::size_bits;
     use crate::bits_utils::size_bytes;
@@ -114,15 +114,15 @@ pub mod debug {
 
     #[macro_export]
     macro_rules! argsfmt
-{
-    ($($arg:expr),* $(,)?) =>
-    {{
-        use $crate::debug::debug::ArgsFmt;
-        let mut args = ArgsFmt::new();
-        $(args.add($arg);)*
-        args
-    }};
-}
+    {
+        ($($arg:expr),* $(,)?) =>
+        {{
+            use $crate::debug::debug_and_test_utils::ArgsFmt;
+            let mut args = ArgsFmt::new();
+            $(args.add($arg);)*
+            args
+        }};
+    }
 
     pub const RED: &str = "\x1b[31m";
     pub const GREEN: &str = "\x1b[32m";
@@ -684,10 +684,10 @@ pub mod debug {
                 const YELLOW: &str = "\x1b[33m";
                 const RESET: &str = "\x1b[0m";
                 let mut result_test: bool = false;
-                use obsidian_sync_lib::debug::debug::Test;
-                use obsidian_sync_lib::debug::debug::get_last_test;
-                use obsidian_sync_lib::debug::debug::get_type_test;
-                use obsidian_sync_lib::debug::debug::add_test;
+                use $crate::debug::debug_and_test_utils::Test;
+                use $crate::debug::debug_and_test_utils::get_last_test;
+                use $crate::debug::debug_and_test_utils::get_type_test;
+                use $crate::debug::debug_and_test_utils::add_test;
                 use std::sync::atomic::Ordering;
                 //$crate::debug::* может так лучше?
                 let last_test_option: Option<Test> = get_last_test();

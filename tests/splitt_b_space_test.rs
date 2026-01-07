@@ -1,12 +1,12 @@
 use std::str::SplitAsciiWhitespace;
 
-use obsidian_sync_lib::debug::debug::clear_console;
 use obsidian_sync_lib::splitt_b_space;
 use obsidian_sync_lib::{
-    debug::debug::{TESTS, get_count_tests, get_test, result_list, successes_beh},
+    debug::debug_and_test_utils::{TESTS, get_count_tests, get_test, result_list, successes_beh},
     tokinezed::Construction,
     *,
 };
+use obsidian_sync_lib::debug::debug_and_test_utils::clear_console;
 use std::thread;
 use std::time::Duration;
 
