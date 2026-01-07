@@ -1,5 +1,7 @@
 use git2::opts::get_server_timeout_in_milliseconds;
 use obsidian_sync_lib::argsfmt;
+use obsidian_sync_lib::print_bits_detailed;
+use obsidian_sync_lib::BitsDisplay;
 use obsidian_sync_lib::utils::*;
 use obsidian_sync_lib::{debug::*, tokinezed::Construction, *};
 
@@ -31,11 +33,12 @@ fn test_time() {
 }
 
 #[test]
-fn хзкакназвать()
-{
-    for i in 1..4{
+fn хзкакназвать() {
+    for i in 1..4 {
         let m: u32 = (1 << (6 * i)) - 1;
         let nem: u32 = !m;
-        println!("{:032b}\t{:032b}",m,nem);
+        print_bits_detailed(m, "m",BitsDisplay::BIN);
+        print_bits_detailed(nem, "nem",BitsDisplay::BIN);
+        println!();
     }
 }

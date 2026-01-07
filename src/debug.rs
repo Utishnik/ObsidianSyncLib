@@ -1,8 +1,8 @@
+use crate::bits_utils;
 use crate::bits_utils::size_bits;
 use crate::bits_utils::size_bytes;
 use crate::debug_println;
 use crate::debug_println_fileinfo;
-use crate::bits_utils;
 use std::fmt;
 use std::fs::File;
 use std::io::Write;
@@ -566,44 +566,106 @@ pub fn dump_result_list(path: String) -> Result<(), std::io::Error> //todo: сд
     //теста в нужную директорию
 }
 
-pub fn print_bits_detailed<T>(value: T, label: &str) 
-where
-    T: std::fmt::Binary + std::fmt::Display + Copy + std::fmt::UpperHex,
-{
-    let size_bytes: usize = size_bytes::<T>();
-    let size_bits: usize = size_bits::<T>();
-    
-    debug_println!("{}:", label);
-    debug_println!("  DEC: {}", value);
-    debug_println!("  HEX: 0x{:X}", value);
-    debug_println!("  BIN: {:0width$b}", value, width = size_bits);
+#[derive(Clone, PartialEq)]
+pub enum BitsDisplay {
+    All,
+    DEC,
+    HEX,
+    BIN,
 }
 
-pub fn print_bits_formating<T>(value: T, label: &str,split_width: usize,separator: &str) 
+pub fn print_bits_detailed<T>(value: T, label: &str, filter: BitsDisplay)
 where
     T: std::fmt::Binary + std::fmt::Display + Copy + std::fmt::UpperHex,
 {
     let size_bytes: usize = size_bytes::<T>();
     let size_bits: usize = size_bits::<T>();
 
-    if split_width >= size_bits{
+    let mut print_dec: bool = filter == BitsDisplay::DEC;
+    let mut print_hex: bool = filter == BitsDisplay::HEX;
+    let mut print_bin: bool = filter == BitsDisplay::BIN;
+    if filter == BitsDisplay::All {
+        print_dec = true;
+        print_hex = true;
+        print_bin = true;
+    }
+
+    debug_println!("{}:", label);
+    if print_dec {
+        debug_println!("  DEC: {}", value);
+    }
+    if print_hex {
+        debug_println!("  HEX: 0x{:X}", value);
+    }
+    if print_bin {
+        debug_println!("  BIN: {:0width$b}", value, width = size_bits);
+    }
+}
+
+pub fn print_bits_formating<T>(value: T, label: &str, split_width: usize, separator: &str)
+where
+    T: std::fmt::Binary + std::fmt::Display + Copy + std::fmt::UpperHex,
+{
+    let size_bytes: usize = size_bytes::<T>();
+    let size_bits: usize = size_bits::<T>();
+
+    if split_width >= size_bits {
         set_color_eprint(Colors::Red);
         debug_eprintln_fileinfo!("print_bits_detailed  split_width >= size_bits");
         reset_color_eprint();
+        return;
     }
     let binary_str: String = format!("{:0width$b}", value, width = size_bits);
     let with_spaces: String = binary_str
         .chars()
         .enumerate()
         .map(|(i, c)| {
-            if i > 0 && i % split_width == 0 { format!("{separator}{}", c) } else { c.to_string() }
+            if i > 0 && i % split_width == 0 {
+                format!("{separator}{}", c)
+            } else {
+                c.to_string()
+            }
         })
         .collect();
-    
+
     debug_println!("  С разделителями: {}", with_spaces);
     debug_println!("  Размер: {} байт ({} бит)", size_bytes, size_bits);
 }
 
+fn format_hex_with_separators<T>(value: T, chunk_size: usize, separator: &str) -> String
+where
+    T: std::fmt::LowerHex,
+{
+    let hex_string: String = format!("{:x}", value);
+    let mut result: String =
+        String::with_capacity(hex_string.len() + (hex_string.len() / chunk_size) * separator.len());
+
+    let first_chunk_len: usize = hex_string.len() % chunk_size;
+    let first_chunk_len: usize = if first_chunk_len == 0 {
+        chunk_size
+    } else {
+        first_chunk_len
+    };
+
+    result.push_str(&hex_string[..first_chunk_len]);
+
+    for chunk in hex_string[first_chunk_len..].as_bytes().chunks(chunk_size) {
+        result.push_str(separator);
+        result.push_str(&String::from_utf8_lossy(chunk));
+    }
+    result
+}
+
+pub fn print_hex_with_separators<T>(value: T, chunk_size: usize, separator: &str)
+where
+    T: std::fmt::LowerHex,
+{
+    let size_bytes: usize = size_bytes::<T>();
+    let size_bits: usize = size_bits::<T>();
+    let format_hex_res: String = format_hex_with_separators(value, chunk_size, separator);
+    debug_println!("  С разделителями: {}", format_hex_res);
+    debug_println!("  Размер: {} байт ({} бит)", size_bytes, size_bits);
+}
 //todo: pub fn dump_list_print
 
 //ебаный раст засирает assert_eq поэтому пишем свой

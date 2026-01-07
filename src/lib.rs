@@ -17,13 +17,13 @@ pub use debug::*;
 pub mod abstract__tokinezer;
 pub mod abstract_parser;
 pub mod back_trace_debug;
+pub mod bits_utils;
 pub mod black_list_iterator;
 pub mod debug_multi_thread;
 pub mod number_utils;
 pub mod optional_error;
 pub mod str_utils;
 pub mod utils;
-pub mod bits_utils;
 
 #[derive(Debug)]
 enum Cfg_Error {

@@ -93,7 +93,7 @@ impl Relax for Backoff {
             //надо после того как сделаю step атомарным проверять если ее значение изменилось проверить
             //дошли до 1024 а измненили на 256 смотрим а в цикле мы на 310 итерации значит break
             let unpark_state: bool = check_bits(self.msg, Self::UNPARK);
-            if unpark_state{
+            if unpark_state {
                 break;
             }
             core::hint::spin_loop();
