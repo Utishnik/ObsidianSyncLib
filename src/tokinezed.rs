@@ -240,17 +240,12 @@ pub fn enum_format_err(msg: &str, val: &str, separator: &str) -> String {
 }
 
 // более низкоуровенвый аналог Tokinezed_Error
-#[derive(Clone)]
+#[derive(Clone,Default)]
 pub enum TokinezedErrorLow {
+    #[default]
     NoneErr,
     SkipSymbolErr(String),
     SkipConstructionErr(String),
-}
-
-impl Default for TokinezedErrorLow {
-    fn default() -> Self {
-        Self::NoneErr
-    }
 }
 
 impl TokinezedErrorLow {
@@ -362,10 +357,8 @@ pub fn skip_construction_abstract_parse_value(
         if len_str < fix_construction.len() {
             return None;
         }
-    } else {
-        if len_str < len_construction {
-            return None;
-        }
+    } else if len_str < len_construction {
+        return None;
     }
     crate::debug_println!("\n\n\n");
     loop {
@@ -520,21 +513,11 @@ fn check_construction(
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone,Default)]
 pub struct Construction {
     pub start: Option<usize>,
     pub end: Option<usize>,
     pub monolit: bool,
-}
-
-impl Default for Construction {
-    fn default() -> Self {
-        Self {
-            start: None,
-            end: None,
-            monolit: false,
-        }
-    }
 }
 
 impl Construction {

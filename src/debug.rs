@@ -101,7 +101,6 @@ pub mod display_utils {
 }
 
 pub mod debug_and_test_utils {
-    use crate::bits_utils;
     use crate::bits_utils::size_bits;
     use crate::bits_utils::size_bytes;
     use crate::debug_println;
@@ -270,7 +269,7 @@ pub mod debug_and_test_utils {
     }
 
     pub fn reset_color_print() {
-        print!("{}", "\x1b[0m");
+        print!("\x1b[0m");
     }
 
     pub fn set_color_eprint(color: Colors) {
@@ -278,7 +277,7 @@ pub mod debug_and_test_utils {
     }
 
     pub fn reset_color_eprint() {
-        eprint!("{}", "\x1b[0m");
+        eprint!("\x1b[0m");
     }
 
     pub struct ParseCntColor {
