@@ -117,6 +117,7 @@ pub mod debug {
 {
     ($($arg:expr),* $(,)?) =>
     {{
+        use $crate::debug::debug::ArgsFmt;
         let mut args = ArgsFmt::new();
         $(args.add($arg);)*
         args
@@ -683,7 +684,10 @@ pub mod debug {
                 const YELLOW: &str = "\x1b[33m";
                 const RESET: &str = "\x1b[0m";
                 let mut result_test: bool = false;
-                use crate::debug::*;
+                use obsidian_sync_lib::debug::debug::Test;
+                use obsidian_sync_lib::debug::debug::get_last_test;
+                use obsidian_sync_lib::debug::debug::get_type_test;
+                use obsidian_sync_lib::debug::debug::add_test;
                 use std::sync::atomic::Ordering;
                 //$crate::debug::* может так лучше?
                 let last_test_option: Option<Test> = get_last_test();
