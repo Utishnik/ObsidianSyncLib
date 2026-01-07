@@ -16,13 +16,19 @@ pub mod display_utils {
     {
         let items: Vec<String> = vec.iter().map(|x| x.to_string()).collect();
         if scobes.is_none() {
-            format!("[{}]", items.join(separator))
+            format!("{}", items.join(separator))
         } else {
             let scobes_unwrap: ScobesFormatSymbols = unsafe { scobes.unwrap_unchecked() };
             let l_scobe: char = scobes_unwrap.0;
             let r_scobe: char = scobes_unwrap.1;
             format!("{l_scobe}{}{r_scobe}", items.join(separator))
         }
+    }
+
+    pub fn write_slice<T>(f: &mut core::fmt::Formatter<'_>, slice: &[T])
+    where
+        T: std::fmt::Display,
+    {
     }
 
     pub fn print_vec<T>(
@@ -55,24 +61,33 @@ pub mod display_utils {
     where
         T: std::fmt::Display,
     {
+        if start == end {
+            return String::default();
+        }
         let items: Vec<String> = vec
             .iter()
             .skip(start)
             .take(end)
             .map(|x| x.to_string())
             .collect();
+        let vec_len: usize = vec.len();
         if scobes.is_none() {
-            format!("[{}]", items.join(separator))
+            format!("{}", items.join(separator))
         } else {
             let scobes_unwrap: ScobesFormatSymbols = unsafe { scobes.unwrap_unchecked() };
             let l_scobe: char = scobes_unwrap.0;
             let r_scobe: char = scobes_unwrap.1;
-            if start != 0 && end != vec.len() {
+            if start != 0 && end != vec_len {
                 format!("..{l_scobe}{}{r_scobe}..", items.join(separator))
             } else if start == 0 {
                 format!("{l_scobe}{}{r_scobe}..", items.join(separator))
-            } else {
+            } else if start != 0 && end == vec_len {
                 format!("..{l_scobe}{}{r_scobe}", items.join(separator))
+            } else {
+                set_color_print(debug::debug_and_test_utils::Colors::Blue);
+                debug_println!("display_vec_range -> full range");
+                reset_color_print();
+                format!("{l_scobe}{}{r_scobe}", items.join(separator))
             }
         }
     }

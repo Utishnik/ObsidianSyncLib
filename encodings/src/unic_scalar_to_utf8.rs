@@ -81,9 +81,9 @@ I also got the idea from
 which uses it for executing automata on their term index.
 */
 
-use core::{char, fmt, iter::FusedIterator, slice};
-
 use alloc::{vec, vec::Vec};
+use core::{char, fmt, iter::FusedIterator, slice};
+use obsidian_sync_lib::debug::display_utils;
 const MAX_UTF8_BYTES: usize = 4;
 
 /// Utf8Sequence represents a sequence of byte ranges.

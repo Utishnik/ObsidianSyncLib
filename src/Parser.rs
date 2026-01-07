@@ -427,14 +427,12 @@ pub fn skip_time_type_and_value(
                 let err_msg: String = if time_construct.start.is_some() {
                     let unwrap_d_construct_start: usize =
                         unsafe { time_construct.start.unwrap_unchecked() };
-                     format!(
+                    format!(
                         "the beginning of an unsuccessful parsing: {}",
                         unwrap_d_construct_start
                     )
                 } else {
-                     format!(
-                        "skip_symbol_abstract_parse_value err and len_str < len_construction"
-                    )
+                    format!("skip_symbol_abstract_parse_value err and len_str < len_construction")
                 };
                 debug_eprintln_fileinfo!("{}", err_msg);
                 return Err(ParseExprError::Time(err_msg));

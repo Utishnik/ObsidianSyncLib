@@ -240,7 +240,7 @@ pub fn enum_format_err(msg: &str, val: &str, separator: &str) -> String {
 }
 
 // более низкоуровенвый аналог Tokinezed_Error
-#[derive(Clone,Default)]
+#[derive(Clone, Default)]
 pub enum TokinezedErrorLow {
     #[default]
     NoneErr,
@@ -513,7 +513,7 @@ fn check_construction(
     }
 }
 
-#[derive(Clone,Default)]
+#[derive(Clone, Default)]
 pub struct Construction {
     pub start: Option<usize>,
     pub end: Option<usize>,
