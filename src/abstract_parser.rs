@@ -274,7 +274,7 @@ pub fn take_var_slices(slices: &[&Slice]) -> bool {
         {
             debug_println!(
                 "take_var_slices !take_index_valid_slice_result_ret vec res: \n{}",
-                display_vec(&take_index_valid_slice_all_ret(slices), " ,".to_string())
+                display_vec(&take_index_valid_slice_all_ret(slices), " ,",None)
             )
         }
         return false;

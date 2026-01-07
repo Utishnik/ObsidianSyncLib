@@ -1,7 +1,31 @@
-pub mod display_utils{  
-    pub fn display_vec<T: std::fmt::Display>(vec: &[T], separator: String) -> String {
+pub mod display_utils {
+    #[derive(Default)]
+    pub struct ScobesFormatSymbols(char,char);
+    fn set_scobes_format_syms(l_scobe: char,r_scobe: char) -> ScobesFormatSymbols{
+        ScobesFormatSymbols(l_scobe, r_scobe)
+    }
+    
+    pub fn display_vec<T>(vec: &[T], separator: &str,scobes: Option<ScobesFormatSymbols>) -> String
+    where
+        T: std::fmt::Display,
+    {
         let items: Vec<String> = vec.iter().map(|x| x.to_string()).collect();
-        format!("[{}]", items.join(&separator))
+        if scobes.is_none() {
+            format!("[{}]", items.join(separator))
+        }
+        else{
+            let scobes_unwrap: ScobesFormatSymbols = unsafe{scobes.unwrap_unchecked()};
+            let l_scobe: char = scobes_unwrap.0;
+            let r_scobe: char = scobes_unwrap.1;
+            format!("{l_scobe}{}{r_scobe}", items.join(separator))
+        }
+    }
+
+    pub fn display_vec_range<T>(vec: &[T], separator: &str) 
+    where
+        T: std::fmt::Display,
+    {
+
     }
 }
 

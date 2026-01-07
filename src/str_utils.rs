@@ -35,7 +35,7 @@ pub fn safe_remove_chars(str: &str, char_indices: &[usize]) -> String {
         .collect();
     debug_eprintln_fileinfo!(
         "indexes > str.len : {}",
-        display_vec(&incorrect_idx, " ,".to_string())
+        display_vec(&incorrect_idx, " ,",None)
     );
     str.char_indices()
         .enumerate()
@@ -86,7 +86,7 @@ pub fn safe_insert_and_remove_chars(
         chars_remove_correct.push(shift);
         i += 1;
     }
-    display_vec(&chars_remove_correct, " ,".to_string());
+    display_vec(&chars_remove_correct, " ,",None);
     let insert_res: String = safe_insert_chars(str, chars_insert);
     debug_eprintln_fileinfo!("insert str: {}", insert_res);
     for item in chars_remove.iter_mut().enumerate() {
