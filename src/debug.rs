@@ -1,9 +1,8 @@
 pub mod display_utils {
     use crate::debug;
-    use crate::debug_println;
-    use crate::debug::debug_and_test_utils::set_color_print;
     use crate::debug::debug_and_test_utils::reset_color_print;
-
+    use crate::debug::debug_and_test_utils::set_color_print;
+    use crate::debug_println;
 
     #[derive(Default)]
     pub struct ScobesFormatSymbols(char, char);
@@ -36,20 +35,68 @@ pub mod display_utils {
     {
         if color.is_none() {
             let display: String = display_vec(vec, separator, scobes);
-            debug_println!("{}",display);
-        }
-        else{
+            debug_println!("{}", display);
+        } else {
             let display: String = display_vec(vec, separator, scobes);
-            let unwrap_color: debug::debug_and_test_utils::Colors = unsafe{color.unwrap_unchecked()};
+            let unwrap_color: debug::debug_and_test_utils::Colors =
+                unsafe { color.unwrap_unchecked() };
             set_color_print(unwrap_color);
-            debug_println!("{}",display);
+            debug_println!("{}", display);
             reset_color_print();
         }
     }
-    pub fn display_vec_range<T>(vec: &[T], separator: &str, start: usize, end: usize)
+    pub fn display_vec_range<T>(
+        vec: &[T],
+        separator: &str,
+        scobes: Option<ScobesFormatSymbols>,
+        start: usize,
+        end: usize,
+    ) -> String
     where
         T: std::fmt::Display,
     {
+        let items: Vec<String> = vec
+            .iter()
+            .skip(start)
+            .take(end)
+            .map(|x| x.to_string())
+            .collect();
+        if scobes.is_none() {
+            format!("[{}]", items.join(separator))
+        } else {
+            let scobes_unwrap: ScobesFormatSymbols = unsafe { scobes.unwrap_unchecked() };
+            let l_scobe: char = scobes_unwrap.0;
+            let r_scobe: char = scobes_unwrap.1;
+            if start != 0 && end != vec.len() {
+                format!("..{l_scobe}{}{r_scobe}..", items.join(separator))
+            } else if start == 0 {
+                format!("{l_scobe}{}{r_scobe}..", items.join(separator))
+            } else {
+                format!("..{l_scobe}{}{r_scobe}", items.join(separator))
+            }
+        }
+    }
+    pub fn print_vec_range<T>(
+        vec: &[T],
+        separator: &str,
+        scobes: Option<ScobesFormatSymbols>,
+        start: usize,
+        end: usize,
+        color: Option<debug::debug_and_test_utils::Colors>,
+    ) where
+        T: std::fmt::Display,
+    {
+        if color.is_none() {
+            let display: String = display_vec_range(vec, separator, scobes, start, end);
+            debug_println!("{}", display);
+        } else {
+            let display: String = display_vec_range(vec, separator, scobes, start, end);
+            let unwrap_color: debug::debug_and_test_utils::Colors =
+                unsafe { color.unwrap_unchecked() };
+            set_color_print(unwrap_color);
+            debug_println!("{}", display);
+            reset_color_print();
+        }
     }
 }
 
