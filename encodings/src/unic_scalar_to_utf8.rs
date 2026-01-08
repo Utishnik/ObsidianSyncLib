@@ -83,7 +83,8 @@ which uses it for executing automata on their term index.
 
 use alloc::{vec, vec::Vec};
 use core::{char, fmt, iter::FusedIterator, slice};
-use obsidian_sync_lib::debug::display_utils;
+use obsidian_sync_lib::debug::display_utils::write_slice_ref;
+use obsidian_sync_lib::debug::display_utils::{self, write_slice};
 const MAX_UTF8_BYTES: usize = 4;
 
 /// Utf8Sequence represents a sequence of byte ranges.
@@ -242,6 +243,7 @@ impl fmt::Debug for Utf8Range {
         }
     }
 }
+//todo debug для Vec<Utf8Range>
 
 /// An iterator over ranges of matching UTF-8 byte sequences.
 ///

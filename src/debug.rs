@@ -3,6 +3,7 @@ pub mod display_utils {
     use crate::debug::debug_and_test_utils::reset_color_print;
     use crate::debug::debug_and_test_utils::set_color_print;
     use crate::debug_println;
+    use core::fmt;
 
     #[derive(Default)]
     pub struct ScobesFormatSymbols(char, char);
@@ -25,10 +26,43 @@ pub mod display_utils {
         }
     }
 
-    pub fn write_slice<T>(f: &mut core::fmt::Formatter<'_>, slice: &[T])
+    #[doc = "для T у которого Vec<&T> есть Display trait"]
+    pub fn write_slice_ref<T>(
+        f: &mut core::fmt::Formatter<'_>,
+        slice: &[T],
+        start: usize,
+        end: usize,
+    ) -> fmt::Result
     where
-        T: std::fmt::Display,
+        for<'a> Vec<&'a T>: core::fmt::Display,
     {
+        Ok(write!(
+            f,
+            "{}",
+            slice.iter().skip(start - 1).take(end).collect::<Vec<&T>>()
+        )?)
+    }
+    #[doc = "для T у которого Vec<T> есть Display trait"]
+    pub fn write_slice<T>(
+        f: &mut core::fmt::Formatter<'_>,
+        slice: &[T],
+        start: usize,
+        end: usize,
+    ) -> fmt::Result
+    where
+        Vec<T>: core::fmt::Display,
+        T: core::clone::Clone,
+    {
+        Ok(write!(
+            f,
+            "{}",
+            slice
+                .iter()
+                .skip(start - 1)
+                .take(end)
+                .cloned()
+                .collect::<Vec<T>>()
+        )?)
     }
 
     pub fn print_vec<T>(
@@ -114,6 +148,8 @@ pub mod display_utils {
         }
     }
 }
+
+pub mod debug_trait_utils {}
 
 pub mod debug_and_test_utils {
     use crate::bits_utils::size_bits;
