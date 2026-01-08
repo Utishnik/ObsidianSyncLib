@@ -4,7 +4,7 @@ pub mod display_utils {
     use crate::debug::debug_and_test_utils::set_color_print;
     use crate::debug_println;
     use core::fmt;
-
+    use std::sync::LazyLock;
     pub const DEFAULT_OUTLINE: (char, char) = ('[', ']');
     pub struct OutLineFormatSymbols(char, char);
     pub fn set_scobes_format_syms(l_scobe: char, r_scobe: char) -> OutLineFormatSymbols {
@@ -26,6 +26,35 @@ pub mod display_utils {
         separator_width: usize,
         transfer: usize,
     }
+    static DEFAULT_FORMATER_SLICE_FMT: LazyLock<FormaterSliceFmt<'static, 'static>> =
+        LazyLock::new(|| {
+            let formater_default: FormaterSliceFmt<'_, '_> = FormaterSliceFmt::default();
+            formater_default
+        });
+    pub struct PrintSliceFmt<'sep_lt, 'outln_lt, 'fmtslice_lt> {
+        formater_slice_fmt: &'fmtslice_lt FormaterSliceFmt<'sep_lt, 'outln_lt>,
+        color: Option<debug::debug_and_test_utils::Colors>,
+    }
+
+    impl<'sep_lt, 'outln_lt, 'fmtslice_lt> Default for PrintSliceFmt<'sep_lt, 'outln_lt, 'fmtslice_lt> {
+        fn default() -> Self {
+            Self {
+                formater_slice_fmt: &DEFAULT_FORMATER_SLICE_FMT,
+                color: None,
+            }
+        }
+    }
+
+    impl<'sep_lt, 'outln_lt, 'fmtslice_lt> PrintSliceFmt<'sep_lt, 'outln_lt, 'fmtslice_lt> {
+        fn set(
+            &mut self,
+            formater_slice_fmt: &'fmtslice_lt FormaterSliceFmt<'sep_lt, 'outln_lt>,
+            color: Option<debug::debug_and_test_utils::Colors>,
+        ) {
+            self.formater_slice_fmt = formater_slice_fmt;
+            self.color = color;
+        }
+    }
 
     impl Default for FormaterSliceFmt<'_, '_> {
         fn default() -> Self {
@@ -35,6 +64,21 @@ pub mod display_utils {
                 separator_width: 1,
                 transfer: 0,
             }
+        }
+    }
+
+    impl<'a, 'b> FormaterSliceFmt<'a, 'b> {
+        fn set(
+            &mut self,
+            separator: &'a str,
+            outline: &'b OutLineFormatSymbols,
+            separator_width: usize,
+            transfer: usize,
+        ) {
+            self.separator = separator;
+            self.outline = outline;
+            self.separator_width = separator_width;
+            self.transfer = transfer;
         }
     }
 
@@ -288,7 +332,7 @@ pub mod debug_and_test_utils {
             &self.args
         }
     }
-    //todooo
+
     impl Iterator for ArgsFmt {
         type Item = String;
         fn next(&mut self) -> Option<Self::Item> {
