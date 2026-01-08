@@ -5,24 +5,73 @@ pub mod display_utils {
     use crate::debug_println;
     use core::fmt;
 
-    #[derive(Default)]
-    pub struct ScobesFormatSymbols(char, char);
-    pub fn set_scobes_format_syms(l_scobe: char, r_scobe: char) -> ScobesFormatSymbols {
-        ScobesFormatSymbols(l_scobe, r_scobe)
+    pub const DEFAULT_OUTLINE: (char, char) = ('[', ']');
+    pub struct OutLineFormatSymbols(char, char);
+    pub fn set_scobes_format_syms(l_scobe: char, r_scobe: char) -> OutLineFormatSymbols {
+        OutLineFormatSymbols(l_scobe, r_scobe)
+    }
+    impl Default for OutLineFormatSymbols {
+        fn default() -> Self {
+            Self(DEFAULT_OUTLINE.0, DEFAULT_OUTLINE.1)
+        }
+    }
+    #[doc = "separator -> при записи как разделять элементы,
+    outline -> как обоводить элементы(OutLineFormatSymbols),
+    separator_width -> через сколько добавлять separator
+    transfer -> через сколько переносы (writeln)
+    lifetime separator и separator различны"]
+    pub struct FormaterSliceFmt<'a, 'b> {
+        separator: &'a str,
+        outline: &'b OutLineFormatSymbols,
+        separator_width: usize,
+        transfer: usize,
     }
 
-    pub fn display_vec<T>(vec: &[T], separator: &str, scobes: Option<ScobesFormatSymbols>) -> String
+    impl Default for FormaterSliceFmt<'_, '_> {
+        fn default() -> Self {
+            Self {
+                separator: " ,",
+                outline: &OutLineFormatSymbols(DEFAULT_OUTLINE.0, DEFAULT_OUTLINE.1),
+                separator_width: 1,
+                transfer: 0,
+            }
+        }
+    }
+
+    pub fn display_vec<T>(
+        vec: &[T],
+        separator: &str,
+        scobes: Option<OutLineFormatSymbols>,
+    ) -> String
     where
-        T: std::fmt::Display,
+        T: core::fmt::Display,
     {
         let items: Vec<String> = vec.iter().map(|x| x.to_string()).collect();
         if scobes.is_none() {
             format!("{}", items.join(separator))
         } else {
-            let scobes_unwrap: ScobesFormatSymbols = unsafe { scobes.unwrap_unchecked() };
+            let scobes_unwrap: OutLineFormatSymbols = unsafe { scobes.unwrap_unchecked() };
             let l_scobe: char = scobes_unwrap.0;
             let r_scobe: char = scobes_unwrap.1;
             format!("{l_scobe}{}{r_scobe}", items.join(separator))
+        }
+    }
+
+    #[doc = "нужно для \"правила сироты\" и для правил хранения правил 
+    форматирования когда если T реализует trait Display мы реализуем
+    для Vec<T> этот trait"]
+    pub struct DisplayableVec<'a, T> {
+        pub vec: Vec<T>,
+        pub separator: &'a str,
+    }
+
+    #[doc = "если T реализует trait Display мы реализуем для Vec<T> этот trait"]
+    impl<T> core::fmt::Display for DisplayableVec<'_, T>
+    where
+        T: core::fmt::Display,
+    {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> core::fmt::Result {
+            Ok(write!(f, "a")?) //загулшка
         }
     }
 
@@ -68,7 +117,7 @@ pub mod display_utils {
     pub fn print_vec<T>(
         vec: &[T],
         separator: &str,
-        scobes: Option<ScobesFormatSymbols>,
+        scobes: Option<OutLineFormatSymbols>,
         color: Option<debug::debug_and_test_utils::Colors>,
     ) where
         T: std::fmt::Display,
@@ -88,7 +137,7 @@ pub mod display_utils {
     pub fn display_vec_range<T>(
         vec: &[T],
         separator: &str,
-        scobes: Option<ScobesFormatSymbols>,
+        scobes: Option<OutLineFormatSymbols>,
         start: usize,
         end: usize,
     ) -> String
@@ -108,7 +157,7 @@ pub mod display_utils {
         if scobes.is_none() {
             format!("{}", items.join(separator))
         } else {
-            let scobes_unwrap: ScobesFormatSymbols = unsafe { scobes.unwrap_unchecked() };
+            let scobes_unwrap: OutLineFormatSymbols = unsafe { scobes.unwrap_unchecked() };
             let l_scobe: char = scobes_unwrap.0;
             let r_scobe: char = scobes_unwrap.1;
             if start != 0 && end != vec_len {
@@ -128,7 +177,7 @@ pub mod display_utils {
     pub fn print_vec_range<T>(
         vec: &[T],
         separator: &str,
-        scobes: Option<ScobesFormatSymbols>,
+        scobes: Option<OutLineFormatSymbols>,
         start: usize,
         end: usize,
         color: Option<debug::debug_and_test_utils::Colors>,
@@ -239,18 +288,18 @@ pub mod debug_and_test_utils {
             &self.args
         }
     }
-
+    //todooo
     impl Iterator for ArgsFmt {
         type Item = String;
         fn next(&mut self) -> Option<Self::Item> {
             let len: usize = self.get_len();
-            let mut i: usize = len;
-            'out: while i > 0 {
+            let mut i: usize = 0;
+            'out: while i < len {
                 let ret: Option<&String> = self.get_args_ref().get(i).clone();
                 if ret.is_none() {
-                    break 'out;
-                } else {
                     i += 1;
+                    continue 'out;
+                } else {
                     return Some(ret.map_or("zxc", |v| v).to_string());
                 }
             }
