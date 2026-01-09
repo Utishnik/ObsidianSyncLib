@@ -211,7 +211,9 @@ impl fmt::Debug for Utf8Sequence {
         match *self {
             One(ref r) => write!(f, "{r:?}"),
             Two(ref r) => {
-                let slice: Utf8RangeSlice = Utf8RangeSlice(r);
+                let r_vec: Vec<Utf8Range> = r.to_vec();
+                let r_ref_vec: Vec<&Utf8Range> = r_vec.iter().collect();
+                let slice: Utf8RangeVec<'_> = Utf8RangeVec(r_ref_vec);
                 //write_slice_ref(f, slice, 0, 2) todo для arrayvec
                 write!(f, "{:?}{:?}", r[0], r[1])
             }
@@ -254,8 +256,8 @@ impl fmt::Debug for Utf8Range {
 }
 
 pub struct Utf8RangeSlice<'a>(&'a [Utf8Range]);
-pub struct Utf8RangeVec<'a>(Vec<&'a Utf8RangeVec<'a>>);
-pub struct Utf8RangeVecOwned<'a>(Vec<Utf8RangeVec<'a>>);
+pub struct Utf8RangeVec<'a>(Vec<&'a Utf8Range>);
+pub struct Utf8RangeVecOwned(Vec<Utf8Range>);
 //TODO для ArrayVec
 //todo debug для Vec<Utf8Range>
 impl fmt::Debug for Utf8RangeSlice<'_> {
@@ -278,7 +280,7 @@ impl fmt::Debug for Utf8RangeVec<'_> {
     }
 }
 
-impl fmt::Debug for Utf8RangeVecOwned<'_> {
+impl fmt::Debug for Utf8RangeVecOwned {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for item in self.0.iter() {
             let format: alloc::string::String = format!("{item:?}");
