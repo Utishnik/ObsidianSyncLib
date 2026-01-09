@@ -4,6 +4,7 @@ pub mod display_utils {
     use crate::debug::debug_and_test_utils::set_color_print;
     use crate::debug_println;
     use core::fmt;
+    use std::fs;
     use std::sync::LazyLock;
     pub const DEFAULT_OUTLINE: (char, char) = ('[', ']');
     pub struct OutLineFormatSymbols(char, char);
@@ -183,8 +184,7 @@ pub mod display_utils {
     #[must_use]
     pub fn display_vec_range<T>(
         vec: &[T],
-        separator: &str,
-        scobes: Option<OutLineFormatSymbols>,
+        fsf: &FormaterSliceFmt,
         start: usize,
         end: usize,
     ) -> String
@@ -201,41 +201,45 @@ pub mod display_utils {
             .map(|x| x.to_string())
             .collect();
         let vec_len: usize = vec.len();
-        if scobes.is_none() {
-            format!("{}", items.join(separator))
+        if fsf.outline.is_none() {
+            format!("{}", items.join(fsf.separator))
         } else {
-            let scobes_unwrap: OutLineFormatSymbols = unsafe { scobes.unwrap_unchecked() };
+            let scobes_unwrap: &OutLineFormatSymbols = unsafe { fsf.outline.unwrap_unchecked() };
             let l_scobe: char = scobes_unwrap.0;
             let r_scobe: char = scobes_unwrap.1;
             if start != 0 && end != vec_len {
-                format!("..{l_scobe}{}{r_scobe}..", items.join(separator))
+                format!("..{l_scobe}{}{r_scobe}..", items.join(fsf.separator))
             } else if start == 0 {
-                format!("{l_scobe}{}{r_scobe}..", items.join(separator))
+                format!("{l_scobe}{}{r_scobe}..", items.join(fsf.separator))
             } else if start != 0 && end == vec_len {
-                format!("..{l_scobe}{}{r_scobe}", items.join(separator))
+                format!("..{l_scobe}{}{r_scobe}", items.join(fsf.separator))
             } else {
                 set_color_print(debug::debug_and_test_utils::Colors::Blue);
                 debug_println!("display_vec_range -> full range");
                 reset_color_print();
-                format!("{l_scobe}{}{r_scobe}", items.join(separator))
+                format!("{l_scobe}{}{r_scobe}", items.join(fsf.separator))
             }
         }
     }
     pub fn print_vec_range<T>(
         vec: &[T],
         separator: &str,
-        scobes: Option<OutLineFormatSymbols>,
+        outline: Option<OutLineFormatSymbols>,
         start: usize,
+        separator_width: usize,
+        transfer: usize,
         end: usize,
         color: Option<debug::debug_and_test_utils::Colors>,
     ) where
         T: std::fmt::Display,
     {
+        let mut fsf: FormaterSliceFmt = FormaterSliceFmt::default();
+        fsf.set(separator, outline.as_ref(), separator_width, transfer);
         if color.is_none() {
-            let display: String = display_vec_range(vec, separator, scobes, start, end);
+            let display: String = display_vec_range(vec, &fsf, start, end);
             debug_println!("{}", display);
         } else {
-            let display: String = display_vec_range(vec, separator, scobes, start, end);
+            let display: String = display_vec_range(vec, &fsf, start, end);
             let unwrap_color: debug::debug_and_test_utils::Colors =
                 unsafe { color.unwrap_unchecked() };
             set_color_print(unwrap_color);
