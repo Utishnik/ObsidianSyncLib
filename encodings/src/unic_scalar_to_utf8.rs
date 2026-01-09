@@ -81,8 +81,11 @@ I also got the idea from
 which uses it for executing automata on their term index.
 */
 
+use alloc::fmt::format;
+use alloc::format;
 use alloc::{vec, vec::Vec};
 use core::{char, fmt, iter::FusedIterator, slice};
+use obsidian_sync_lib::debug;
 use obsidian_sync_lib::debug::display_utils::write_slice_ref;
 use obsidian_sync_lib::debug::display_utils::{self, write_slice};
 const MAX_UTF8_BYTES: usize = 4;
@@ -203,6 +206,9 @@ impl<'a> IntoIterator for &'a Utf8Sequence {
 impl fmt::Debug for Utf8Sequence {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use self::Utf8Sequence::*;
+        let fsf: display_utils::FormaterSliceFmt<'_, '_> =
+            debug::display_utils::FormaterSliceFmt::default();
+        
         match *self {
             One(ref r) => write!(f, "{r:?}"),
             Two(ref r) => write!(f, "{:?}{:?}", r[0], r[1]),
@@ -243,7 +249,18 @@ impl fmt::Debug for Utf8Range {
         }
     }
 }
+
+pub struct Utf8RangeSlice<'a>(&'a [Utf8Range]);
 //todo debug для Vec<Utf8Range>
+impl fmt::Debug for Utf8RangeSlice<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for item in self.0 {
+            let format: alloc::string::String = format!("{item:?}");
+            writeln!(f, "{format}")?
+        }
+        Ok(())
+    }
+}
 
 /// An iterator over ranges of matching UTF-8 byte sequences.
 ///

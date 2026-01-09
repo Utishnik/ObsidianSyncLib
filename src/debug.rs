@@ -117,6 +117,8 @@ pub mod display_utils {
     }
 
     #[doc = "для T у которого Vec<&T> есть Display trait"]
+    //todo сделать для ArrayVec
+    #[must_use]
     pub fn write_slice_ref<T>(
         f: &mut core::fmt::Formatter<'_>,
         slice: &[T],
