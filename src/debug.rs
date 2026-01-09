@@ -794,7 +794,6 @@ pub mod debug_and_test_utils {
     }
 
     //todo get_test_slice
-
     pub fn get_last_test() -> Option<Test> {
         let tests: &Arc<Mutex<Vec<Test>>> = get_tests();
         let guard: std::sync::MutexGuard<'_, Vec<Test>> = tests.lock().unwrap();
@@ -964,6 +963,7 @@ pub mod debug_and_test_utils {
     //todo: pub fn dump_list_print
 
     //ебаный раст засирает assert_eq поэтому пишем свой
+    //todo добавить еще типы тестов типо not_assert и assert
     #[macro_export]
     macro_rules! test_assert {
     ($left:expr,$right:expr) => {
@@ -1014,6 +1014,68 @@ pub mod debug_and_test_utils {
                     println!("{}══════════════════════════════════════════════════════════{}", GREEN, RESET);
                     println!("{} ✔ ТЕСТ ПРОЙДЕН{}", GREEN, RESET);
                     println!("{} Ожидалось: {:?}{}", YELLOW, right_val, RESET);
+                    println!("{} Получено:  {:?}{}", GREEN, left_val, RESET);
+                    println!("{}══════════════════════════════════════════════════════════{}\n", GREEN, RESET);
+                    result_test=true;
+                }
+                test.result=result_test;
+                test.typetest=get_type_test();
+                add_test(test);
+            }
+        }
+    };
+    }
+    //todo добавить еще типы тестов типо not_assert и assert
+    #[macro_export]
+    macro_rules! test_not_assert {
+    ($left:expr,$right:expr) => {
+        match (&$left, &$right)
+        {
+            (left_val, right_val) =>
+            {
+                const RED: &str = "\x1b[31m";
+                const GREEN: &str = "\x1b[32m";
+                const YELLOW: &str = "\x1b[33m";
+                const RESET: &str = "\x1b[0m";
+                let mut result_test: bool = false;
+                use $crate::debug::debug_and_test_utils::Test;
+                use $crate::debug::debug_and_test_utils::get_last_test;
+                use $crate::debug::debug_and_test_utils::get_type_test;
+                use $crate::debug::debug_and_test_utils::add_test;
+                use std::sync::atomic::Ordering;
+                //$crate::debug::* может так лучше?
+                let last_test_option: Option<Test> = get_last_test();
+                let mut test: Test;
+                match last_test_option
+                {
+                    None =>
+                    {
+                        test = Test {result: false, number: 1,typetest: 0};
+                    },
+                    Some(x) =>
+                    {
+                        test=x.clone();
+                        test.number=x.number+1;
+                    }
+                }
+
+                if *left_val == *right_val
+                {
+                    println!();
+                    println!("{}══════════════════════════════════════════════════════════{}", RED, RESET);
+                    println!("{} ✗ ТЕСТ НЕ ПРОЙДЕН{}", RED, RESET);
+                    println!("{} Результат не должен был равен: {:?}{}", YELLOW, right_val, RESET);
+                    println!("{} Получено:  {:?}{}", RED, left_val, RESET);
+                    println!("{}══════════════════════════════════════════════════════════{}\n", RED, RESET);
+                    result_test=false;
+                    //todo чекнуть почему при eprintln! может ломматься вывод
+                }
+                else
+                {
+                    println!();
+                    println!("{}══════════════════════════════════════════════════════════{}", GREEN, RESET);
+                    println!("{} ✔ ТЕСТ ПРОЙДЕН{}", GREEN, RESET);
+                    println!("{} Результат не должен был равен: {:?}{}", YELLOW, right_val, RESET);
                     println!("{} Получено:  {:?}{}", GREEN, left_val, RESET);
                     println!("{}══════════════════════════════════════════════════════════{}\n", GREEN, RESET);
                     result_test=true;
