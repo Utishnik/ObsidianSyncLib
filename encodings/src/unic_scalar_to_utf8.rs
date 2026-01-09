@@ -215,6 +215,7 @@ impl fmt::Debug for Utf8Sequence {
                 let r_ref_vec: Vec<&Utf8Range> = r_vec.iter().collect();
                 let slice: Utf8RangeVec<'_> = Utf8RangeVec(r_ref_vec);
                 //write_slice_ref(f, slice, 0, 2) todo для arrayvec
+                //write_slice_ref(f, slice, 0, 2);//todo debug версия
                 write!(f, "{:?}{:?}", r[0], r[1])
             }
             Three(ref r) => write!(f, "{:?}{:?}{:?}", r[0], r[1], r[2]),

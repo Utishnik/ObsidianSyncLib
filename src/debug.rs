@@ -251,7 +251,50 @@ pub mod display_utils {
     }
 }
 
-pub mod debug_trait_utils {}
+pub mod debug_trait_utils {
+    use core::fmt;
+    #[doc = "для T у которого Vec<T> есть Debug trait 
+    отличие от аналога в debug_utils в том что он выполняет 
+    туже задачу но для debug trait"]
+    #[must_use]
+    pub fn write_slice<T>(
+        f: &mut core::fmt::Formatter<'_>,
+        slice: &[T],
+        start: usize,
+        end: usize,
+    ) -> fmt::Result
+    where
+        Vec<T>: core::fmt::Debug,
+        T: core::clone::Clone,
+    {
+        let slice_ranging: Vec<T> = slice
+            .iter()
+            .skip(start - 1)
+            .take(end)
+            .cloned()
+            .collect::<Vec<T>>();
+        let formater: String = format!("{slice_ranging:?}",);
+        Ok(write!(f, "{}", formater)?)
+    }
+    #[doc = "для T у которого Vec<&T> есть Debug trait 
+    отличие от аналога в debug_utils в том что он выполняет 
+    туже задачу но для debug trait"]
+    #[must_use]
+    pub fn write_slice_ref<T>(
+        f: &mut core::fmt::Formatter<'_>,
+        slice: &[T],
+        start: usize,
+        end: usize,
+    ) -> fmt::Result
+    where
+        for<'a> Vec<&'a T>: core::fmt::Debug,
+        T: core::clone::Clone,
+    {
+        let slice_ranging: Vec<&T> = slice.iter().skip(start - 1).take(end).collect::<Vec<&T>>();
+        let formater: String = format!("{slice_ranging:?}",);
+        Ok(write!(f, "{}", formater)?)
+    }
+}
 
 pub mod debug_and_test_utils {
     use crate::bits_utils::size_bits;
