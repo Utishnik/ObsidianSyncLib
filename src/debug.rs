@@ -22,7 +22,7 @@ pub mod display_utils {
     lifetime separator и separator различны"]
     pub struct FormaterSliceFmt<'a, 'b> {
         separator: &'a str,
-        outline: &'b OutLineFormatSymbols,
+        outline: Option<&'b OutLineFormatSymbols>,
         separator_width: usize,
         transfer: usize,
     }
@@ -60,7 +60,7 @@ pub mod display_utils {
         fn default() -> Self {
             Self {
                 separator: " ,",
-                outline: &OutLineFormatSymbols(DEFAULT_OUTLINE.0, DEFAULT_OUTLINE.1),
+                outline: Some(&OutLineFormatSymbols(DEFAULT_OUTLINE.0, DEFAULT_OUTLINE.1)),
                 separator_width: 1,
                 transfer: 0,
             }
@@ -71,7 +71,7 @@ pub mod display_utils {
         fn set(
             &mut self,
             separator: &'a str,
-            outline: &'b OutLineFormatSymbols,
+            outline: Option<&'b OutLineFormatSymbols>,
             separator_width: usize,
             transfer: usize,
         ) {
@@ -81,23 +81,19 @@ pub mod display_utils {
             self.transfer = transfer;
         }
     }
-
-    pub fn display_vec<T>(
-        vec: &[T],
-        separator: &str,
-        scobes: Option<OutLineFormatSymbols>,
-    ) -> String
+    #[must_use]
+    pub fn display_vec<T>(vec: &[T], fsf: &FormaterSliceFmt<'_, '_>) -> String
     where
         T: core::fmt::Display,
     {
         let items: Vec<String> = vec.iter().map(|x| x.to_string()).collect();
-        if scobes.is_none() {
-            format!("{}", items.join(separator))
+        if fsf.outline.is_none() {
+            format!("{}", items.join(fsf.separator))
         } else {
-            let scobes_unwrap: OutLineFormatSymbols = unsafe { scobes.unwrap_unchecked() };
+            let scobes_unwrap: &OutLineFormatSymbols = unsafe { fsf.outline.unwrap_unchecked() };
             let l_scobe: char = scobes_unwrap.0;
             let r_scobe: char = scobes_unwrap.1;
-            format!("{l_scobe}{}{r_scobe}", items.join(separator))
+            format!("{l_scobe}{}{r_scobe}", items.join(fsf.separator))
         }
     }
 
@@ -136,6 +132,7 @@ pub mod display_utils {
         )?)
     }
     #[doc = "для T у которого Vec<T> есть Display trait"]
+    #[must_use]
     pub fn write_slice<T>(
         f: &mut core::fmt::Formatter<'_>,
         slice: &[T],
@@ -157,20 +154,25 @@ pub mod display_utils {
                 .collect::<Vec<T>>()
         )?)
     }
-
+    #[doc = "почему в dispay_vec нужно FormaterSliceFmt а здесь передовать просто параметры которыми потом заполнится 
+    он, ну так банально удобнее ну нужно если тебе просто вывести нужно значение каждый раз создавать а просто ввел нужное"]
     pub fn print_vec<T>(
         vec: &[T],
         separator: &str,
-        scobes: Option<OutLineFormatSymbols>,
+        outline: Option<OutLineFormatSymbols>,
         color: Option<debug::debug_and_test_utils::Colors>,
+        separator_width: usize,
+        transfer: usize,
     ) where
         T: std::fmt::Display,
     {
+        let mut fsf: FormaterSliceFmt = FormaterSliceFmt::default();
+        fsf.set(separator, outline.as_ref(), separator_width, transfer);
         if color.is_none() {
-            let display: String = display_vec(vec, separator, scobes);
+            let display: String = display_vec(vec, &fsf);
             debug_println!("{}", display);
         } else {
-            let display: String = display_vec(vec, separator, scobes);
+            let display: String = display_vec(vec, &fsf);
             let unwrap_color: debug::debug_and_test_utils::Colors =
                 unsafe { color.unwrap_unchecked() };
             set_color_print(unwrap_color);
@@ -178,6 +180,7 @@ pub mod display_utils {
             reset_color_print();
         }
     }
+    #[must_use]
     pub fn display_vec_range<T>(
         vec: &[T],
         separator: &str,

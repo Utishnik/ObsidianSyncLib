@@ -272,9 +272,14 @@ pub fn take_var_slices(slices: &[&Slice]) -> bool {
     if !take_index_valid_slice_result_ret(slices) {
         #[cfg(debug_assertions)]
         {
+            use crate::debug::display_utils::FormaterSliceFmt;
+
             debug_println!(
                 "take_var_slices !take_index_valid_slice_result_ret vec res: \n{}",
-                display_vec(&take_index_valid_slice_all_ret(slices), " ,", None)
+                display_vec(
+                    &take_index_valid_slice_all_ret(slices),
+                    &FormaterSliceFmt::default()
+                )
             )
         }
         return false;

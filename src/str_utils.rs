@@ -1,7 +1,7 @@
 use std::char;
 
 use super::debug::display_utils::display_vec;
-use crate::debug_eprintln_fileinfo;
+use crate::{debug::display_utils::FormaterSliceFmt, debug_eprintln_fileinfo, debug_println};
 
 #[derive(Clone)]
 pub struct InsertChar {
@@ -35,7 +35,7 @@ pub fn safe_remove_chars(str: &str, char_indices: &[usize]) -> String {
         .collect();
     debug_eprintln_fileinfo!(
         "indexes > str.len : {}",
-        display_vec(&incorrect_idx, " ,", None)
+        display_vec(&incorrect_idx, &FormaterSliceFmt::default())
     );
     str.char_indices()
         .enumerate()
@@ -86,7 +86,16 @@ pub fn safe_insert_and_remove_chars(
         chars_remove_correct.push(shift);
         i += 1;
     }
-    display_vec(&chars_remove_correct, " ,", None);
+    #[cfg(debug_assertions)]
+    {
+        use crate::debug_println_fileinfo;
+
+        let fmt_vec: String = display_vec(&chars_remove_correct, &FormaterSliceFmt::default());
+        if fmt_vec.is_empty() {
+            debug_println!("safe_insert_and_remove_chars is empty");
+        }
+        debug_println_fileinfo!("safe_insert_and_remove_chars fmt_vec {}", fmt_vec);
+    }
     let insert_res: String = safe_insert_chars(str, chars_insert);
     debug_eprintln_fileinfo!("insert str: {}", insert_res);
     for item in chars_remove.iter_mut().enumerate() {
