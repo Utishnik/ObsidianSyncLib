@@ -15,51 +15,33 @@ pub enum TypedValue {
     I32(i32),
     I64(i64),
     F64(f64),
-    USIZE(usize),
+    Usize(usize),
     String(String),
     Bool(bool),
     // другие типы...
 }
 
+macro_rules! as_types_val {
+    ($name_fn:ident,$enum_type:path,$ret_type:ty) => {
+        pub fn $name_fn(&self) -> Option<$ret_type> {
+            match self {
+                $enum_type(v) => Some(*v),
+                _ => None,
+            }
+        }
+    };
+}
+
 impl TypedValue {
-    pub fn as_i32(&self) -> Option<i32> {
-        match self {
-            TypedValue::I32(v) => Some(*v),
-            _ => None,
-        }
-    }
-
-    pub fn as_i64(&self) -> Option<i64> {
-        match self {
-            TypedValue::I64(v) => Some(*v),
-            _ => None,
-        }
-    }
-
-    pub fn as_usize(&self) -> Option<usize> {
-        match self {
-            TypedValue::USIZE(v) => Some(*v),
-            _ => None,
-        }
-    }
-
-    pub fn f64(&self) -> Option<f64> {
-        match self {
-            TypedValue::F64(v) => Some(*v),
-            _ => None,
-        }
-    }
+    as_types_val!(as_i32, TypedValue::I32, i32);
+    as_types_val!(as_i64, TypedValue::I64, i64);
+    as_types_val!(as_usize, TypedValue::Usize, usize);
+    as_types_val!(as_f64, TypedValue::F64, f64);
+    as_types_val!(as_bool, TypedValue::Bool, bool);
 
     pub fn as_string(&self) -> Option<String> {
         match self {
             TypedValue::String(v) => Some(v.clone()),
-            _ => None,
-        }
-    }
-
-    pub fn as_bool(&self) -> Option<bool> {
-        match self {
-            TypedValue::Bool(v) => Some(*v),
             _ => None,
         }
     }
