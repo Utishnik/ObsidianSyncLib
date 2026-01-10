@@ -5,9 +5,10 @@ use crate::debug_eprintln_fileinfo;
 use std::any::Any;
 use std::any::TypeId;
 
+#[doc = "type_id это id value"]
 pub struct TypedResult {
     value: Box<dyn Any>,
-    type_id: TypeId,
+    type_id: TypeId, 
     type_name: String,
 }
 
@@ -83,10 +84,17 @@ impl TypedResult {
 
     fn downcast_ref<T: 'static>(&self) -> Option<&T> {
         if self.type_id == TypeId::of::<T>() {
+            //когда станет стабильной TodoSome(self.value.downcast_ref_unchecked::<T>())
             self.value.downcast_ref::<T>()
         } else {
             None
         }
+    }
+
+    pub fn obsydian_downcast_ref_unchecked<T>(value: T) -> &T
+    where T: Any
+    {
+        
     }
 
     fn downcast<T: 'static>(self) -> Result<T, Self> {
