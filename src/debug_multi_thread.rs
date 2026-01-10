@@ -8,7 +8,7 @@ use std::any::TypeId;
 #[doc = "type_id это id value"]
 pub struct TypedResult {
     value: Box<dyn Any>,
-    type_id: TypeId, 
+    type_id: TypeId,
     type_name: String,
 }
 
@@ -65,6 +65,12 @@ impl TypedResult {
     }
 }
 
+pub unsafe fn obsydian_downcast_ref_unchecked<'a, T: Any>(value: &'a (dyn Any + 'static)) -> &'a T {
+    debug_assert!(value.is::<T>());
+    // SAFETY: caller guarantees that T is the correct type
+    unsafe { &*(value as *const dyn Any as *const T) }
+}
+
 impl TypedResult {
     pub fn new<T: 'static + std::fmt::Debug>(value: T) -> Self {
         Self {
@@ -85,16 +91,11 @@ impl TypedResult {
     fn downcast_ref<T: 'static>(&self) -> Option<&T> {
         if self.type_id == TypeId::of::<T>() {
             //когда станет стабильной TodoSome(self.value.downcast_ref_unchecked::<T>())
-            self.value.downcast_ref::<T>()
+            //self.value.downcast_ref::<T>()
+            unsafe { *obsydian_downcast_ref_unchecked(self.value.as_ref()) }
         } else {
             None
         }
-    }
-
-    pub fn obsydian_downcast_ref_unchecked<T>(value: T) -> &T
-    where T: Any
-    {
-        
     }
 
     fn downcast<T: 'static>(self) -> Result<T, Self> {
