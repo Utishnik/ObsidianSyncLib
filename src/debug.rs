@@ -252,6 +252,9 @@ pub mod display_utils {
 }
 
 pub mod debug_trait_utils {
+    use crate::debug::debug_and_test_utils::reset_color_print;
+    use crate::debug::debug_and_test_utils::set_color_print;
+    use crate::debug_println;
     use core::fmt;
 
     use crate::debug;
@@ -326,6 +329,52 @@ pub mod debug_trait_utils {
             let l_scobe: char = scobes_unwrap.0;
             let r_scobe: char = scobes_unwrap.1;
             result = format!("{l_scobe}{}{r_scobe}", str_items.join(fsf.separator));
+        }
+
+        result
+    }
+    pub fn display_vec_range<T>(
+        vec: &[T],
+        fsf: &debug::display_utils::FormaterSliceFmt<'_, '_>,
+        start: usize,
+        end: usize,
+    ) -> String
+    where
+        T: core::fmt::Debug,
+    {
+        let result: String;
+        let items: Vec<&T> = vec.iter().skip(start).take(end).collect::<Vec<&T>>();
+        let items_count: usize = items.len();
+        let mut str_items: Vec<String> = Vec::with_capacity(items_count);
+        for i in items.iter().enumerate() {
+            let item: (usize, &&T) = i;
+            if i.0 < items_count {
+                let t_item: &&T = item.1;
+                let formater: String = format!("{t_item:?}",);
+                str_items[i.0] = formater;
+            } else {
+                break;
+            }
+        }
+        if fsf.outline.is_none() {
+            result = format!("{}", str_items.join(fsf.separator));
+        } else {
+            let scobes_unwrap: &debug::display_utils::OutLineFormatSymbols =
+                unsafe { fsf.outline.unwrap_unchecked() };
+            let l_scobe: char = scobes_unwrap.0;
+            let r_scobe: char = scobes_unwrap.1;
+            if start != 0 && end != items_count {
+                result = format!("..{l_scobe}{}{r_scobe}..", str_items.join(fsf.separator));
+            } else if start == 0 {
+                result = format!("{l_scobe}{}{r_scobe}..", str_items.join(fsf.separator));
+            } else if start != 0 && end == items_count {
+                result = format!("..{l_scobe}{}{r_scobe}", str_items.join(fsf.separator));
+            } else {
+                set_color_print(debug::debug_and_test_utils::Colors::Blue);
+                debug_println!("display_vec_range -> full range");
+                reset_color_print();
+                result = format!("{l_scobe}{}{r_scobe}", str_items.join(fsf.separator));
+            }
         }
 
         result
