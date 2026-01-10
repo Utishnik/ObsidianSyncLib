@@ -210,9 +210,9 @@ impl fmt::Debug for Utf8Sequence {
             debug::display_utils::FormaterSliceFmt::default();
         match *self {
             One(ref r) => write!(f, "{r:?}"),
-            Two(ref r) => write_slice_ref(f,r,0,1),
-            Three(ref r) => write_slice_ref(f,r,0,2),
-            Four(ref r) => write_slice_ref(f,r,0,3),
+            Two(ref r) => write_slice_ref(f, r, 0, 1),
+            Three(ref r) => write_slice_ref(f, r, 0, 2),
+            Four(ref r) => write_slice_ref(f, r, 0, 3),
         }
     }
 }

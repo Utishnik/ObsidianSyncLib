@@ -7,7 +7,7 @@ pub mod display_utils {
     use std::fs;
     use std::sync::LazyLock;
     pub const DEFAULT_OUTLINE: (char, char) = ('[', ']');
-    pub struct OutLineFormatSymbols(char, char);
+    pub struct OutLineFormatSymbols(pub char, pub char);
     pub fn set_scobes_format_syms(l_scobe: char, r_scobe: char) -> OutLineFormatSymbols {
         OutLineFormatSymbols(l_scobe, r_scobe)
     }
@@ -22,10 +22,10 @@ pub mod display_utils {
     transfer -> через сколько переносы (writeln)
     lifetime separator и separator различны"]
     pub struct FormaterSliceFmt<'a, 'b> {
-        separator: &'a str,
-        outline: Option<&'b OutLineFormatSymbols>,
-        separator_width: usize,
-        transfer: usize,
+        pub separator: &'a str,
+        pub outline: Option<&'b OutLineFormatSymbols>,
+        pub separator_width: usize,
+        pub transfer: usize,
     }
     static DEFAULT_FORMATER_SLICE_FMT: LazyLock<FormaterSliceFmt<'static, 'static>> =
         LazyLock::new(|| {
@@ -253,6 +253,8 @@ pub mod display_utils {
 
 pub mod debug_trait_utils {
     use core::fmt;
+
+    use crate::debug;
     #[doc = "для T у которого Vec<T> есть Debug trait 
     отличие от аналога в debug_utils в том что он выполняет 
     туже задачу но для debug trait"]
@@ -293,6 +295,40 @@ pub mod debug_trait_utils {
         let slice_ranging: Vec<&T> = slice.iter().skip(start).take(end).collect::<Vec<&T>>();
         let formater: String = format!("{slice_ranging:?}",);
         Ok(write!(f, "{}", formater)?)
+    }
+
+    #[doc = "аналогичен display_vec из debug::display_utils но он для 
+    типов реализующих trait Debug"]
+    #[must_use]
+    pub fn display_vec<T>(vec: &[T], fsf: &debug::display_utils::FormaterSliceFmt<'_, '_>) -> String
+    where
+        T: core::fmt::Debug,
+    {
+        let result: String;
+        let items: Vec<&T> = vec.iter().collect::<Vec<&T>>();
+        let items_count: usize = items.len();
+        let mut str_items: Vec<String> = Vec::with_capacity(items_count);
+        for i in items.iter().enumerate() {
+            let item: (usize, &&T) = i;
+            if i.0 < items_count {
+                let t_item: &&T = item.1;
+                let formater: String = format!("{t_item:?}",);
+                str_items[i.0] = formater;
+            } else {
+                break;
+            }
+        }
+        if fsf.outline.is_none() {
+            result = format!("{}", str_items.join(fsf.separator));
+        } else {
+            let scobes_unwrap: &debug::display_utils::OutLineFormatSymbols =
+                unsafe { fsf.outline.unwrap_unchecked() };
+            let l_scobe: char = scobes_unwrap.0;
+            let r_scobe: char = scobes_unwrap.1;
+            result = format!("{l_scobe}{}{r_scobe}", str_items.join(fsf.separator));
+        }
+
+        result
     }
 }
 
