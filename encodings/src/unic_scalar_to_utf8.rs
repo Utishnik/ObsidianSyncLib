@@ -86,7 +86,7 @@ use alloc::format;
 use alloc::{vec, vec::Vec};
 use core::{char, fmt, iter::FusedIterator, slice};
 use obsidian_sync_lib::debug;
-use obsidian_sync_lib::debug::display_utils::write_slice_ref;
+use obsidian_sync_lib::debug::debug_trait_utils::write_slice_ref;
 use obsidian_sync_lib::debug::display_utils::{self, write_slice};
 const MAX_UTF8_BYTES: usize = 4;
 
@@ -210,18 +210,9 @@ impl fmt::Debug for Utf8Sequence {
             debug::display_utils::FormaterSliceFmt::default();
         match *self {
             One(ref r) => write!(f, "{r:?}"),
-            Two(ref r) => {
-                let r_vec: Vec<Utf8Range> = r.to_vec();
-                let r_ref_vec: Vec<&Utf8Range> = r_vec.iter().collect();
-                let slice: Utf8RangeVec<'_> = Utf8RangeVec(r_ref_vec);
-                //write_slice_ref(f, slice, 0, 2) todo для arrayvec
-                //write_slice_ref(f, slice, 0, 2);//todo debug версия
-                write!(f, "{:?}{:?}", r[0], r[1])
-            }
-            Three(ref r) => write!(f, "{:?}{:?}{:?}", r[0], r[1], r[2]),
-            Four(ref r) => {
-                write!(f, "{:?}{:?}{:?}{:?}", r[0], r[1], r[2], r[3]) //todo fmt array
-            }
+            Two(ref r) => write_slice_ref(f,r,0,1),
+            Three(ref r) => write_slice_ref(f,r,0,2),
+            Four(ref r) => write_slice_ref(f,r,0,3),
         }
     }
 }

@@ -151,7 +151,7 @@ pub mod display_utils {
             "{}",
             slice
                 .iter()
-                .skip(start - 1)
+                .skip(start)
                 .take(end)
                 .cloned()
                 .collect::<Vec<T>>()
@@ -269,7 +269,7 @@ pub mod debug_trait_utils {
     {
         let slice_ranging: Vec<T> = slice
             .iter()
-            .skip(start - 1)
+            .skip(start)
             .take(end)
             .cloned()
             .collect::<Vec<T>>();
@@ -290,7 +290,7 @@ pub mod debug_trait_utils {
         for<'a> Vec<&'a T>: core::fmt::Debug,
         T: core::clone::Clone,
     {
-        let slice_ranging: Vec<&T> = slice.iter().skip(start - 1).take(end).collect::<Vec<&T>>();
+        let slice_ranging: Vec<&T> = slice.iter().skip(start).take(end).collect::<Vec<&T>>();
         let formater: String = format!("{slice_ranging:?}",);
         Ok(write!(f, "{}", formater)?)
     }

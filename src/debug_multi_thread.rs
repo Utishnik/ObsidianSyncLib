@@ -91,7 +91,6 @@ impl TypedResult {
     fn downcast_ref<T: 'static>(&self) -> Option<&T> {
         if self.type_id == TypeId::of::<T>() {
             //когда станет стабильной TodoSome(self.value.downcast_ref_unchecked::<T>())
-            //self.value.downcast_ref::<T>()
             unsafe { *obsydian_downcast_ref_unchecked(self.value.as_ref()) }
         } else {
             None
