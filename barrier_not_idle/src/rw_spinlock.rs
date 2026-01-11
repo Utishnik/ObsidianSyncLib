@@ -154,7 +154,7 @@ unsafe impl<R: Relax> RawRwLockDowngrade for RawRwSpinlock<R> {
 unsafe impl<R: Relax> RawRwLockUpgrade for RawRwSpinlock<R> {
     #[inline]
     fn lock_upgradable(&self) {
-        let mut relax = R::default();
+        let mut relax: R = R::default();
 
         while !self.try_lock_upgradable() {
             relax.relax();
@@ -163,9 +163,9 @@ unsafe impl<R: Relax> RawRwLockUpgrade for RawRwSpinlock<R> {
 
     #[inline]
     fn try_lock_upgradable(&self) -> bool {
-        let value = self.lock.fetch_or(UPGRADABLE, Ordering::Acquire);
+        let value: usize = self.lock.fetch_or(UPGRADABLE, Ordering::Acquire);
 
-        let acquired = value & (UPGRADABLE | EXCLUSIVE) == 0;
+        let acquired: bool = value & (UPGRADABLE | EXCLUSIVE) == 0;//todo нужен UPGRADABLE?
 
         if !acquired && value & UPGRADABLE == 0 {
             unsafe {
@@ -186,9 +186,10 @@ unsafe impl<R: Relax> RawRwLockUpgrade for RawRwSpinlock<R> {
     #[inline]
     unsafe fn upgrade(&self) {
         let mut relax = R::default();
-
-        while !self.try_upgrade() {
-            relax.relax();
+        unsafe{ //unsafe warn
+            while !self.try_upgrade() {
+                relax.relax();
+            }
         }
     }
 
