@@ -69,7 +69,7 @@ pub mod display_utils {
     }
 
     impl<'a, 'b> FormaterSliceFmt<'a, 'b> {
-        fn set(
+        pub fn set(
             &mut self,
             separator: &'a str,
             outline: Option<&'b OutLineFormatSymbols>,
@@ -378,6 +378,65 @@ pub mod debug_trait_utils {
         }
 
         result
+    }
+
+    #[doc = "аналогичная print_vec из debug::display_utils, почему print_vec в
+    dispay_vec нужно FormaterSliceFmt а здесь 
+    передовать просто параметры которыми потом заполнится 
+    он, ну так банально удобнее ну нужно если тебе просто вывести нужно
+    значение каждый раз создавать а просто ввел нужное"]
+    pub fn print_vec<T>(
+        vec: &[T],
+        separator: &str,
+        outline: Option<debug::display_utils::OutLineFormatSymbols>,
+        color: Option<debug::debug_and_test_utils::Colors>,
+        separator_width: usize,
+        transfer: usize,
+    ) where
+        T: std::fmt::Debug,
+    {
+        let mut fsf: debug::display_utils::FormaterSliceFmt<'_, '_> =
+            debug::display_utils::FormaterSliceFmt::default();
+        fsf.set(separator, outline.as_ref(), separator_width, transfer);
+        if color.is_none() {
+            let display: String = display_vec(vec, &fsf);
+            debug_println!("{}", display);
+        } else {
+            let display: String = display_vec(vec, &fsf);
+            let unwrap_color: debug::debug_and_test_utils::Colors =
+                unsafe { color.unwrap_unchecked() };
+            set_color_print(unwrap_color);
+            debug_println!("{}", display);
+            reset_color_print();
+        }
+    }
+    #[doc = "аналогично print_vec_range из debug::display_utils но для Debug trait"]
+    pub fn print_vec_range<T>(
+        vec: &[T],
+        separator: &str,
+        outline: Option<debug::display_utils::OutLineFormatSymbols>,
+        start: usize,
+        separator_width: usize,
+        transfer: usize,
+        end: usize,
+        color: Option<debug::debug_and_test_utils::Colors>,
+    ) where
+        T: std::fmt::Debug,
+    {
+        let mut fsf: debug::display_utils::FormaterSliceFmt =
+            debug::display_utils::FormaterSliceFmt::default();
+        fsf.set(separator, outline.as_ref(), separator_width, transfer);
+        if color.is_none() {
+            let display: String = display_vec_range(vec, &fsf, start, end);
+            debug_println!("{}", display);
+        } else {
+            let display: String = display_vec_range(vec, &fsf, start, end);
+            let unwrap_color: debug::debug_and_test_utils::Colors =
+                unsafe { color.unwrap_unchecked() };
+            set_color_print(unwrap_color);
+            debug_println!("{}", display);
+            reset_color_print();
+        }
     }
 }
 
