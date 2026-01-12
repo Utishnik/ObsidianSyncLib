@@ -972,6 +972,15 @@ pub mod debug_and_test_utils {
         guard.push(type_t.clone());
     }
 
+    pub fn find_type_test(type_t: TestType<'static>) -> Option<TestType>{
+        let test_t: &Arc<Mutex<Vec<TestType>>> = get_test_type();
+        let guard: std::sync::MutexGuard<'_, Vec<TestType<'static>>> = test_t.lock().unwrap();
+        let res_find: Option<&TestType<'_>> = guard
+            .iter()
+            .find(|&x| x.test_t == type_t.test_t && x.assert_s == type_t.assert_s);
+        res_find.cloned()
+    }
+
     #[doc = "возвращет количество типов тестов"]
     pub fn get_count_type_test() -> usize {
         CNT_TYPE_TEST.load(Ordering::Acquire)
