@@ -866,9 +866,34 @@ pub mod debug_and_test_utils {
         //pub cnt_types: usize,
     }
 
+    //нужно для assert и not assert
+    #[derive(Clone)]
+    pub struct TestType<'a>{
+        test_t: &'a str,
+        assert_s: bool,
+    }
+
+    impl<'a,'b> TestType<'a>{
+        pub fn get_test_t(&self) -> &str{
+            self.test_t
+        }
+        pub fn get_assert_s(&self) -> bool{
+            self.assert_s
+        }
+        pub fn set_test_t(&mut self,type_t: &'b str)
+        where 'b: 'a
+        {
+            self.test_t=type_t;
+        }
+        pub fn set_assert_s(&mut self,state: bool){
+            self.assert_s=state;
+        }
+    }
+
     //maybe многопоточное тестирования хз нужно?
     pub static TESTS: OnceLock<Arc<Mutex<Vec<Test>>>> = OnceLock::new();
-    pub static type_test: AtomicUsize = AtomicUsize::new(0);
+    pub static CNT_TYPE_TEST: AtomicUsize = AtomicUsize::new(0);
+    pub static TYPE_TESTS_LIST: OnceLock<Arc<Mutex<Vec<String>>>> = OnceLock::new();
 
     fn get_tests() -> &'static Arc<Mutex<Vec<Test>>> {
         TESTS.get_or_init(|| Arc::new(Mutex::new(Vec::new())))
@@ -922,12 +947,19 @@ pub mod debug_and_test_utils {
         guard.push(test);
     }
 
-    pub fn add_type_test() {
-        type_test.fetch_add(1, Ordering::Release);
+    #[doc = "нужна когда добовляем тип теста показывать сколько всего у
+    нас типов "]
+    pub fn store_count_type_test() { //todo not use
+        CNT_TYPE_TEST.fetch_add(1, Ordering::Release);
     }
 
-    pub fn get_type_test() -> usize {
-        type_test.load(Ordering::Acquire)
+    pub fn add_type_test(type_t: String){
+
+    }
+
+    #[doc = "возвращет количество типов тестов"]
+    pub fn get_count_type_test() -> usize {
+        CNT_TYPE_TEST.load(Ordering::Acquire)
     }
 
     pub fn get_test(index: usize) -> Option<Test> {
@@ -1122,7 +1154,7 @@ pub mod debug_and_test_utils {
                 let mut result_test: bool = false;
                 use $crate::debug::debug_and_test_utils::Test;
                 use $crate::debug::debug_and_test_utils::get_last_test;
-                use $crate::debug::debug_and_test_utils::get_type_test;
+                use $crate::debug::debug_and_test_utils::get_count_type_test;
                 use $crate::debug::debug_and_test_utils::add_test;
                 use std::sync::atomic::Ordering;
                 //$crate::debug::* может так лучше?
@@ -1163,7 +1195,7 @@ pub mod debug_and_test_utils {
                     result_test=true;
                 }
                 test.result=result_test;
-                test.typetest=get_type_test();
+                test.typetest=get_count_type_test();
                 add_test(test);
             }
         }
@@ -1172,7 +1204,7 @@ pub mod debug_and_test_utils {
     //todo добавить еще типы тестов типо not_assert и assert
     #[macro_export]
     macro_rules! test_not_assert {
-    ($left:expr,$right:expr) => {
+    ($left:expr,$right:expr,&type_tst:expr) => {
         match (&$left, &$right)
         {
             (left_val, right_val) =>
@@ -1184,7 +1216,7 @@ pub mod debug_and_test_utils {
                 let mut result_test: bool = false;
                 use $crate::debug::debug_and_test_utils::Test;
                 use $crate::debug::debug_and_test_utils::get_last_test;
-                use $crate::debug::debug_and_test_utils::get_type_test;
+                use $crate::debug::debug_and_test_utils::get_count_type_test;
                 use $crate::debug::debug_and_test_utils::add_test;
                 use std::sync::atomic::Ordering;
                 //$crate::debug::* может так лучше?
@@ -1225,7 +1257,7 @@ pub mod debug_and_test_utils {
                     result_test=true;
                 }
                 test.result=result_test;
-                test.typetest=get_type_test();
+                test.typetest=get_count_type_test();
                 add_test(test);
             }
         }
