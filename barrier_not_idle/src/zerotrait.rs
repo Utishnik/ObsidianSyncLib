@@ -6,20 +6,20 @@ pub trait Zero {
 
 macro_rules! zero_decl {
     ($ret_type: ty) => {
-    impl Zero for $ret_type{
-        fn zero() -> Self {
-            0
+        impl Zero for $ret_type {
+            fn zero() -> Self {
+                0
+            }
         }
-    }
     };
 }
 macro_rules! float_zero_decl {
     ($ret_type: ty) => {
-    impl Zero for $ret_type{
-        fn zero() -> Self {
-            0.0
+        impl Zero for $ret_type {
+            fn zero() -> Self {
+                0.0
+            }
         }
-    }
     };
 }
 zero_decl!(u8);

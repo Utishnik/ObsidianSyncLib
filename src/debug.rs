@@ -868,32 +868,38 @@ pub mod debug_and_test_utils {
 
     //нужно для assert и not assert
     #[derive(Clone)]
-    pub struct TestType<'a>{
+    pub struct TestType<'a> {
         test_t: &'a str,
         assert_s: bool,
     }
 
-    impl<'a,'b> TestType<'a>{
-        pub fn get_test_t(&self) -> &str{
+    impl<'a, 'b> TestType<'a> {
+        pub fn get_test_t(&self) -> &str {
             self.test_t
         }
-        pub fn get_assert_s(&self) -> bool{
+        pub fn get_assert_s(&self) -> bool {
             self.assert_s
         }
-        pub fn set_test_t(&mut self,type_t: &'b str)
-        where 'b: 'a
+        pub fn set_test_t(&mut self, type_t: &'b str)
+        where
+            'b: 'a,
         {
-            self.test_t=type_t;
+            self.test_t = type_t;
         }
-        pub fn set_assert_s(&mut self,state: bool){
-            self.assert_s=state;
+        pub fn set_assert_s(&mut self, state: bool) {
+            self.assert_s = state;
         }
     }
 
     //maybe многопоточное тестирования хз нужно?
     pub static TESTS: OnceLock<Arc<Mutex<Vec<Test>>>> = OnceLock::new();
     pub static CNT_TYPE_TEST: AtomicUsize = AtomicUsize::new(0);
-    pub static TYPE_TESTS_LIST: OnceLock<Arc<Mutex<Vec<String>>>> = OnceLock::new();
+    pub static TYPE_TESTS_LIST: OnceLock<Arc<Mutex<Vec<TestType<'static>>>>> = OnceLock::new();
+    pub static CNT_TYPE_TEST_LIMIT: usize = 64_000;
+
+    fn get_test_type() -> &'static Arc<Mutex<Vec<TestType<'static>>>> {
+        TYPE_TESTS_LIST.get_or_init(|| Arc::new(Mutex::new(Vec::new())))
+    }
 
     fn get_tests() -> &'static Arc<Mutex<Vec<Test>>> {
         TESTS.get_or_init(|| Arc::new(Mutex::new(Vec::new())))
@@ -949,12 +955,21 @@ pub mod debug_and_test_utils {
 
     #[doc = "нужна когда добовляем тип теста показывать сколько всего у
     нас типов "]
-    pub fn store_count_type_test() { //todo not use
+    pub fn store_count_type_test() {
+        //todo not use
         CNT_TYPE_TEST.fetch_add(1, Ordering::Release);
     }
 
-    pub fn add_type_test(type_t: String){
-
+    pub fn add_type_test(type_t: TestType<'static>) {
+        let cnt_test_types: usize = get_count_type_test();
+        if cnt_test_types > CNT_TYPE_TEST_LIMIT {
+            set_color_eprint(Colors::Red);
+            debug_eprintln_fileinfo!("cnt_test_types > CNT_TYPE_TEST_LIMIT");
+            reset_color_eprint();
+        }
+        let test_t: &Arc<Mutex<Vec<TestType>>> = get_test_type();
+        let mut guard: std::sync::MutexGuard<'_, Vec<TestType<'static>>> = test_t.lock().unwrap();
+        guard.push(type_t.clone());
     }
 
     #[doc = "возвращет количество типов тестов"]
