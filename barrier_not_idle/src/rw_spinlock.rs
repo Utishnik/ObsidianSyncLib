@@ -89,7 +89,18 @@ unsafe impl<R: Relax> RawRwLock for RawRwSpinlock<R> {
 
     #[inline]
     unsafe fn unlock_shared(&self) {
-        debug_assert!(self.is_locked_shared());
+        #[cfg(debug_assertions)]
+        {
+            if self.is_locked_shared() {
+                use obsidian_sync_lib::debug::debug_and_test_utils::Colors;
+
+                obsidian_sync_lib::debug::debug_and_test_utils::set_color_eprint(Colors::Red);
+                // obsidian_sync_lib::debug_eprintln_fileinfo!("unlock_upgradable self.is_locked_upgradable true");
+                //нужен аналог для no_str
+                obsidian_sync_lib::debug::debug_and_test_utils::reset_color_eprint();
+                return;
+            }
+        }
 
         self.lock.fetch_sub(SHARED, Ordering::Release);
     }
@@ -112,7 +123,18 @@ unsafe impl<R: Relax> RawRwLock for RawRwSpinlock<R> {
 
     #[inline]
     unsafe fn unlock_exclusive(&self) {
-        debug_assert!(self.is_locked_exclusive());
+        #[cfg(debug_assertions)]
+        {
+            if self.is_locked_exclusive() {
+                use obsidian_sync_lib::debug::debug_and_test_utils::Colors;
+
+                obsidian_sync_lib::debug::debug_and_test_utils::set_color_eprint(Colors::Red);
+                // obsidian_sync_lib::debug_eprintln_fileinfo!("unlock_upgradable self.is_locked_upgradable true");
+                //нужен аналог для no_str
+                obsidian_sync_lib::debug::debug_and_test_utils::reset_color_eprint();
+                return;
+            }
+        }
 
         self.lock.fetch_and(!EXCLUSIVE, Ordering::Release);
     }
@@ -181,11 +203,16 @@ unsafe impl<R: Relax> RawRwLockUpgrade for RawRwSpinlock<R> {
     unsafe fn unlock_upgradable(&self) {
         #[cfg(debug_assertions)]
         {
-            if self.is_locked_upgradable(){
-                
+            if self.is_locked_upgradable() {
+                use obsidian_sync_lib::debug::debug_and_test_utils::Colors;
+
+                obsidian_sync_lib::debug::debug_and_test_utils::set_color_eprint(Colors::Red);
+                // obsidian_sync_lib::debug_eprintln_fileinfo!("unlock_upgradable self.is_locked_upgradable true");
+                //нужен аналог для no_str
+                obsidian_sync_lib::debug::debug_and_test_utils::reset_color_eprint();
+                return;
             }
         }
-        debug_assert!(self.is_locked_upgradable());
         self.lock.fetch_and(!UPGRADABLE, Ordering::Release);
     }
 

@@ -498,9 +498,7 @@ pub mod debug_and_test_utils {
             match self {
                 StreamPrint::StdErr => "stderr".to_string(),
                 StreamPrint::StdOut => "stdout".to_string(),
-                Self::Custom => {
-                    crate::not_panic_todo!(StreamPrint).as_str()
-                }
+                Self::Custom => crate::not_panic_todo!(StreamPrint).as_str(),
             }
         }
     }

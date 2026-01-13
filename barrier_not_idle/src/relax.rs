@@ -92,7 +92,7 @@ impl Relax for Backoff {
         for _ in 0..1_u16 << self.step {
             //надо после того как сделаю step атомарным проверять если ее значение изменилось проверить
             //дошли до 1024 а измненили на 256 смотрим а в цикле мы на 310 итерации значит break
-            let unpark_state: bool = check_bits::<u8,u8>(self.msg, Self::UNPARK);
+            let unpark_state: bool = check_bits::<u8, u8>(self.msg, Self::UNPARK);
             if unpark_state {
                 break;
             }

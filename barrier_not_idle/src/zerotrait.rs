@@ -22,6 +22,13 @@ macro_rules! float_zero_decl {
         }
     };
 }
+#[doc = "false так по умолчанию в си/си++ и не только 0
+== false"]
+impl Zero for bool {
+    fn zero() -> Self {
+        false
+    }
+}
 zero_decl!(u8);
 zero_decl!(u16);
 zero_decl!(u32);
