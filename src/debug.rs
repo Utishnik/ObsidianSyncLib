@@ -1,3 +1,28 @@
+pub mod dev_utils {
+    #[macro_export]
+    macro_rules! not_panic_todo {
+    ($ret_type:ty) => {{
+        use $crate::debug::debug_and_test_utils::{set_color_eprint, reset_color_eprint};
+        use $crate::debug::debug_and_test_utils::Colors;
+
+        set_color_eprint(Colors::Red);
+        $crate::debug_eprintln_fileinfo!("not yet implemented!");
+        reset_color_eprint();
+        <$ret_type>::default()
+    }};
+
+    ($ret_type:ty, $($arg:tt)+) => {{
+        use $crate::debug::debug_and_test_utils::{set_color_eprint, reset_color_eprint};
+        use $crate::debug::debug_and_test_utils::Colors;
+
+        set_color_eprint(Colors::Red);
+        $crate::debug_eprintln_fileinfo!("not yet implemented: {}", format_args!($($arg)+));
+        reset_color_eprint();
+        <$ret_type>::default()
+    }};
+}
+}
+
 pub mod display_utils {
     use crate::debug;
     use crate::debug::debug_and_test_utils::reset_color_print;
@@ -463,6 +488,7 @@ pub mod debug_and_test_utils {
     pub enum StreamPrint {
         StdOut,
         StdErr,
+        Custom,
     }
 
     impl StreamPrint {
@@ -470,6 +496,9 @@ pub mod debug_and_test_utils {
             match self {
                 StreamPrint::StdErr => "stderr".to_string(),
                 StreamPrint::StdOut => "stdout".to_string(),
+                Self::Custom => {
+                    crate::not_panic_todo!(String)
+                }
             }
         }
     }
@@ -972,7 +1001,7 @@ pub mod debug_and_test_utils {
         guard.push(type_t.clone());
     }
 
-    pub fn find_type_test(type_t: TestType<'static>) -> Option<TestType>{
+    pub fn find_type_test(type_t: TestType<'static>) -> Option<TestType> {
         let test_t: &Arc<Mutex<Vec<TestType>>> = get_test_type();
         let guard: std::sync::MutexGuard<'_, Vec<TestType<'static>>> = test_t.lock().unwrap();
         let res_find: Option<&TestType<'_>> = guard
