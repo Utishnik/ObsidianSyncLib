@@ -7,6 +7,7 @@ use lock_api::{
 };
 
 use crate::relax::{Backoff, Relax, Spin};
+use obsidian_sync_lib::debug_eprintln_fileinfo;
 
 /// A simple, spinning, read-preferring readers-writer lock.
 // Adapted from `spin::rwlock::RwLock`, but
@@ -64,7 +65,7 @@ unsafe impl<R: Relax> RawRwLock for RawRwSpinlock<R> {
 
     #[inline]
     fn lock_shared(&self) {
-        let mut relax = R::default();
+        let mut relax: R = R::default();
 
         while !self.try_lock_shared() {
             relax.relax();
@@ -178,8 +179,13 @@ unsafe impl<R: Relax> RawRwLockUpgrade for RawRwSpinlock<R> {
 
     #[inline]
     unsafe fn unlock_upgradable(&self) {
+        #[cfg(debug_assertions)]
+        {
+            if self.is_locked_upgradable(){
+                
+            }
+        }
         debug_assert!(self.is_locked_upgradable());
-
         self.lock.fetch_and(!UPGRADABLE, Ordering::Release);
     }
 

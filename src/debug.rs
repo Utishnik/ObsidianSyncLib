@@ -485,7 +485,9 @@ pub mod debug_and_test_utils {
         cnt_args: usize,
     }
 
+    #[derive(Default)]
     pub enum StreamPrint {
+        #[default]
         StdOut,
         StdErr,
         Custom,
@@ -497,7 +499,7 @@ pub mod debug_and_test_utils {
                 StreamPrint::StdErr => "stderr".to_string(),
                 StreamPrint::StdOut => "stdout".to_string(),
                 Self::Custom => {
-                    crate::not_panic_todo!(String)
+                    crate::not_panic_todo!(StreamPrint).as_str()
                 }
             }
         }
