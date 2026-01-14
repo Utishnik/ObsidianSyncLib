@@ -1,3 +1,5 @@
+будет использоваться для своего маленького движка regex, которые будет использоваться для валидации имен типов.Также для работы с графом заметок для при добавлении связи будет переход, который позволит довольно точно воспроизвести историю блуждания изменений.
+
 # A framework and a DSL for building finite state machines in Rust
 
 [![Documentation][docs-badge]][docs-link]
@@ -226,3 +228,4 @@ repository][repo].
 [crate-badge]: https://img.shields.io/crates/v/rust-fsm.svg
 [crate-link]: https://crates.io/crates/rust-fsm
 [mermaid]: https://mermaid.js.org/
+
