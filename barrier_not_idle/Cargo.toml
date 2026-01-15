@@ -18,6 +18,7 @@ rustdoc-args = ["--cfg", "docsrs", "--generate-link-to-definition"]
 [features]
 arc_lock = ["lock_api/arc_lock"]
 owning_ref = ["lock_api/owning_ref"]
+std = []
 
 [dependencies]
 lock_api = "0.4.7"

@@ -121,18 +121,30 @@ unsafe impl<R: Relax> RawRwLock for RawRwSpinlock<R> {
             .is_ok()
     }
 
+    #[cfg(feature = "std")]
+    fn debug_err(msg: String) {
+        use obsidian_sync_lib::debug::debug_and_test_utils::Colors;
+        obsidian_sync_lib::debug::debug_and_test_utils::set_color_eprint(Colors::Red);
+        obsidian_sync_lib::debug_eprintln_fileinfo!("{msg}");
+        obsidian_sync_lib::debug::debug_and_test_utils::reset_color_eprint();
+    }
+
     #[inline]
     unsafe fn unlock_exclusive(&self) {
         #[cfg(debug_assertions)]
         {
-            if self.is_locked_exclusive() {
-                use obsidian_sync_lib::debug::debug_and_test_utils::Colors;
-
-                obsidian_sync_lib::debug::debug_and_test_utils::set_color_eprint(Colors::Red);
-                // obsidian_sync_lib::debug_eprintln_fileinfo!("unlock_upgradable self.is_locked_upgradable true");
-                //нужен аналог для no_str
-                obsidian_sync_lib::debug::debug_and_test_utils::reset_color_eprint();
-                return;
+            #[cfg(feature = "std")]
+            {
+                if self.is_locked_exclusive() {
+                    debug_err("unlock_exclusive is_locked_exclusive -> true".to_string());
+                    return;
+                }
+            }
+            #[cfg(not(feature = "std"))]
+            {
+                if self.is_locked_exclusive() {
+                    panic!("unlock_exclusive is_locked_exclusive -> true");
+                }
             }
         }
 

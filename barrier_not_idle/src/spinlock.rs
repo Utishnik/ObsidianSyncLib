@@ -364,7 +364,8 @@ mod tests {
     fn mapped_lock() {
         let spinlock: lock_api::Mutex<RawSpinlock, [i32; 3]> = Spinlock::new([1, 2, 3]);
         let data: lock_api::MutexGuard<'_, RawSpinlock, [i32; 3]> = spinlock.lock();
-        let mut mapped: lock_api::MappedMutexGuard<'_, RawSpinlock, i32> = SpinlockGuard::map(data, |d| &mut d[0]);
+        let mut mapped: lock_api::MappedMutexGuard<'_, RawSpinlock, i32> =
+            SpinlockGuard::map(data, |d| &mut d[0]);
         assert_eq!(*mapped, 1);
         *mapped = 4;
         assert_eq!(*mapped, 4);
