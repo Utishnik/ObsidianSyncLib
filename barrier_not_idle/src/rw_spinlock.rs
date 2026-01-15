@@ -218,7 +218,7 @@ unsafe impl<R: Relax> RawRwLockUpgrade for RawRwSpinlock<R> {
 
     #[inline]
     unsafe fn upgrade(&self) {
-        let mut relax = R::default();
+        let mut relax: R = R::default();
         unsafe {
             //unsafe warn
             while !self.try_upgrade() {
@@ -352,7 +352,7 @@ mod tests {
 
     #[test]
     fn smoke() {
-        let l = RwSpinlock::new(());
+        let l: lock_api::RwLock<RawRwSpinlock, ()> = RwSpinlock::new(());
         drop(l.read());
         drop(l.write());
         drop((l.read(), l.read()));
@@ -388,12 +388,12 @@ mod tests {
 
     #[test]
     fn test_rw_arc() {
-        let arc = Arc::new(RwSpinlock::new(0));
-        let arc2 = arc.clone();
+        let arc: Arc<lock_api::RwLock<RawRwSpinlock, i32>> = Arc::new(RwSpinlock::new(0));
+        let arc2: Arc<lock_api::RwLock<RawRwSpinlock, i32>> = arc.clone();
         let (tx, rx) = channel();
 
         thread::spawn(move || {
-            let mut lock = arc2.write();
+            let mut lock: RwLockWriteGuard<'_, RawRwSpinlock, i32> = arc2.write();
             for _ in 0..10 {
                 let tmp = *lock;
                 *lock = -1;
@@ -406,9 +406,9 @@ mod tests {
         // Readers try to catch the writer in the act
         let mut children = Vec::new();
         for _ in 0..5 {
-            let arc3 = arc.clone();
+            let arc3: Arc<lock_api::RwLock<RawRwSpinlock, i32>> = arc.clone();
             children.push(thread::spawn(move || {
-                let lock = arc3.read();
+                let lock: lock_api::RwLockReadGuard<'_, RawRwSpinlock, i32> = arc3.read();
                 assert!(*lock >= 0);
             }));
         }
@@ -420,14 +420,14 @@ mod tests {
 
         // Wait for writer to finish
         rx.recv().unwrap();
-        let lock = arc.read();
+        let lock: lock_api::RwLockReadGuard<'_, RawRwSpinlock, i32> = arc.read();
         assert_eq!(*lock, 10);
     }
 
     #[test]
     fn test_rw_access_in_unwind() {
-        let arc = Arc::new(RwSpinlock::new(1));
-        let arc2 = arc.clone();
+        let arc: Arc<lock_api::RwLock<RawRwSpinlock, isize>> = Arc::new(RwSpinlock::new(1));
+        let arc2: Arc<lock_api::RwLock<RawRwSpinlock, isize>> = arc.clone();
         let _ = thread::spawn(move || -> () {
             struct Unwinder {
                 i: Arc<RwSpinlock<isize>>,

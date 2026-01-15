@@ -324,16 +324,16 @@ mod tests {
 
     #[test]
     fn create_and_lock() {
-        let spinlock = Spinlock::new(42);
-        let data = spinlock.try_lock();
+        let spinlock: lock_api::Mutex<RawSpinlock, i32> = Spinlock::new(42);
+        let data: Option<lock_api::MutexGuard<'_, RawSpinlock, i32>> = spinlock.try_lock();
         assert!(data.is_some());
         assert_eq!(*data.unwrap(), 42);
     }
 
     #[test]
     fn mutual_exclusion() {
-        let spinlock = Spinlock::new(1);
-        let data = spinlock.try_lock();
+        let spinlock: lock_api::Mutex<RawSpinlock, i32> = Spinlock::new(1);
+        let data: Option<lock_api::MutexGuard<'_, RawSpinlock, i32>> = spinlock.try_lock();
         assert!(data.is_some());
         assert!(spinlock.try_lock().is_none());
         assert!(spinlock.try_lock().is_none()); // still None
@@ -343,12 +343,12 @@ mod tests {
 
     #[test]
     fn three_locks() {
-        let spinlock1 = Spinlock::new(1);
-        let spinlock2 = Spinlock::new(2);
-        let spinlock3 = Spinlock::new(3);
-        let data1 = spinlock1.try_lock();
-        let data2 = spinlock2.try_lock();
-        let data3 = spinlock3.try_lock();
+        let spinlock1: lock_api::Mutex<RawSpinlock, i32> = Spinlock::new(1);
+        let spinlock2: lock_api::Mutex<RawSpinlock, i32> = Spinlock::new(2);
+        let spinlock3: lock_api::Mutex<RawSpinlock, i32> = Spinlock::new(3);
+        let data1: Option<lock_api::MutexGuard<'_, RawSpinlock, i32>> = spinlock1.try_lock();
+        let data2: Option<lock_api::MutexGuard<'_, RawSpinlock, i32>> = spinlock2.try_lock();
+        let data3: Option<lock_api::MutexGuard<'_, RawSpinlock, i32>> = spinlock3.try_lock();
         assert!(data1.is_some());
         assert!(data2.is_some());
         assert!(data3.is_some());
@@ -362,9 +362,9 @@ mod tests {
 
     #[test]
     fn mapped_lock() {
-        let spinlock = Spinlock::new([1, 2, 3]);
-        let data = spinlock.lock();
-        let mut mapped = SpinlockGuard::map(data, |d| &mut d[0]);
+        let spinlock: lock_api::Mutex<RawSpinlock, [i32; 3]> = Spinlock::new([1, 2, 3]);
+        let data: lock_api::MutexGuard<'_, RawSpinlock, [i32; 3]> = spinlock.lock();
+        let mut mapped: lock_api::MappedMutexGuard<'_, RawSpinlock, i32> = SpinlockGuard::map(data, |d| &mut d[0]);
         assert_eq!(*mapped, 1);
         *mapped = 4;
         assert_eq!(*mapped, 4);

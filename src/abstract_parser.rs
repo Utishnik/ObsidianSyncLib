@@ -90,13 +90,14 @@ pub struct Var {
 
 pub static VARS: OnceLock<Arc<Mutex<Vec<Var>>>> = OnceLock::new();
 
-fn validate_var_name<F>(tok: &String,var_symbol_black_list_pat: F) -> bool
-where F: Fn(&String) -> bool
+fn validate_var_name<F>(tok: &String, var_symbol_black_list_pat: F) -> bool
+where
+    F: Fn(&String) -> bool,
 {
     var_symbol_black_list_pat(tok)
 }
 
-fn symbols_pat(str: &String) -> bool{
+fn symbols_pat(str: &String) -> bool {
     false
 }
 
