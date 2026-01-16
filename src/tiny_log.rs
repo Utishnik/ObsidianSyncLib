@@ -1,3 +1,5 @@
+//TODO: ЗАМЕНИТЬ АНСИ ЧЕРЕЗ WRITE НА ЛИБУ
+
 pub use serde_json;
 use std::{fs::File, io::IsTerminal};
 use std::io::Write;
@@ -81,7 +83,7 @@ pub fn pretty_print_buffer(buffer: &[u8]) {
             .filter_map(|pair| unsafe { std::str::from_utf8_unchecked(pair) }.split_once('='))
         {
             if key == "ts" {
-                let time = if let Some((_, time)) = value.split_once('T') {
+                let time: &str = if let Some((_, time)) = value.split_once('T') {
                     time.trim_end_matches('Z')
                 } else {
                     value.trim_end_matches('Z')
@@ -193,8 +195,8 @@ pub fn pretty_print_buffer(buffer: &[u8]) {
 
 fn stdout_sync_thread() {
     let mut max_size: usize = 0;
-    let mut buffer = Vec::<u8>::with_capacity(BUFFER_CAPACITY);
-    let mut wait_flushers = false;
+    let mut buffer: Vec<u8> = Vec::<u8>::with_capacity(BUFFER_CAPACITY);
+    let mut wait_flushers: bool = false;
     loop {
         let mut queue: std::sync::MutexGuard<'_, TCQueue> = LOG_WRITER.lock().unwrap();
         if queue.sync_state == SyncState::Flushing {
@@ -260,7 +262,7 @@ fn stdout_sync_thread_pretty() {
     }
 }
 fn exit_logger() {
-    let handle = {
+    let handle: Option<thread::JoinHandle<()>> = {
         let mut queue: std::sync::MutexGuard<'_, TCQueue> = LOG_WRITER.lock().unwrap();
         queue.exiting = true;
         queue.handle.take()
