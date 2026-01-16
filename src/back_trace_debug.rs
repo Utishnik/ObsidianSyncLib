@@ -4,37 +4,18 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::OnceLock;
 
-static hand_log_panic_hook: Arc<
+/* 
+
+static HAND_LOG_PANIC_HOOK: Arc<
     OnceLock<Box<dyn Fn(core::fmt::Formatter<'static>) + Sync + Send>>,
 > = Arc::new(OnceLock::new());
 
-pub fn set_hand_log_panic_hook() {}
-
-pub fn attach_panic_hook() {
-    let prev: Box<dyn Fn(&std::panic::PanicHookInfo<'_>) + Send + Sync> = std::panic::take_hook();
-    std::panic::set_hook(Box::new(move |info| {
-        let mut err: String = String::default();
-        if let Some(x) = info.payload().downcast_ref::<String>() {
-            err = x.clone();
-        } else if let Some(x) = info.payload().downcast_ref::<&str>() {
-            err = x.to_string();
-        }
-        let thread: std::thread::Thread = std::thread::current();
-        let thread: &str = thread.name().unwrap_or("<unnamed>");
-        if let Some(location) = info.location() {
-            log!( format!(
-                "{}:{}:{}",
-                location.file(),
-                location.line(),
-                location.column()
-            );"error"; msg= "PANIC", err, thread)
-        } else {
-            error!("PANIC", err, thread)
-        }
-
-        prev(info)
-    }));
+pub fn get_or_init_hlph(){
+    HAND_LOG_PANIC_HOOK.get_or_init(|| {
+        Arc<OnceLock<Box<|x: core::fmt::Formatter<'static>|>>>
+    });
 }
+    */
 
 pub fn is_crate(_symbol: String) {}
 

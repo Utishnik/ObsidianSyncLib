@@ -17,7 +17,10 @@ git2 = "0.20.2"
 validator = { version = "0.16", features = ["derive"] }
 dotenvy = "0.15.7"
 backtrace = "0.3"
+serde_json = "1.0"
 tinyvec = "1.8"
+itoa = "1.0"
+time = "0.3"
 
 [workspace]
 members = ["ansicodes",
