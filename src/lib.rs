@@ -22,8 +22,8 @@ pub mod debug_multi_thread;
 pub mod number_utils;
 pub mod optional_error;
 pub mod str_utils;
-pub mod utils;
 pub mod tiny_log;
+pub mod utils;
 
 #[derive(Debug)]
 enum Cfg_Error {

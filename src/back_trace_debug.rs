@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::OnceLock;
 
-/* 
+/*
 
 static HAND_LOG_PANIC_HOOK: Arc<
     OnceLock<Box<dyn Fn(core::fmt::Formatter<'static>) + Sync + Send>>,

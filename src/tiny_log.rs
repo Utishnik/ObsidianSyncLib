@@ -35,9 +35,9 @@ pub static LOG_WRITER: Mutex<TCQueue> = Mutex::new(TCQueue {
 
 const BUFFER_CAPACITY: usize = 4096;
 pub fn pretty_print_buffer(buffer: &[u8]) {
-    let mut stdout = std::io::stdout();
-    let mut in_quote = false;
-    let mut prev_escape = false;
+    let mut stdout: std::io::Stdout = std::io::stdout();
+    let mut in_quote: bool = false;
+    let mut prev_escape: bool = false;
     for line in buffer.split(|x| {
         if *x == b'"' && !prev_escape {
             in_quote ^= true;
@@ -58,9 +58,9 @@ pub fn pretty_print_buffer(buffer: &[u8]) {
         //         eprintln!("[[\n{}\n]]\n\n",
         //             unsafe {std::str::from_utf8_unchecked(line)}
         // );
-        let mut out = stdout.lock();
-        let mut in_quote = false;
-        let mut last_escape = false;
+        let mut out: std::io::StdoutLock<'_> = stdout.lock();
+        let mut in_quote: bool = false;
+        let mut last_escape: bool = false;
         for (key, value) in line
             .split(|&ch| {
                 let escaped = last_escape;
@@ -196,13 +196,13 @@ fn stdout_sync_thread() {
     let mut buffer = Vec::<u8>::with_capacity(BUFFER_CAPACITY);
     let mut wait_flushers = false;
     loop {
-        let mut queue = LOG_WRITER.lock().unwrap();
+        let mut queue: std::sync::MutexGuard<'_, TCQueue> = LOG_WRITER.lock().unwrap();
         if queue.sync_state == SyncState::Flushing {
             wait_flushers = true;
         }
         if queue.buffer.is_empty() {
             queue.sync_state = SyncState::Waiting;
-            let exiting = queue.exiting;
+            let exiting: bool = queue.exiting;
             if wait_flushers {
                 wait_flushers = false;
                 FLUSHING.notify_all();
@@ -221,23 +221,23 @@ fn stdout_sync_thread() {
         }
         queue.sync_state = SyncState::Writing;
         drop(queue);
-        let mut stdout = std::io::stdout();
+        let mut stdout: std::io::Stdout = std::io::stdout();
         stdout.write_all(&buffer).ok();
     }
 }
 
 fn stdout_sync_thread_pretty() {
     let mut max_size: usize = 0;
-    let mut buffer = Vec::<u8>::with_capacity(BUFFER_CAPACITY);
-    let mut wait_flushers = false;
+    let mut buffer: Vec<u8> = Vec::<u8>::with_capacity(BUFFER_CAPACITY);
+    let mut wait_flushers: bool = false;
     loop {
-        let mut queue = LOG_WRITER.lock().unwrap();
+        let mut queue: std::sync::MutexGuard<'_, TCQueue> = LOG_WRITER.lock().unwrap();
         if queue.sync_state == SyncState::Flushing {
             wait_flushers = true;
         }
         if queue.buffer.is_empty() {
             queue.sync_state = SyncState::Waiting;
-            let exiting = queue.exiting;
+            let exiting: bool = queue.exiting;
             if wait_flushers {
                 wait_flushers = false;
                 FLUSHING.notify_all();
@@ -261,7 +261,7 @@ fn stdout_sync_thread_pretty() {
 }
 fn exit_logger() {
     let handle = {
-        let mut queue = LOG_WRITER.lock().unwrap();
+        let mut queue: std::sync::MutexGuard<'_, TCQueue> = LOG_WRITER.lock().unwrap();
         queue.exiting = true;
         queue.handle.take()
     };
@@ -274,7 +274,7 @@ pub struct LoggerGuard {}
 
 impl LoggerGuard {
     pub fn flush(&self) {
-        let mut queue = LOG_WRITER.lock().unwrap();
+        let mut queue: std::sync::MutexGuard<'_, TCQueue> = LOG_WRITER.lock().unwrap();
         if let Some (handle) = &queue.handle {
             handle.thread().unpark();
         } else {
@@ -295,13 +295,13 @@ impl Drop for LoggerGuard {
 const LOG_FILE_TARGET_SIZE: usize = 1024 * 1024 * 16; // 16 MB
 
 fn directory_sync_thread(path: Box<str>) {
-    let mut pathbuf = PathBuf::from_str(&path).expect("XLOG invalid PATH");
+    let mut pathbuf: PathBuf = PathBuf::from_str(&path).expect("XLOG invalid PATH");
     if let Err(err) = std::fs::create_dir_all(&pathbuf) {
         panic!("XLOG: {} {:?}", path, err);
     }
     let mut current: u32 = std::fs::read_dir(&pathbuf)
         .expect("PATH")
-        .filter_map(|entry| entry.ok()?.file_name().to_str()?.parse::<u32>().ok())
+        .filter_map(|entry: Result<std::fs::DirEntry, std::io::Error>| entry.ok()?.file_name().to_str()?.parse::<u32>().ok())
         .max()
         .unwrap_or(0);
     pathbuf.push(&current.to_string());
@@ -321,7 +321,7 @@ fn directory_sync_thread(path: Box<str>) {
     };
     pathbuf.pop();
     let mut max_size: usize = 0;
-    let mut buffer = Vec::<u8>::with_capacity(BUFFER_CAPACITY);
+    let mut buffer: Vec<u8> = Vec::<u8>::with_capacity(BUFFER_CAPACITY);
     loop {
         if written >= LOG_FILE_TARGET_SIZE {
             current += 1;
@@ -331,7 +331,7 @@ fn directory_sync_thread(path: Box<str>) {
             written = 0;
         }
 
-        let mut queue = LOG_WRITER.lock().unwrap();
+        let mut queue: std::sync::MutexGuard<'_, TCQueue> = LOG_WRITER.lock().unwrap();
         if queue.buffer.is_empty() {
             queue.sync_state = SyncState::Waiting;
             let exiting = queue.exiting;
@@ -355,16 +355,16 @@ fn directory_sync_thread(path: Box<str>) {
 }
 fn file_sync_thread(mut file: std::fs::File) {
     let mut max_size: usize = 0;
-    let mut buffer = Vec::<u8>::with_capacity(BUFFER_CAPACITY);
-    let mut wait_flushers = false;
+    let mut buffer: Vec<u8> = Vec::<u8>::with_capacity(BUFFER_CAPACITY);
+    let mut wait_flushers: bool = false;
     loop {
-        let mut queue = LOG_WRITER.lock().unwrap();
+        let mut queue: std::sync::MutexGuard<'_, TCQueue> = LOG_WRITER.lock().unwrap();
         if queue.sync_state == SyncState::Flushing {
             wait_flushers = true;
         }
         if queue.buffer.is_empty() {
             queue.sync_state = SyncState::Waiting;
-            let exiting = queue.exiting;
+            let exiting: bool = queue.exiting;
             if wait_flushers {
                 wait_flushers = false;
                 FLUSHING.notify_all();
@@ -399,7 +399,7 @@ pub fn init_stdout_logger() -> LoggerGuard {
 
 #[must_use]
 pub fn init_file_logger(file: &str) -> LoggerGuard {
-    let path = file.to_string();
+    let path: String = file.to_string();
     init_logger(move || {
         file_sync_thread(
             std::fs::OpenOptions::new()
@@ -418,16 +418,16 @@ pub fn init_directory_logger(dir: &str) -> LoggerGuard {
 }
 
 pub fn attach_panic_hook() {
-    let prev = std::panic::take_hook();
+    let prev: Box<dyn Fn(&std::panic::PanicHookInfo<'_>) + Send + Sync> = std::panic::take_hook();
     std::panic::set_hook(Box::new(move |info| {
-        let mut err = String::default();
+        let mut err: String = String::default();
         if let Some(x) = info.payload().downcast_ref::<String>() {
             err = x.clone();
         } else if let Some(x) = info.payload().downcast_ref::<&str>() {
             err = x.to_string();
         }
-        let thread = std::thread::current();
-        let thread= thread.name().unwrap_or("<unnamed>");
+        let thread: thread::Thread = std::thread::current();
+        let thread: &str= thread.name().unwrap_or("<unnamed>");
         if let Some(location) = info.location() {
             crate::log!( format!(
                 "{}:{}:{}",
@@ -478,12 +478,12 @@ pub use time::OffsetDateTime;
 
 #[inline(never)]
 pub fn __fmt_init(out: &mut Vec<u8>, t: &OffsetDateTime) {
-    let mut buf = itoa::Buffer::new();
+    let mut buf: itoa::Buffer = itoa::Buffer::new();
     out.extend_from_slice(b" ts=");
     out.extend_from_slice(buf.format(t.year()).as_bytes());
     out.push(b'-');
     let mut a = |out: &mut Vec<u8>, t: u8| {
-        let bytes = buf.format(t).as_bytes();
+        let bytes: &[u8] = buf.format(t).as_bytes();
         if bytes.len() == 1 {
             out.push(b'0');
         }
@@ -577,7 +577,7 @@ impl<T: SafeDisplay> LoggerDisplayDispatch for &&&DWrap<&T> {
 
 impl<T: AsRef<str>> LoggerDisplayDispatch for &&DWrap<T> {
     fn render(&self, queue: &mut TCQueue) {
-        let text = self.0.as_ref();
+        let text: &str = self.0.as_ref();
         if text.contains(|ch| ch < '#' || ch > '~') {
             serde_json::to_writer(&mut queue.buffer, &text).ok();
         } else {
