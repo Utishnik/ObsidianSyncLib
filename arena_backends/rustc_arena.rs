@@ -67,7 +67,7 @@ impl<T> ArenaChunk<T> {
             // SAFETY: The caller must ensure that `len` elements of this chunk have
             // been initialized.
             unsafe {
-                let slice = self.storage.as_mut();
+                let slice: &mut [MaybeUninit<T>] = self.storage.as_mut();
                 slice[..len].assume_init_drop();
             }
         }
@@ -143,12 +143,12 @@ impl<T> TypedArena<T> {
         unsafe {
             if size_of::<T>() == 0 {
                 self.ptr.set(self.ptr.get().wrapping_byte_add(1));
-                let ptr = ptr::NonNull::<T>::dangling().as_ptr();
+                let ptr: *mut T = ptr::NonNull::<T>::dangling().as_ptr();
                 // Don't drop the object. This `write` is equivalent to `forget`.
                 ptr::write(ptr, object);
                 &mut *ptr
             } else {
-                let ptr = self.ptr.get();
+                let ptr: *mut T = self.ptr.get();
                 // Advance the pointer.
                 self.ptr.set(self.ptr.get().add(1));
                 // Write into uninitialized memory.
@@ -162,8 +162,8 @@ impl<T> TypedArena<T> {
     fn can_allocate(&self, additional: usize) -> bool {
         // FIXME: this should *likely* use `offset_from`, but more
         // investigation is needed (including running tests in miri).
-        let available_bytes = self.end.get().addr() - self.ptr.get().addr();
-        let additional_bytes = additional.checked_mul(size_of::<T>()).unwrap();
+        let available_bytes: usize = self.end.get().addr() - self.ptr.get().addr();
+        let additional_bytes: usize = additional.checked_mul(size_of::<T>()).unwrap();
         available_bytes >= additional_bytes
     }
 
@@ -178,7 +178,7 @@ impl<T> TypedArena<T> {
             debug_assert!(self.can_allocate(len));
         }
 
-        let start_ptr = self.ptr.get();
+        let start_ptr: *mut T = self.ptr.get();
         // SAFETY: `can_allocate`/`grow` ensures that there is enough space for
         // `len` elements.
         unsafe { self.ptr.set(start_ptr.add(len)) };
@@ -191,7 +191,8 @@ impl<T> TypedArena<T> {
     /// storing the elements in the arena.
     #[inline]
     pub fn alloc_from_iter<I: IntoIterator<Item = T>>(&self, iter: I) -> &mut [T] {
-        self.try_alloc_from_iter(iter.into_iter().map(Ok::<T, !>)).into_ok()
+        self.try_alloc_from_iter(iter.into_iter().map(Ok::<T, !>))
+            .into_ok()
     }
 
     /// Allocates the elements of this iterator into a contiguous slice in the `TypedArena`.
@@ -218,13 +219,13 @@ impl<T> TypedArena<T> {
         assert!(size_of::<T>() != 0);
 
         let vec: Result<SmallVec<[T; 8]>, E> = iter.into_iter().collect();
-        let mut vec = vec?;
+        let mut vec: SmallVec<[T; 8]> = vec?;
         if vec.is_empty() {
             return Ok(&mut []);
         }
         // Move the content to the arena by copying and then forgetting it.
-        let len = vec.len();
-        let start_ptr = self.alloc_raw_slice(len);
+        let len: usize = vec.len();
+        let start_ptr: *mut T = self.alloc_raw_slice(len);
         Ok(unsafe {
             vec.as_ptr().copy_to_nonoverlapping(start_ptr, len);
             vec.set_len(0);
@@ -239,16 +240,16 @@ impl<T> TypedArena<T> {
         unsafe {
             // We need the element size to convert chunk sizes (ranging from
             // PAGE to HUGE_PAGE bytes) to element counts.
-            let elem_size = cmp::max(1, size_of::<T>());
-            let mut chunks = self.chunks.borrow_mut();
-            let mut new_cap;
+            let elem_size: usize = cmp::max(1, size_of::<T>());
+            let mut chunks: std::cell::RefMut<'_, Vec<ArenaChunk<T>>> = self.chunks.borrow_mut();
+            let mut new_cap: usize;
             if let Some(last_chunk) = chunks.last_mut() {
                 // If a type is `!needs_drop`, we don't need to keep track of how many elements
                 // the chunk stores - the field will be ignored anyway.
                 if mem::needs_drop::<T>() {
                     // FIXME: this should *likely* use `offset_from`, but more
                     // investigation is needed (including running tests in miri).
-                    let used_bytes = self.ptr.get().addr() - last_chunk.start().addr();
+                    let used_bytes: usize = self.ptr.get().addr() - last_chunk.start().addr();
                     last_chunk.entries = used_bytes / size_of::<T>();
                 }
 
@@ -263,7 +264,7 @@ impl<T> TypedArena<T> {
             // Also ensure that this chunk can fit `additional`.
             new_cap = cmp::max(additional, new_cap);
 
-            let mut chunk = ArenaChunk::<T>::new(new_cap);
+            let mut chunk: ArenaChunk<T> = ArenaChunk::<T>::new(new_cap);
             self.ptr.set(chunk.start());
             self.end.set(chunk.end());
             chunks.push(chunk);
@@ -274,12 +275,12 @@ impl<T> TypedArena<T> {
     // chunks.
     fn clear_last_chunk(&self, last_chunk: &mut ArenaChunk<T>) {
         // Determine how much was filled.
-        let start = last_chunk.start().addr();
+        let start: usize = last_chunk.start().addr();
         // We obtain the value of the pointer to the first uninitialized element.
-        let end = self.ptr.get().addr();
+        let end: usize = self.ptr.get().addr();
         // We then calculate the number of elements to be dropped in the last chunk,
         // which is the filled area's length.
-        let diff = if size_of::<T>() == 0 {
+        let diff: usize = if size_of::<T>() == 0 {
             // `T` is ZST. It can't have a drop flag, so the value here doesn't matter. We get
             // the number of zero-sized values in the last and only chunk, just out of caution.
             // Recall that `end` was incremented for each allocated value.
@@ -302,7 +303,7 @@ unsafe impl<#[may_dangle] T> Drop for TypedArena<T> {
     fn drop(&mut self) {
         unsafe {
             // Determine how much was filled.
-            let mut chunks_borrow = self.chunks.borrow_mut();
+            let mut chunks_borrow: std::cell::RefMut<'_, Vec<ArenaChunk<T>>> = self.chunks.borrow_mut();
             if let Some(mut last_chunk) = chunks_borrow.pop() {
                 // Drop the contents of the last chunk.
                 self.clear_last_chunk(&mut last_chunk);
@@ -375,11 +376,11 @@ impl DroplessArena {
     fn grow(&self, layout: Layout) {
         // Add some padding so we can align `self.end` while
         // still fitting in a `layout` allocation.
-        let additional = layout.size() + cmp::max(DROPLESS_ALIGNMENT, layout.align()) - 1;
+        let additional: usize = layout.size() + cmp::max(DROPLESS_ALIGNMENT, layout.align()) - 1;
 
         unsafe {
-            let mut chunks = self.chunks.borrow_mut();
-            let mut new_cap;
+            let mut chunks: std::cell::RefMut<'_, Vec<ArenaChunk>> = self.chunks.borrow_mut();
+            let mut new_cap: usize;
             if let Some(last_chunk) = chunks.last_mut() {
                 // There is no need to update `last_chunk.entries` because that
                 // field isn't used by `DroplessArena`.
@@ -395,11 +396,11 @@ impl DroplessArena {
             // Also ensure that this chunk can fit `additional`.
             new_cap = cmp::max(additional, new_cap);
 
-            let mut chunk = ArenaChunk::new(align_up(new_cap, PAGE));
+            let mut chunk: ArenaChunk = ArenaChunk::new(align_up(new_cap, PAGE));
             self.start.set(chunk.start());
 
             // Align the end to DROPLESS_ALIGNMENT.
-            let end = align_down(chunk.end().addr(), DROPLESS_ALIGNMENT);
+            let end: usize = align_down(chunk.end().addr(), DROPLESS_ALIGNMENT);
 
             // Make sure we don't go past `start`. This should not happen since the allocation
             // should be at least DROPLESS_ALIGNMENT - 1 bytes.
@@ -418,13 +419,13 @@ impl DroplessArena {
         // This loop executes once or twice: if allocation fails the first
         // time, the `grow` ensures it will succeed the second time.
         loop {
-            let start = self.start.get().addr();
-            let old_end = self.end.get();
-            let end = old_end.addr();
+            let start: usize = self.start.get().addr();
+            let old_end: *mut u8 = self.end.get();
+            let end: usize = old_end.addr();
 
             // Align allocated bytes so that `self.end` stays aligned to
             // DROPLESS_ALIGNMENT.
-            let bytes = align_up(layout.size(), DROPLESS_ALIGNMENT);
+            let bytes: usize = align_up(layout.size(), DROPLESS_ALIGNMENT);
 
             // Tell LLVM that `end` is aligned to DROPLESS_ALIGNMENT.
             unsafe { intrinsics::assume(end == align_down(end, DROPLESS_ALIGNMENT)) };
@@ -452,7 +453,7 @@ impl DroplessArena {
         assert!(!mem::needs_drop::<T>());
         assert!(size_of::<T>() != 0);
 
-        let mem = self.alloc_raw(Layout::new::<T>()) as *mut T;
+        let mem: *mut T = self.alloc_raw(Layout::new::<T>()) as *mut T;
 
         unsafe {
             // Write into uninitialized memory.
@@ -477,7 +478,7 @@ impl DroplessArena {
         assert!(size_of::<T>() != 0);
         assert!(!slice.is_empty());
 
-        let mem = self.alloc_raw(Layout::for_value::<[T]>(slice)) as *mut T;
+        let mem: *mut T = self.alloc_raw(Layout::for_value::<[T]>(slice)) as *mut T;
 
         unsafe {
             mem.copy_from_nonoverlapping(slice.as_ptr(), slice.len());
@@ -490,7 +491,7 @@ impl DroplessArena {
     #[inline]
     pub fn contains_slice<T>(&self, slice: &[T]) -> bool {
         for chunk in self.chunks.borrow_mut().iter_mut() {
-            let ptr = slice.as_ptr().cast::<u8>().cast_mut();
+            let ptr: *mut u8 = slice.as_ptr().cast::<u8>().cast_mut();
             if chunk.start() <= ptr && chunk.end() >= ptr {
                 return true;
             }
@@ -506,7 +507,7 @@ impl DroplessArena {
     ///  - Zero-length string
     #[inline]
     pub fn alloc_str(&self, string: &str) -> &str {
-        let slice = self.alloc_slice(string.as_bytes());
+        let slice: &mut [u8] = self.alloc_slice(string.as_bytes());
 
         // SAFETY: the result has a copy of the same valid UTF-8 bytes.
         unsafe { std::str::from_utf8_unchecked(slice) }
@@ -548,7 +549,7 @@ impl DroplessArena {
     pub fn alloc_from_iter<T, I: IntoIterator<Item = T>>(&self, iter: I) -> &mut [T] {
         // Warning: this function is reentrant: `iter` could hold a reference to `&self` and
         // allocate additional elements while we're iterating.
-        let iter = iter.into_iter();
+        let iter: <I as IntoIterator>::IntoIter = iter.into_iter();
         assert!(size_of::<T>() != 0);
         assert!(!mem::needs_drop::<T>());
 
@@ -563,7 +564,7 @@ impl DroplessArena {
                     return &mut [];
                 }
 
-                let mem = self.alloc_raw(Layout::array::<T>(len).unwrap()) as *mut T;
+                let mem: *mut T = self.alloc_raw(Layout::array::<T>(len).unwrap()) as *mut T;
                 // SAFETY: `write_from_iter` doesn't touch `self`. It only touches the slice we just
                 // reserved. If the iterator panics or doesn't output `len` elements, this will
                 // leave some unallocated slots in the arena, which is fine because we do not call
@@ -585,14 +586,14 @@ impl DroplessArena {
 
         // Takes care of reentrancy.
         let vec: Result<SmallVec<[T; 8]>, E> = iter.into_iter().collect();
-        let mut vec = vec?;
+        let mut vec: SmallVec<[T; 8]> = vec?;
         if vec.is_empty() {
             return Ok(&mut []);
         }
         // Move the content to the arena by copying and then forgetting it.
-        let len = vec.len();
+        let len: usize = vec.len();
         Ok(unsafe {
-            let start_ptr = self.alloc_raw(Layout::for_value::<[T]>(vec.as_slice())) as *mut T;
+            let start_ptr: *mut T = self.alloc_raw(Layout::for_value::<[T]>(vec.as_slice())) as *mut T;
             vec.as_ptr().copy_to_nonoverlapping(start_ptr, len);
             vec.set_len(0);
             slice::from_raw_parts_mut(start_ptr, len)
