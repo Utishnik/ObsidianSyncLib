@@ -303,7 +303,8 @@ unsafe impl<#[may_dangle] T> Drop for TypedArena<T> {
     fn drop(&mut self) {
         unsafe {
             // Determine how much was filled.
-            let mut chunks_borrow: std::cell::RefMut<'_, Vec<ArenaChunk<T>>> = self.chunks.borrow_mut();
+            let mut chunks_borrow: std::cell::RefMut<'_, Vec<ArenaChunk<T>>> =
+                self.chunks.borrow_mut();
             if let Some(mut last_chunk) = chunks_borrow.pop() {
                 // Drop the contents of the last chunk.
                 self.clear_last_chunk(&mut last_chunk);
@@ -593,7 +594,8 @@ impl DroplessArena {
         // Move the content to the arena by copying and then forgetting it.
         let len: usize = vec.len();
         Ok(unsafe {
-            let start_ptr: *mut T = self.alloc_raw(Layout::for_value::<[T]>(vec.as_slice())) as *mut T;
+            let start_ptr: *mut T =
+                self.alloc_raw(Layout::for_value::<[T]>(vec.as_slice())) as *mut T;
             vec.as_ptr().copy_to_nonoverlapping(start_ptr, len);
             vec.set_len(0);
             slice::from_raw_parts_mut(start_ptr, len)

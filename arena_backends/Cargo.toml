@@ -5,7 +5,7 @@ repository = ""
 license = "MIT"
 categories = ["allocator", "arena-allocator"]
 version = "0.5.0"
-authors = ["Utishnik and rust lang"]
+authors = ["Utishnik"]
 edition = "2024"
 
 [lib]
@@ -14,10 +14,11 @@ path = "lib.rs"
 
 [dependencies]
 smallvec = "1.15.1"
-bumpalo = { version = "3", features = [
+bumpalo = { version = "3.19.1", features = [
     "allocator_api",
     "collections", "boxed"
 ]}
+allocator-api2 = "0.4.0"
 
 [features]
 unstable = []

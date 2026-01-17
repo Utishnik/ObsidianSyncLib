@@ -4,4 +4,5 @@
 #![feature(never_type)]
 #![feature(rustc_attrs)]
 #![feature(unwrap_infallible)]
+pub mod bumpalo_herd;
 pub mod rustc_arena;
