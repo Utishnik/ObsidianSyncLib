@@ -1,6 +1,6 @@
 [package]
 name = "rust-arena-api"
-description = "A framework and a DSL for building finite state machines in Rust"
+description = "A crate for a convenient API to interact with arena allocators"
 repository = ""
 license = "MIT"
 categories = ["allocator", "arena-allocator"]
@@ -14,6 +14,10 @@ path = "lib.rs"
 
 [dependencies]
 smallvec = "1.15.1"
+bumpalo = { version = "3", features = [
+    "allocator_api",
+    "collections", "boxed"
+]}
 
 [features]
 unstable = []

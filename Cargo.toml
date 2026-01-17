@@ -34,6 +34,17 @@ resolver = "2"
 [workspace.dependencies]
 serde = { version = "1.0.90", features = ["derive"] }
 
+[profile.release]
+opt-level = "z"      # оптимизация по размеру
+lto = true           # link-time optimization
+codegen-units = 1    # лучше качество оптимизации
+strip = true         # удалить отладочные символы
+panic = "abort"      # без unwinding
+
+[profile.dev]
+opt-level = "s"      # мега оптимизация по размеру
+lto = true           # link-time optimization
+
 [[test]]
 name = "test_tokinezer"  
 path = "tests/test_tokinizer.rs"
