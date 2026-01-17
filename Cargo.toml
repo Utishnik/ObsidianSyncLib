@@ -25,7 +25,8 @@ time = "0.3"
 [workspace]
 members = ["ansicodes",
 "barrier_not_idle",
-"encodings"
+"encodings",
+"arena_backends",
 ]
 
 resolver = "2"

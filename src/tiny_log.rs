@@ -1,12 +1,12 @@
 //TODO: ЗАМЕНИТЬ АНСИ ЧЕРЕЗ WRITE НА ЛИБУ
 
 pub use serde_json;
-use std::{fs::File, io::IsTerminal};
 use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
+use std::{fs::File, io::IsTerminal};
 
-use std::sync::{Mutex, Condvar};
+use std::sync::{Condvar, Mutex};
 use std::thread;
 
 #[derive(PartialEq, Eq, Copy, Clone)]
@@ -177,7 +177,7 @@ pub fn pretty_print_buffer(buffer: &[u8]) {
             //     out.write_all(&x[s..]).ok();
             //     write!(&mut out, "`").ok();
             // } else
-                if value.starts_with('"'){
+            if value.starts_with('"') {
                 if let Ok(value) = serde_json::from_str::<String>(&value) {
                     write!(&mut out, "{}", value).ok();
                 } else {
@@ -277,7 +277,7 @@ pub struct LoggerGuard {}
 impl LoggerGuard {
     pub fn flush(&self) {
         let mut queue: std::sync::MutexGuard<'_, TCQueue> = LOG_WRITER.lock().unwrap();
-        if let Some (handle) = &queue.handle {
+        if let Some(handle) = &queue.handle {
             handle.thread().unpark();
         } else {
             return;
@@ -303,7 +303,9 @@ fn directory_sync_thread(path: Box<str>) {
     }
     let mut current: u32 = std::fs::read_dir(&pathbuf)
         .expect("PATH")
-        .filter_map(|entry: Result<std::fs::DirEntry, std::io::Error>| entry.ok()?.file_name().to_str()?.parse::<u32>().ok())
+        .filter_map(|entry: Result<std::fs::DirEntry, std::io::Error>| {
+            entry.ok()?.file_name().to_str()?.parse::<u32>().ok()
+        })
         .max()
         .unwrap_or(0);
     pathbuf.push(&current.to_string());
@@ -389,7 +391,6 @@ fn file_sync_thread(mut file: std::fs::File) {
     }
 }
 
-
 #[must_use]
 pub fn init_stdout_logger() -> LoggerGuard {
     if std::io::stdout().is_terminal() {
@@ -429,7 +430,7 @@ pub fn attach_panic_hook() {
             err = x.to_string();
         }
         let thread: thread::Thread = std::thread::current();
-        let thread: &str= thread.name().unwrap_or("<unnamed>");
+        let thread: &str = thread.name().unwrap_or("<unnamed>");
         if let Some(location) = info.location() {
             crate::log!( format!(
                 "{}:{}:{}",
@@ -440,7 +441,6 @@ pub fn attach_panic_hook() {
         } else {
             crate::error!("PANIC", err, thread)
         }
-
 
         prev(info)
     }));
@@ -538,8 +538,12 @@ macro_rules! log {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __v {
-    ($x:ident) => {$x};
-    ($x:ident; $value: expr) => {$value};
+    ($x:ident) => {
+        $x
+    };
+    ($x:ident; $value: expr) => {
+        $value
+    };
 }
 
 pub trait SafeDisplay: Display {}

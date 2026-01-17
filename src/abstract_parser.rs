@@ -430,7 +430,6 @@ fn take_index_valid_slice_result_ret(slices: &[&Slice]) -> bool {
 // except according to those terms.
 
 /// Parameterized string expansion
-
 use self::Param::*;
 use self::States::*;
 
@@ -989,7 +988,7 @@ fn format(val: Param, op: FormatOp, flags: Flags) -> Result<Vec<u8>, Error> {
 #[cfg(test)]
 mod test {
     use super::Param::{self, Number, Words};
-    use super::{expand, Variables};
+    use super::{Variables, expand};
     use std::result::Result::Ok;
 
     #[test]
