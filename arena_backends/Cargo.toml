@@ -9,7 +9,7 @@ authors = ["Utishnik"]
 edition = "2024"
 
 [lib]
-name = "arena_rustc"          
+name = "arena_api"          
 path = "lib.rs"
 
 [dependencies]
