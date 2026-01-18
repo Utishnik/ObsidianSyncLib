@@ -34,7 +34,6 @@ resolver = "2"
 [workspace.dependencies]
 serde = { version = "1.0.90", features = ["derive"] }
 
-
 [profile.release]
 opt-level = "z"           
 lto = true                # полная LTO
