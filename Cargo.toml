@@ -34,6 +34,14 @@ resolver = "2"
 [workspace.dependencies]
 serde = { version = "1.0.90", features = ["derive"] }
 
+[build]
+rustflags = [
+    "-C", "linker=wild",
+    "-C", "link-arg=-Wl,--threads=8",  # параллельная линковка
+    "-C", "link-arg=-Wl,--compress-debug-sections=zlib",
+    "-Clink-self-contained=no",
+]
+
 [profile.release]
 opt-level = "z"           
 lto = true                # полная LTO
