@@ -269,3 +269,5 @@ pub use gradient::*;
 
 mod rgb;
 pub use rgb::*;
+
+pub mod get_term_info;
