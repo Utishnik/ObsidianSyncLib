@@ -4,11 +4,14 @@ use std::collections::HashMap;
 use std::env;
 use std::fs::File;
 use std::io;
-use std::io::prelude::*;
 use std::io::BufReader;
+use std::io::prelude::*;
 use std::path::Path;
+use crate::term_bd_info::*;
 
-#[derive(Debug, Eq, PartialEq,Clone, Copy)]
+pub type Result<T> = std::result::Result<T, Error>;
+
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
 /// An error from parsing a terminfo entry
 pub enum Error {
     /// The "magic" number at the start of the file was wrong.
@@ -36,6 +39,32 @@ pub enum Error {
     /// The strings table was missing a trailing null terminator.
     StringsMissingNull,
 }
+
+/// An error arising from interacting with the terminal.
+#[derive(Debug)]
+#[non_exhaustive]
+pub enum ErrorUsed {
+    /// Indicates an error from any underlying IO
+    Io(io::Error),
+    /// Indicates an error during terminfo parsing
+    TerminfoParsing(String),
+    /// Indicates an error expanding a parameterized string from the terminfo database
+    ParameterizedExpansion(String),
+    /// Indicates that the terminal does not support the requested operation.
+    NotSupported,
+    /// Indicates that the `TERM` environment variable was unset, and thus we were unable to detect
+    /// which terminal we should be using.
+    TermUnset,
+    /// Indicates that we were unable to find a terminfo entry for the requested terminal.
+    TerminfoEntryNotFound,
+    /// Indicates that the cursor could not be moved to the requested position.
+    CursorDestinationInvalid,
+    /// Indicates that the terminal does not support displaying the requested color.
+    ///
+    /// This is like `NotSupported`, but more specific.
+    ColorOutOfRange,
+}
+
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -77,7 +106,70 @@ pub fn is_ansi(name: &str) -> bool {
         Err(0) => false,
         Err(idx) => name.starts_with(ANSI_TERM_PREFIX[idx - 1]),
     }
-    
+}
+
+#[cfg(windows)]
+
+pub fn from_env() -> Result<TermInfo> {
+    let term_var: Option<String> = env::var("TERM").ok();
+    let term_name: Option<&str> = term_var.as_deref().or_else(|| {
+        env::var("MSYSCON").ok().and_then(|s| {
+            if s == "mintty.exe" {
+                Some("msyscon")
+            } else {
+                None
+            }
+        })
+    });
+
+    #[cfg(windows)]
+    {
+        if term_name.is_none() && win::supports_ansi() {
+            // Microsoft people seem to be fine with pretending to be xterm:
+            // https://github.com/Microsoft/WSL/issues/1446
+            // The basic ANSI fallback terminal will be uses.
+            return TermInfo::from_name("xterm");
+        }
+    }
+
+    if let Some(term_name) = term_name {
+        TermInfo::from_name(term_name)
+    } else {
+        Err(crate::Error::TermUnset)
+    }
 }
 
 
+#[cfg(windows)]
+
+pub fn from_name(name: &str) -> Result<TermInfo> {
+    if let Some(path) = get_dbpath_for_term(name) {
+        match TermInfo::from_path(path) {
+            Ok(term) => return Ok(term),
+            // Skip IO Errors (e.g., permission denied).
+            Err(crate::Error::Io(_)) => {}
+            // Don't ignore malformed terminfo databases.
+            Err(e) => return Err(e),
+        }
+    }
+    // Basic ANSI fallback terminal.
+    if is_ansi(name) {
+        let mut strings: HashMap<&str, Vec<u8>> = HashMap::new();
+        strings.insert("sgr0", b"\x1B[0m".to_vec());
+        strings.insert("bold", b"\x1B[1m".to_vec());
+        strings.insert("setaf", b"\x1B[3%p1%dm".to_vec());
+        strings.insert("setab", b"\x1B[4%p1%dm".to_vec());
+
+        let mut numbers: HashMap<&str, u32> = HashMap::new();
+        numbers.insert("colors", 8);
+
+        Ok(TermInfo {
+            names: vec![name.to_owned()],
+            bools: HashMap::new(),
+            numbers,
+            strings,
+        })
+    } else {
+        Err(crate::Error::TerminfoEntryNotFound)
+    }
+}

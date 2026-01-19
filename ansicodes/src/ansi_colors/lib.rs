@@ -270,4 +270,7 @@ pub use gradient::*;
 mod rgb;
 pub use rgb::*;
 
+//Term get utils
 pub mod get_term_info;
+pub mod term_bd_info;
+pub mod parse_term_info;
