@@ -8,7 +8,7 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::path::Path;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq,Clone, Copy)]
 /// An error from parsing a terminfo entry
 pub enum Error {
     /// The "magic" number at the start of the file was wrong.
