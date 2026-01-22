@@ -46,6 +46,7 @@ name = "ansicodes"
 version = "0.1.0"
 dependencies = [
  "doc-comment",
+ "libc",
  "serde",
  "serde_json",
  "windows-sys",

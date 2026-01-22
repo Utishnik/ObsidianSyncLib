@@ -1,5 +1,6 @@
 //https://github.com/Stebalien/term/blob/master/src/terminfo/mod.rs
 
+use crate::term_bd_info::*;
 use std::collections::HashMap;
 use std::env;
 use std::fs::File;
@@ -7,7 +8,6 @@ use std::io;
 use std::io::BufReader;
 use std::io::prelude::*;
 use std::path::Path;
-use crate::term_bd_info::*;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -64,7 +64,6 @@ pub enum ErrorUsed {
     /// This is like `NotSupported`, but more specific.
     ColorOutOfRange,
 }
-
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -138,7 +137,6 @@ pub fn from_env() -> Result<TermInfo> {
         Err(crate::Error::TermUnset)
     }
 }
-
 
 #[cfg(windows)]
 
