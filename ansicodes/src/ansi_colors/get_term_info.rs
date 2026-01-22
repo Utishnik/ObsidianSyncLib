@@ -9,7 +9,7 @@ use std::io::BufReader;
 use std::io::prelude::*;
 use std::path::Path;
 
-pub type Result<T> = std::result::Result<T, Error>;
+pub type Result<T> = std::result::Result<T, ErrorUsed>;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
 /// An error from parsing a terminfo entry
@@ -108,7 +108,6 @@ pub fn is_ansi(name: &str) -> bool {
 }
 
 #[cfg(windows)]
-
 pub fn from_env() -> Result<TermInfo> {
     let term_var: Option<String> = env::var("TERM").ok();
     let term_name: Option<&str> = term_var.as_deref().or_else(|| {
@@ -134,40 +133,42 @@ pub fn from_env() -> Result<TermInfo> {
     if let Some(term_name) = term_name {
         TermInfo::from_name(term_name)
     } else {
-        Err(crate::Error::TermUnset)
+        Err(ErrorUsed::TermUnset)
     }
 }
 
 #[cfg(windows)]
+impl TermInfo {
+    pub fn from_name(name: &str) -> Result<TermInfo> {
+        if let Some(path) = get_dbpath_for_term(name) {
+            match TermInfo::from_path(path) {
+                Ok(term) => return Ok(term),
+                // Skip IO Errors (e.g., permission denied).
+                Err(ErrorUsed::Io(_)) => {}
+                // Don't ignore malformed terminfo databases.
+                Err(e) => return Err(e),
+            }
+        }
+        // Basic ANSI fallback terminal.
+        if is_ansi(name) {
+            let mut strings: HashMap<&str, Vec<u8>> = HashMap::new();
+            strings.insert("sgr0", b"\x1B[0m".to_vec());
+            strings.insert("bold", b"\x1B[1m".to_vec());
+            strings.insert("setaf", b"\x1B[3%p1%dm".to_vec());
+            strings.insert("setab", b"\x1B[4%p1%dm".to_vec());
 
-pub fn from_name(name: &str) -> Result<TermInfo> {
-    if let Some(path) = get_dbpath_for_term(name) {
-        match TermInfo::from_path(path) {
-            Ok(term) => return Ok(term),
-            // Skip IO Errors (e.g., permission denied).
-            Err(crate::Error::Io(_)) => {}
-            // Don't ignore malformed terminfo databases.
-            Err(e) => return Err(e),
+            let mut numbers: HashMap<&str, u32> = HashMap::new();
+            numbers.insert("colors", 8);
+
+            Ok(TermInfo {
+                names: vec![name.to_owned()],
+                bools: HashMap::new(),
+                numbers,
+                strings,
+            })
+        } else {
+            Err(ErrorUsed::TerminfoEntryNotFound)
         }
     }
-    // Basic ANSI fallback terminal.
-    if is_ansi(name) {
-        let mut strings: HashMap<&str, Vec<u8>> = HashMap::new();
-        strings.insert("sgr0", b"\x1B[0m".to_vec());
-        strings.insert("bold", b"\x1B[1m".to_vec());
-        strings.insert("setaf", b"\x1B[3%p1%dm".to_vec());
-        strings.insert("setab", b"\x1B[4%p1%dm".to_vec());
-
-        let mut numbers: HashMap<&str, u32> = HashMap::new();
-        numbers.insert("colors", 8);
-
-        Ok(TermInfo {
-            names: vec![name.to_owned()],
-            bools: HashMap::new(),
-            numbers,
-            strings,
-        })
-    } else {
-        Err(crate::Error::TerminfoEntryNotFound)
-    }
 }
+

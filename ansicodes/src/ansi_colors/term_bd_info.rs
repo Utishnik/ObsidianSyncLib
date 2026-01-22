@@ -30,8 +30,9 @@ const DEFAULT_LOCATIONS: &[&str] = &[
 /// Return path to database entry for `term`
 pub fn get_dbpath_for_term(term: &str) -> Option<PathBuf> {
     let mut dirs_to_search: Vec<PathBuf> = Vec::new();
-    let mut default_locations = DEFAULT_LOCATIONS.iter().map(PathBuf::from);
-    let first_char = term.chars().next()?;
+    let mut default_locations: std::iter::Map<std::slice::Iter<'_, &str>, fn(&&str) -> PathBuf> =
+        DEFAULT_LOCATIONS.iter().map(|x: &&str| PathBuf::from(x));
+    let first_char: char = term.chars().next()?;
 
     // From the manual.
     //
