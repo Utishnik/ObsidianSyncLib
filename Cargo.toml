@@ -27,6 +27,7 @@ members = ["ansicodes",
 "barrier_not_idle",
 "encodings",
 "arena_backends",
+"bitfields",
 ]
 
 resolver = "2"

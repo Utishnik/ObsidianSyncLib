@@ -1,0 +1,20 @@
+[package]
+name = "bitfield_api"          
+license = "BSD 3-Clause, Apache 2.0 and MIT"
+description = "A crate for a convenient API to interact with bitfields"
+categories = ["bitfield", "bitfield-api"]
+version = "0.5.0"
+authors = ["Utishnik and C2Rust project"]
+readme = "READMEC2RUST.md"
+edition = "2024"
+
+[dependencies]
+# nightly-2022-08-08 requires these exact versions
+proc-macro2 = "=1.0.103"
+syn = { version = "=2.0.106", features = ["full"] }
+quote = "=1.0.40"
+
+[lib]
+proc-macro = true
+name = "bitfield_api"          
+path = "lib.rs"
