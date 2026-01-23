@@ -31,18 +31,18 @@ fn parse_bitfield_attr(
     attr: &Attribute,
     field_ident: &Ident,
 ) -> Result<Option<BFFieldAttr>, Error> {
-    let mut name = None;
-    let mut ty = None;
-    let mut bits = None;
-    let mut bits_span = None;
-    let mut is_padding = false;
+    let mut name: Option<String> = None;
+    let mut ty: Option<String> = None;
+    let mut bits: Option<String> = None;
+    let mut bits_span: Option<Span> = None;
+    let mut is_padding: bool = false;
 
     attr.parse_nested_meta(|meta| {
         if meta.path.is_ident("padding") {
             // If the attribute is just `#[bitfield(padding)]`, we can skip parsing further.
             is_padding = true;
         } else {
-            let value = match meta.value()?.parse::<LitStr>() {
+            let value: String = match meta.value()?.parse::<LitStr>() {
                 Ok(lit_str) => lit_str.value(),
                 Err(_) => {
                     let err_str = "Found bitfield attribute with non str literal assignment";
@@ -82,8 +82,8 @@ fn parse_bitfield_attr(
             missing_fields.push("bits");
         }
 
-        let err_str = format!("Missing bitfield params: {:?}", missing_fields);
-        let span = attr.span();
+        let err_str: String = format!("Missing bitfield params: {:?}", missing_fields);
+        let span: Span = attr.span();
 
         return Err(Error::new(span, err_str));
     }
@@ -115,10 +115,10 @@ fn filter_and_parse_fields(field: &Field) -> Vec<Result<BFFieldAttr, Error>> {
 }
 
 fn parse_bitfield_ty_path(field: &BFFieldAttr) -> Path {
-    let mut segments = Punctuated::new();
-    let mut segment_strings = field.ty.split("::").peekable();
-    let colon = Token![::]([Span::call_site(), Span::call_site()]);
-    let leading_colon = segment_strings.next_if_eq(&"").map(|_| colon);
+    let mut segments: Punctuated<PathSegment, syn::token::PathSep> = Punctuated::new();
+    let mut segment_strings: std::iter::Peekable<std::str::Split<'_, &str>> = field.ty.split("::").peekable();
+    let colon: syn::token::PathSep = Token![::]([Span::call_site(), Span::call_site()]);
+    let leading_colon: Option<syn::token::PathSep> = segment_strings.next_if_eq(&"").map(|_| colon);
 
     while let Some(segment_string) = segment_strings.next() {
         segments.push_value(PathSegment {
@@ -140,7 +140,7 @@ fn parse_bitfield_ty_path(field: &BFFieldAttr) -> Path {
 #[cfg(test)]
 #[test]
 fn test_parse_bitfield_ty_path_non_empty_idents() {
-    let tys = ["::core::ffi::c_int", "core::ffi::c_int"];
+    let tys: [&str; 2] = ["::core::ffi::c_int", "core::ffi::c_int"];
     for ty in tys {
         let field = BFFieldAttr {
             field_name: Ident::new("field", Span::call_site()),
@@ -148,13 +148,13 @@ fn test_parse_bitfield_ty_path_non_empty_idents() {
             ty: ty.into(),
             bits: (Default::default(), Span::call_site()),
         };
-        let _path = parse_bitfield_ty_path(&field);
+        let _path: Path = parse_bitfield_ty_path(&field);
     }
 }
 
 #[proc_macro_derive(BitfieldStruct, attributes(bitfield))]
 pub fn bitfield_struct(input: TokenStream) -> TokenStream {
-    let struct_item = parse_macro_input!(input as ItemStruct);
+    let struct_item: ItemStruct = parse_macro_input!(input as ItemStruct);
 
     match bitfield_struct_impl(struct_item) {
         Ok(ts) => ts,
@@ -164,37 +164,37 @@ pub fn bitfield_struct(input: TokenStream) -> TokenStream {
 
 fn bitfield_struct_impl(struct_item: ItemStruct) -> Result<TokenStream, Error> {
     // REVIEW: Should we throw a compile error if bit ranges on a single field overlap?
-    let struct_ident = struct_item.ident;
-    let fields = match struct_item.fields {
+    let struct_ident: Ident = struct_item.ident;
+    let fields: Punctuated<Field, syn::token::Comma> = match struct_item.fields {
         Fields::Named(named_fields) => named_fields.named,
         Fields::Unnamed(_) => {
-            let err_str =
+            let err_str: &str =
                 "Unnamed struct fields are not currently supported but may be in the future.";
-            let span = struct_ident.span();
+            let span: Span = struct_ident.span();
 
             return Err(Error::new(span, err_str));
         }
         Fields::Unit => {
-            let err_str = "Cannot create bitfield struct out of struct with no fields";
-            let span = struct_ident.span();
+            let err_str: &str = "Cannot create bitfield struct out of struct with no fields";
+            let span: Span = struct_ident.span();
 
             return Err(Error::new(span, err_str));
         }
     };
     let bitfields: Result<Vec<BFFieldAttr>, Error> =
         fields.iter().flat_map(filter_and_parse_fields).collect();
-    let bitfields = bitfields?;
+    let bitfields: Vec<BFFieldAttr> = bitfields?;
     let field_types: Vec<_> = bitfields.iter().map(parse_bitfield_ty_path).collect();
-    let field_types_return = &field_types;
-    let field_types_typedef = &field_types;
-    let field_types_setter_arg = &field_types;
+    let field_types_return: &Vec<Path> = &field_types;
+    let field_types_typedef: &Vec<Path> = &field_types;
+    let field_types_setter_arg: &Vec<Path> = &field_types;
     let method_names: Vec<_> = bitfields
         .iter()
         .map(|field| Ident::new(&field.name, Span::call_site()))
         .collect();
     let field_names: Vec<_> = bitfields.iter().map(|field| &field.field_name).collect();
-    let field_names_setters = &field_names;
-    let field_names_getters = &field_names;
+    let field_names_setters: &Vec<&Ident> = &field_names;
+    let field_names_getters: &Vec<&Ident> = &field_names;
     let method_name_setters: Vec<_> = method_names
         .iter()
         .map(|field_ident| {
@@ -207,16 +207,16 @@ fn bitfield_struct_impl(struct_item: ItemStruct) -> Result<TokenStream, Error> {
     let field_bit_info: Result<Vec<_>, Error> = bitfields
         .iter()
         .map(|field| {
-            let bit_string = &field.bits.0;
+            let bit_string: &String = &field.bits.0;
             let nums: Vec<_> = bit_string.split("..=").collect();
-            let err_str = "bits param must be in the format \"1..=4\"";
+            let err_str: &str = "bits param must be in the format \"1..=4\"";
 
             if nums.len() != 2 {
                 return Err(Error::new(field.bits.1, err_str));
             }
 
-            let lhs = nums[0].parse::<usize>();
-            let rhs = nums[1].parse::<usize>();
+            let lhs: Result<usize, std::num::ParseIntError> = nums[0].parse::<usize>();
+            let rhs: Result<usize, std::num::ParseIntError> = nums[1].parse::<usize>();
 
             let (lhs, rhs) = match (lhs, rhs) {
                 (Err(_), _) | (_, Err(_)) => return Err(Error::new(field.bits.1, err_str)),
@@ -226,9 +226,9 @@ fn bitfield_struct_impl(struct_item: ItemStruct) -> Result<TokenStream, Error> {
             Ok(quote! { (#lhs, #rhs) })
         })
         .collect();
-    let field_bit_info = field_bit_info?;
-    let field_bit_info_setters = &field_bit_info;
-    let field_bit_info_getters = &field_bit_info;
+    let field_bit_info: Vec<proc_macro2::TokenStream> = field_bit_info?;
+    let field_bit_info_setters: &Vec<proc_macro2::TokenStream> = &field_bit_info;
+    let field_bit_info_getters: &Vec<proc_macro2::TokenStream> = &field_bit_info;
 
     // TODO: Method visibility determined by struct field visibility?
     let q = quote! {
