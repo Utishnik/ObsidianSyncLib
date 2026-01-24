@@ -185,7 +185,7 @@ fn bitfield_struct_impl(struct_item: ItemStruct) -> Result<TokenStream, Error> {
     let bitfields: Result<Vec<BFFieldAttr>, Error> =
         fields.iter().flat_map(filter_and_parse_fields).collect();
     let bitfields: Vec<BFFieldAttr> = bitfields?;
-    let field_types: Vec<_ > = bitfields.iter().map(parse_bitfield_ty_path).collect();
+    let field_types: Vec<_> = bitfields.iter().map(parse_bitfield_ty_path).collect();
     let field_types_return: &Vec<Path> = &field_types;
     let field_types_typedef: &Vec<Path> = &field_types;
     let field_types_setter_arg: &Vec<Path> = &field_types;

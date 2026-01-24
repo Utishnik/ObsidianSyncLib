@@ -7,6 +7,11 @@ version = "0.5.0"
 authors = ["Utishnik and C2Rust project"]
 edition = "2024"
 
+[features]
+default = ["std"]  #default std
+std = []  
+no_std = []
+
 [lib]
 name = "bitfield_c2rust_api_field_type"          
 path = "lib.rs"
