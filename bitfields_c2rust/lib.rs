@@ -10,8 +10,8 @@ use syn::parse::Error;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 use syn::{
-    parse_macro_input, Attribute, Field, Fields, Ident, ItemStruct, LitStr, Path, PathArguments,
-    PathSegment, Token,
+    Attribute, Field, Fields, Ident, ItemStruct, LitStr, Path, PathArguments, PathSegment, Token,
+    parse_macro_input,
 };
 
 #[cfg(target_endian = "big")]
@@ -45,7 +45,7 @@ fn parse_bitfield_attr(
             let value: String = match meta.value()?.parse::<LitStr>() {
                 Ok(lit_str) => lit_str.value(),
                 Err(_) => {
-                    let err_str = "Found bitfield attribute with non str literal assignment";
+                    let err_str: &str = "Found bitfield attribute with non str literal assignment";
                     return Err(meta.error(err_str));
                 }
             };
@@ -116,7 +116,8 @@ fn filter_and_parse_fields(field: &Field) -> Vec<Result<BFFieldAttr, Error>> {
 
 fn parse_bitfield_ty_path(field: &BFFieldAttr) -> Path {
     let mut segments: Punctuated<PathSegment, syn::token::PathSep> = Punctuated::new();
-    let mut segment_strings: std::iter::Peekable<std::str::Split<'_, &str>> = field.ty.split("::").peekable();
+    let mut segment_strings: std::iter::Peekable<std::str::Split<'_, &str>> =
+        field.ty.split("::").peekable();
     let colon: syn::token::PathSep = Token![::]([Span::call_site(), Span::call_site()]);
     let leading_colon: Option<syn::token::PathSep> = segment_strings.next_if_eq(&"").map(|_| colon);
 
@@ -142,7 +143,7 @@ fn parse_bitfield_ty_path(field: &BFFieldAttr) -> Path {
 fn test_parse_bitfield_ty_path_non_empty_idents() {
     let tys: [&str; 2] = ["::core::ffi::c_int", "core::ffi::c_int"];
     for ty in tys {
-        let field = BFFieldAttr {
+        let field: BFFieldAttr = BFFieldAttr {
             field_name: Ident::new("field", Span::call_site()),
             name: Default::default(),
             ty: ty.into(),
@@ -184,7 +185,7 @@ fn bitfield_struct_impl(struct_item: ItemStruct) -> Result<TokenStream, Error> {
     let bitfields: Result<Vec<BFFieldAttr>, Error> =
         fields.iter().flat_map(filter_and_parse_fields).collect();
     let bitfields: Vec<BFFieldAttr> = bitfields?;
-    let field_types: Vec<_> = bitfields.iter().map(parse_bitfield_ty_path).collect();
+    let field_types: Vec<_ > = bitfields.iter().map(parse_bitfield_ty_path).collect();
     let field_types_return: &Vec<Path> = &field_types;
     let field_types_typedef: &Vec<Path> = &field_types;
     let field_types_setter_arg: &Vec<Path> = &field_types;
@@ -231,7 +232,7 @@ fn bitfield_struct_impl(struct_item: ItemStruct) -> Result<TokenStream, Error> {
     let field_bit_info_getters: &Vec<proc_macro2::TokenStream> = &field_bit_info;
 
     // TODO: Method visibility determined by struct field visibility?
-    let q = quote! {
+    let q: proc_macro2::TokenStream = quote! {
         #[automatically_derived]
         impl #struct_ident {
             #(
@@ -246,7 +247,7 @@ fn bitfield_struct_impl(struct_item: ItemStruct) -> Result<TokenStream, Error> {
 
                 /// This method allows you to read from a bitfield to a value
                 pub fn #method_names(&self) -> #field_types_return {
-                    use c2rust_bitfields::FieldType;
+                    use c2rust_bitfields::FieldType;//бля
 
                     type IntType = #field_types_typedef;
 
