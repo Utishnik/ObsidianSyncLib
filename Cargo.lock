@@ -77,13 +77,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "bitfield_api"
+name = "bitfield_c2rust_api"
 version = "0.5.0"
 dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.106",
 ]
+
+[[package]]
+name = "bitfield_c2rust_api_field_type"
+version = "0.5.0"
 
 [[package]]
 name = "bitflags"

@@ -1,5 +1,5 @@
 [package]
-name = "bitfield_api"          
+name = "bitfield_c2rust_api"          
 license = "BSD 3-Clause, Apache 2.0 and MIT"
 description = "A crate for a convenient API to interact with bitfields"
 categories = ["bitfield", "bitfield-api"]
@@ -16,5 +16,5 @@ quote = "=1.0.40"
 
 [lib]
 proc-macro = true
-name = "bitfield_api"          
+name = "bitfield_c2rust_api"          
 path = "lib.rs"

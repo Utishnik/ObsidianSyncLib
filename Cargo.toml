@@ -28,6 +28,7 @@ members = ["ansicodes",
 "encodings",
 "arena_backends",
 "bitfields_c2rust",
+"bitfields_c2rust/field_type"
 ]
 
 resolver = "2"
