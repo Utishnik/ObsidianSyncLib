@@ -14,6 +14,7 @@ use syn::{
     parse_macro_input,
 };
 
+
 #[cfg(target_endian = "big")]
 compile_error!("Big endian architectures are not currently supported");
 
@@ -96,6 +97,7 @@ fn parse_bitfield_attr(
     }))
 }
 
+//todo нужно унврапы убрать
 fn filter_and_parse_fields(field: &Field) -> Vec<Result<BFFieldAttr, Error>> {
     let attrs: Vec<_> = field
         .attrs

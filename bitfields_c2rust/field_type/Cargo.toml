@@ -12,6 +12,9 @@ default = ["std"]  #default std
 std = []  
 no_std = []
 
+[dependencies]
+obsidian_sync_lib = { path = "../.." }  
+
 [lib]
 name = "bitfield_c2rust_api_field_type"          
 path = "lib.rs"

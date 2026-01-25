@@ -22,6 +22,15 @@ tinyvec = "1.8"
 itoa = "1.0"
 time = "0.3"
 
+[features]
+dev_utils = []
+display_utils = []
+debug_trait_utils = []
+debug_and_test_utils = []
+debug = ["dev_utils","display_utils",
+"debug_trait_utils","debug_and_test_utils"] 
+default = ["debug"]
+
 [workspace]
 members = ["ansicodes",
 "barrier_not_idle",

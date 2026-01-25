@@ -1,3 +1,4 @@
+#[cfg(feature = "dev_utils")]
 pub mod dev_utils {
     #[macro_export]
     macro_rules! not_panic_todo {
@@ -23,6 +24,7 @@ pub mod dev_utils {
 }
 }
 
+#[cfg(feature = "display_utils")]
 pub mod display_utils {
     use crate::debug;
     use crate::debug::debug_and_test_utils::reset_color_print;
@@ -276,6 +278,7 @@ pub mod display_utils {
     }
 }
 
+#[cfg(feature = "debug_trait_utils")]
 pub mod debug_trait_utils {
     use crate::debug::debug_and_test_utils::reset_color_print;
     use crate::debug::debug_and_test_utils::set_color_print;
@@ -465,6 +468,7 @@ pub mod debug_trait_utils {
     }
 }
 
+#[cfg(feature = "debug_and_test_utils")]
 pub mod debug_and_test_utils {
     use crate::bits_utils::size_bits;
     use crate::bits_utils::size_bytes;

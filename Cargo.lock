@@ -88,6 +88,9 @@ dependencies = [
 [[package]]
 name = "bitfield_c2rust_api_field_type"
 version = "0.5.0"
+dependencies = [
+ "obsidian_sync_lib",
+]
 
 [[package]]
 name = "bitflags"
