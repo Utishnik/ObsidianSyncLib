@@ -7,13 +7,19 @@ version = "0.1.0"
 authors = ["Utishnik"]
 edition = "2024"
 
-[features]
-std = []  
-no_std = []
-
 [dependencies]
 obsidian_sync_lib = { path = "../..", default-features = false, features = ["debug"] }  
+proc-macro2 = "=1.0.103"
+syn = { version = "=2.0.106", features = ["full"] }
+quote = "=1.0.40"
+
+[features]
+unstable = []
+stable = []
+default = ["stable"]
+no_std = []
 
 [lib]
-name = "bitfield_c2rust_api_build_error"          
+name = "bitfield_c2rust_api_build_error"    
+proc-macro = true      
 path = "lib.rs"

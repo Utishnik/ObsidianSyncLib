@@ -4,31 +4,29 @@
 #![recursion_limit = "512"]
 
 #[cfg(feature = "unstable")]
-pub mod unstable_build_error{
+pub mod unstable_build_error {
     #![feature(proc_macro_totokens)]
     use proc_macro::ToTokens;
-    
+
     pub fn build_error_feature<T, U>(tokens: T, message: U) -> Error
     where
         T: ToTokens + quote::ToTokens,
         U: Display,
     {
-        Error::new_spanned(
-                tokens,
-                message
-        )
+        Error::new_spanned(tokens, message)
     }
 }
 
+use core::fmt::Display;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
 use syn::parse::Error;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
- use core::fmt::Display;
 use syn::{
-    Attribute, DeriveInput, Field, Fields, Ident, ItemStruct, LitStr, Path, PathArguments, PathSegment, Token, parse_macro_input
+    Attribute, DeriveInput, Field, Fields, Ident, ItemStruct, LitStr, Path, PathArguments,
+    PathSegment, Token, parse_macro_input,
 };
 
 #[cfg(target_endian = "big")]
@@ -180,7 +178,6 @@ pub fn bitfield_struct(input: TokenStream) -> TokenStream {
         Err(error) => error.to_compile_error().into(),
     }
 }
-
 
 //todo debug msg о  if bit ranges on a single field overlap
 fn bitfield_struct_impl(struct_item: ItemStruct) -> Result<TokenStream, Error> {
