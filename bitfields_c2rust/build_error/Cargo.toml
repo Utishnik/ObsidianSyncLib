@@ -16,7 +16,8 @@ quote = "=1.0.40"
 [features]
 unstable = []
 stable = []
-default = ["stable"]
+comp_err = []
+default = ["stable","comp_err"]
 no_std = []
 
 [lib]
