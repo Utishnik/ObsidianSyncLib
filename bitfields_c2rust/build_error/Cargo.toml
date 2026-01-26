@@ -1,14 +1,13 @@
 [package]
-name = "bitfield_c2rust_api_field_type"          
+name = "bitfield_c2rust_api_build_error"          
 license = "Apache 2.0 and MIT"
 description = "A subcrate for a convenient API to interact with bitfields"
-categories = ["bitfield", "bitfield-api"]
-version = "0.5.0"
-authors = ["Utishnik and C2Rust project"]
+categories = ["error", "build"]
+version = "0.1.0"
+authors = ["Utishnik"]
 edition = "2024"
 
 [features]
-default = ["std"]  #default std
 std = []  
 no_std = []
 
@@ -16,5 +15,5 @@ no_std = []
 obsidian_sync_lib = { path = "../..", default-features = false, features = ["debug"] }  
 
 [lib]
-name = "bitfield_c2rust_api_field_type"          
+name = "bitfield_c2rust_api_build_error"          
 path = "lib.rs"
