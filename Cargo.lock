@@ -90,7 +90,6 @@ dependencies = [
 name = "bitfield_c2rust_api_build_error"
 version = "0.1.0"
 dependencies = [
- "obsidian_sync_lib",
  "proc-macro2",
  "quote",
  "syn 2.0.106",

@@ -1,5 +1,6 @@
 use proc_macro::TokenStream;
 use proc_macro2::Span;
+mod builder;
 
 #[cfg(feature = "unstable")]
 mod unstable_build_error {
@@ -21,6 +22,7 @@ mod unstable_build_error {
 #[cfg(feature = "stable")]
 mod stable_build_error {
     use core::fmt::Display;
+    use proc_macro2::Span;
     use syn::DeriveInput;
     use syn::Error;
     use syn::parse_macro_input;
@@ -37,6 +39,13 @@ mod stable_build_error {
         U: Display,
     {
         Error::new(ast.ident.span(), message)
+    }
+
+    pub fn build_span_error<U>(span: Span,message: U) -> Error
+     where
+        U: Display,
+    {
+        Error::new(span, message)
     }
 }
 
