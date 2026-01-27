@@ -13,6 +13,7 @@ edition = "2024"
 proc-macro2 = "=1.0.103"
 syn = { version = "=2.0.106", features = ["full"] }
 quote = "=1.0.40"
+bitfield_c2rust_api_build_error = { path = "build_error", features = ["stable","comp_err"] } #нужно имено name пакета
 
 [features]
 unstable = []

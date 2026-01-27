@@ -80,6 +80,7 @@ dependencies = [
 name = "bitfield_c2rust_api"
 version = "0.5.0"
 dependencies = [
+ "bitfield_c2rust_api_build_error",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
