@@ -17,8 +17,8 @@ pub mod unstable_build_error {
     }
 }
 
-use core::fmt::Display;
 use bitfield_c2rust_api_build_error;
+use core::fmt::Display;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
@@ -112,9 +112,10 @@ fn parse_bitfield_attr(
     }))
 }
 
-fn filter_field_build_error(attr: &Attribute){
+fn filter_field_build_error(attr: &Attribute) {
     let span: Span = attr.pound_token.span;
     let msg: Option<String> = span.source_text();
+    //bitfield_c2rust_api_build_error::
 }
 
 //todo нужно унврапы убрать
@@ -124,9 +125,7 @@ fn filter_and_parse_fields(field: &Field) -> Vec<Result<BFFieldAttr, Error>> {
         .iter()
         .filter(|attr| {
             let last_segment: Option<&PathSegment> = attr.path().segments.last();
-            if last_segment.is_none(){
-
-            }
+            if last_segment.is_none() {}
             attr.path().segments.last().unwrap().ident == "bitfield"
         })
         .collect();

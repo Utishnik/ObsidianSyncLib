@@ -1,6 +1,8 @@
 use proc_macro::TokenStream;
 use proc_macro2::Span;
-mod builder;
+use syn::DeriveInput;
+use syn::Error;
+use syn::parse_macro_input;
 
 #[cfg(feature = "unstable")]
 mod unstable_build_error {
@@ -22,7 +24,7 @@ mod unstable_build_error {
 #[cfg(feature = "stable")]
 mod stable_build_error {
     use core::fmt::Display;
-    use proc_macro2::Span;
+    use proc_macro::Span;
     use syn::DeriveInput;
     use syn::Error;
     use syn::parse_macro_input;
@@ -41,11 +43,11 @@ mod stable_build_error {
         Error::new(ast.ident.span(), message)
     }
 
-    pub fn build_span_error<U>(span: Span,message: U) -> Error
-     where
+    pub fn build_span_error<U>(span: Span, message: U) -> Error
+    where
         U: Display,
     {
-        Error::new(span, message)
+        Error::new(span.into(), message)
     }
 }
 
@@ -57,4 +59,14 @@ mod build_compile_error {
     pub fn build_error(ast: &DeriveInput, err: Error) -> TokenStream {
         err.to_compile_error().into()
     }
+}
+
+#[cfg(feature = "comp_err")]
+#[proc_macro_attribute]
+pub fn build_compiler_error(ast: TokenStream, err: TokenStream) -> TokenStream {
+    let input: DeriveInput = parse_macro_input!(ast);
+    let err_convert: Result<syn::ItemMacro, Error> = syn::parse(err);
+    let err_convert_unwrap: Error = err_convert.unwrap_err();
+    let res: TokenStream = build_compile_error::build_error(&input, err_convert_unwrap);
+    res
 }
