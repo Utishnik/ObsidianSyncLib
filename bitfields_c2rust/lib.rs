@@ -103,12 +103,12 @@ fn parse_bitfield_attr(
 
         return Err(Error::new(span, err_str));
     }
-
+    //safe проверка выше
     Ok(Some(BFFieldAttr {
         field_name: field_ident.clone(),
-        name: name.unwrap(),
-        ty: ty.unwrap(),
-        bits: (bits.unwrap(), bits_span.unwrap()),
+        name: unsafe { name.unwrap_unchecked() },
+        ty: unsafe { ty.unwrap_unchecked() },
+        bits: unsafe { (bits.unwrap(), bits_span.unwrap_unchecked()) },
     }))
 }
 
@@ -125,8 +125,11 @@ fn filter_and_parse_fields(field: &Field) -> Vec<Result<BFFieldAttr, Error>> {
         .iter()
         .filter(|attr| {
             let last_segment: Option<&PathSegment> = attr.path().segments.last();
-            if last_segment.is_none() {}
-            attr.path().segments.last().unwrap().ident == "bitfield"
+            if last_segment.is_none() {
+                panic!("filter_and_parse_fields last_segment.is_none()");
+            }
+            let last_segment_unwrap: &PathSegment = unsafe { last_segment.unwrap_unchecked() };
+            last_segment_unwrap.ident == "bitfield"
         })
         .collect();
 
