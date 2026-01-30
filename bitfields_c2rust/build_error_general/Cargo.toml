@@ -1,0 +1,20 @@
+[package]
+name = "build_error_general"          
+license = "Apache 2.0 and MIT"
+description = ""
+categories = ["macro"]
+version = "0.1.0"
+authors = ["Utishnik"]
+edition = "2024"
+
+[features]
+default = ["std"]  #default std
+std = []  
+no_std = []
+
+[dependencies]
+obsidian_sync_lib = { path = "../..", default-features = false, features = ["debug"] }  
+
+[lib]
+name = "build_error_general"          
+path = "lib.rs"
