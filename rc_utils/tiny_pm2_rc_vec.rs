@@ -33,11 +33,11 @@ impl<T> RcVec<T> {
         self.inner.len()
     }
 
-    pub fn iter(&self) -> slice::Iter<'_,T> {
+    pub fn iter(&self) -> slice::Iter<'_, T> {
         self.inner.iter()
     }
 
-    pub fn make_mut(&mut self) -> RcVecMut<'_,T>
+    pub fn make_mut(&mut self) -> RcVecMut<'_, T>
     where
         T: Clone,
     {
@@ -46,8 +46,8 @@ impl<T> RcVec<T> {
         }
     }
 
-    pub fn get_mut(&mut self) -> Option<RcVecMut<'_,T>> {
-        let inner = Rc::get_mut(&mut self.inner)?;
+    pub fn get_mut(&mut self) -> Option<RcVecMut<'_, T>> {
+        let inner: &mut Vec<T> = Rc::get_mut(&mut self.inner)?;
         Some(RcVecMut { inner })
     }
 
@@ -55,7 +55,7 @@ impl<T> RcVec<T> {
     where
         T: Clone,
     {
-        let vec = if let Some(owned) = Rc::get_mut(&mut self.inner) {
+        let vec: Vec<T> = if let Some(owned) = Rc::get_mut(&mut self.inner) {
             mem::take(owned)
         } else {
             Vec::clone(&self.inner)
@@ -105,7 +105,7 @@ impl<'a, T> RcVecMut<'a, T> {
         self.inner.extend(iter);
     }
 
-    pub fn as_mut(&mut self) -> RcVecMut<T> {
+    pub fn as_mut(&mut self) -> RcVecMut<'_,T> {
         RcVecMut { inner: self.inner }
     }
 

@@ -21,7 +21,6 @@ pub mod stable_build_error {
     use proc_macro2::Span;
     use syn::DeriveInput;
     use syn::Error;
-    use syn::parse_macro_input;
 
     pub fn build_error_feature<U>(ast: &DeriveInput, message: U) -> Error
     where
@@ -48,10 +47,8 @@ pub mod stable_build_error {
 #[cfg(feature = "comp_err")]
 pub mod build_compile_error {
     use proc_macro2::TokenStream;
-    use syn::DeriveInput;
     use syn::Error;
     pub fn build_error(err: Error) -> TokenStream {
         err.to_compile_error().into()
     }
 }
-

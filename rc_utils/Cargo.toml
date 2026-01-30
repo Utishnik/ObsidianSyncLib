@@ -11,3 +11,8 @@ edition = "2024"
 [lib]
 name = "rc_vec_api"          
 path = "lib.rs"
+
+[features]
+tiny = []
+friendly = []
+default = ["tiny"]

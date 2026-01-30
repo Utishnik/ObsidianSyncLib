@@ -1,3 +1,4 @@
+use build_error_general_api::*;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use syn::DeriveInput;
@@ -5,7 +6,6 @@ use syn::Error;
 use syn::Lit;
 use syn::Meta;
 use syn::parse_macro_input;
-use build_error_general_api::*;
 
 macro_rules! bug_match {
     () => {
