@@ -15,4 +15,4 @@ path = "lib.rs"
 [features]
 tiny = []
 friendly = []
-default = ["tiny"]
+default = ["tiny","friendly"]

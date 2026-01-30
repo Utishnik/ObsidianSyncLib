@@ -19,6 +19,7 @@ pub mod unstable_build_error {
 pub mod stable_build_error {
     use core::fmt::Display;
     use proc_macro2::Span;
+    use proc_macro2::TokenStream;
     use syn::DeriveInput;
     use syn::Error;
 
@@ -27,6 +28,18 @@ pub mod stable_build_error {
         U: Display,
     {
         Error::new_spanned(ast, message)
+    }
+
+    pub fn empty_ast() -> TokenStream {
+        let empty_ast: TokenStream = TokenStream::new();
+        empty_ast
+    }
+
+    pub fn build_empty_ast_err<U>(message: U) -> Error
+    where
+        U: Display,
+    {
+        Error::new_spanned(empty_ast(), message)
     }
 
     pub fn build_position_error<U>(ast: &DeriveInput, message: U) -> Error

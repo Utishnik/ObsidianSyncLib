@@ -10,6 +10,8 @@ use std::path::Path;
 use std::rc::Rc;
 use std::slice::Iter;
 
+//todo альтернативная реализация на small vec и https://github.com/murarth/smallstr?tab=readme-ov-file
+
 // A duplicate of `collections::range::RangeArgument`, which is unstable.
 /// Argument for functions accepting a range
 pub trait RangeArgument<T> {

@@ -54,8 +54,7 @@ pub fn build_pos_error(ast: TokenStream) -> TokenStream {
     let first_val_downcast: Option<&String> = first_val_unwrap.downcast_ref::<String>();
     if first_val_downcast.is_none() {
         dbg!("please convert to string");
-        let empty: TokenStream = TokenStream::new();
-        return empty;
+        return build_error_general_api::stable_build_error::empty_ast().into();
     }
     let first_val_downcast_unwrap: &String = unsafe { first_val_downcast.unwrap_unchecked() };
     let res_err: Error =
@@ -66,7 +65,7 @@ pub fn build_pos_error(ast: TokenStream) -> TokenStream {
 #[cfg(feature = "comp_err")]
 #[proc_macro_derive(err_feature, attributes(msg))]
 pub fn build_error_feature(ast: TokenStream) -> TokenStream {
-    use core::any::{Any, TypeId};
+    use core::any::Any;
     let clone_ast: TokenStream = ast.clone();
     let message: DeriveInput = parse_macro_input!(clone_ast as DeriveInput);
     let mut attrl: Vec<Box<dyn Any>> = Vec::new();
@@ -104,8 +103,7 @@ pub fn build_error_feature(ast: TokenStream) -> TokenStream {
     let first_val_downcast: Option<&String> = first_val_unwrap.downcast_ref::<String>();
     if first_val_downcast.is_none() {
         dbg!("please convert to string");
-        let empty: TokenStream = TokenStream::new();
-        return empty;
+        return build_error_general_api::stable_build_error::empty_ast().into();
     }
     let first_val_downcast_unwrap: &String = unsafe { first_val_downcast.unwrap_unchecked() };
     let res_err: Error = stable_build_error::build_error_feature(&input, first_val_downcast_unwrap);

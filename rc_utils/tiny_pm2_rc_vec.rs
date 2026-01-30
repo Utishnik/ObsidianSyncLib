@@ -105,7 +105,7 @@ impl<'a, T> RcVecMut<'a, T> {
         self.inner.extend(iter);
     }
 
-    pub fn as_mut(&mut self) -> RcVecMut<'_,T> {
+    pub fn as_mut(&mut self) -> RcVecMut<'_, T> {
         RcVecMut { inner: self.inner }
     }
 
