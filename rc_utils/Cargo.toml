@@ -1,0 +1,13 @@
+[package]
+name = "rc_vec_api"
+description = "типо реализации rc_vec"
+repository = ""
+license = "MIT"
+categories = ["rc", "vec"]
+version = "0.5.0"
+authors = ["Utishnik"]
+edition = "2024"
+
+[lib]
+name = "rc_vec_api"          
+path = "lib.rs"

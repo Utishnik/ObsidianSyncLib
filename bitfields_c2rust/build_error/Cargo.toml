@@ -9,6 +9,7 @@ edition = "2024"
 
 [dependencies]
 #obsidian_sync_lib = { path = "../..", default-features = false, features = ["debug"] }  
+build_error_general_api = { path = "../build_error_general", features = ["stable","comp_err"] } 
 proc-macro2 = "=1.0.103"
 syn = { version = "=2.0.106", features = ["full"] }
 quote = "=1.0.40"

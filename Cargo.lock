@@ -90,6 +90,7 @@ dependencies = [
 name = "bitfield_c2rust_api_build_error"
 version = "0.1.0"
 dependencies = [
+ "build_error_general_api",
  "proc-macro2",
  "quote",
  "syn 2.0.106",
@@ -107,6 +108,16 @@ name = "bitflags"
 version = "2.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
+
+[[package]]
+name = "build_error_general_api"
+version = "0.1.0"
+dependencies = [
+ "obsidian_sync_lib",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+]
 
 [[package]]
 name = "bumpalo"
@@ -626,6 +637,10 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom 0.2.16",
 ]
+
+[[package]]
+name = "rc_vec_api"
+version = "0.5.0"
 
 [[package]]
 name = "regex"

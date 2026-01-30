@@ -1,5 +1,5 @@
 [package]
-name = "build_error_general"          
+name = "build_error_general_api"          
 license = "Apache 2.0 and MIT"
 description = ""
 categories = ["macro"]
@@ -8,13 +8,19 @@ authors = ["Utishnik"]
 edition = "2024"
 
 [features]
-default = ["std"]  #default std
 std = []  
 no_std = []
+unstable = []
+stable = []
+comp_err = []
+default = ["std","stable","comp_err"]  #default std
 
 [dependencies]
 obsidian_sync_lib = { path = "../..", default-features = false, features = ["debug"] }  
+proc-macro2 = "=1.0.103"
+syn = { version = "=2.0.106", features = ["full"] }
+quote = "=1.0.40"
 
 [lib]
-name = "build_error_general"          
+name = "build_error_general_api"          
 path = "lib.rs"
