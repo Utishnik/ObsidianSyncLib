@@ -40,6 +40,7 @@ members = ["ansicodes",
 "bitfields_c2rust/field_type",
 "bitfields_c2rust/build_error",
 "bitfields_c2rust/build_error_general",
+"validation_transcoding",
 "rc_utils/",
 ]
 

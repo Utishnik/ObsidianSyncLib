@@ -1,0 +1,11 @@
+[package]
+name = "validation_transcoding"          
+version = "0.1.0"
+edition = "2021"
+description = "API for interacting with two validation/transcoding backends"
+license = "MIT"
+repository = ""
+
+[lib]
+name = "validation_transcoding"          
+path = "src/lib.rs"

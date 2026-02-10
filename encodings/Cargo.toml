@@ -19,7 +19,6 @@ default = ["std", "unicode"]
 std = []
 arbitrary = ["dep:arbitrary"]
 
-
 unicode = [
   "unicode-age",
   "unicode-bool",
