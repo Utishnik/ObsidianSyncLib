@@ -18,7 +18,8 @@ bitfield_c2rust_api_build_error = { path = "build_error", features = ["stable","
 [features]
 unstable = []
 stable = []
-default = ["stable"]
+default = ["stable","check_collision"]
+check_collision = []
 
 [lib]
 proc-macro = true

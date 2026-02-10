@@ -71,7 +71,7 @@ fn parse_bitfield_attr(
             } else if meta.path.is_ident("ty") {
                 ty = Some(value);
             } else if meta.path.is_ident("bits") {
-                bits = Some(value);
+                bits = Some(value);///////////////////////////////этот проверять
                 bits_span = Some(meta.path.span());
             }
         }
@@ -84,7 +84,7 @@ fn parse_bitfield_attr(
     }
 
     if name.is_none() || ty.is_none() || bits.is_none() {
-        let mut missing_fields = Vec::new();
+        let mut missing_fields: Vec<&str> = Vec::new();
 
         if name.is_none() {
             missing_fields.push("name");
@@ -118,7 +118,6 @@ fn filter_field_build_error(attr: &Attribute) {
     //bitfield_c2rust_api_build_error::
 }
 
-//todo нужно унврапы убрать
 fn filter_and_parse_fields(field: &Field) -> Vec<Result<BFFieldAttr, Error>> {
     let attrs: Vec<_> = field
         .attrs
