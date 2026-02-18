@@ -42,6 +42,8 @@ members = ["ansicodes",
 "bitfields_c2rust/build_error_general",
 "validation_transcoding",
 "rc_utils/",
+"debug_more_asserts",
+"debug_more_asserts/std_test_asserts",
 ]
 
 resolver = "2"

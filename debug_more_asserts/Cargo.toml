@@ -1,0 +1,13 @@
+[package]
+name = "more_debug_asserts"
+description = ""
+repository = ""
+license = "Unlicense OR MIT OR Apache-2.0 OR CC0-1.0"
+categories = ["asserts", "debug"]
+version = "0.5.0"
+authors = ["Utishnik + Thom Chiovoloni <chiovolonit@gmail.com>"]
+edition = "2021"
+
+[lib]
+name = "more_debug_asserts"          
+path = "src/lib.rs"

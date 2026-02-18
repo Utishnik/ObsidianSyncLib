@@ -71,7 +71,7 @@ fn parse_bitfield_attr(
             } else if meta.path.is_ident("ty") {
                 ty = Some(value);
             } else if meta.path.is_ident("bits") {
-                bits = Some(value);///////////////////////////////этот проверять
+                bits = Some(value); ///////////////////////////////этот проверять
                 bits_span = Some(meta.path.span());
             }
         }

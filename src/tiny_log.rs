@@ -1,4 +1,5 @@
 //TODO: ЗАМЕНИТЬ АНСИ ЧЕРЕЗ WRITE НА ЛИБУ
+//TODO https://github.com/knurling-rs/defmt/tree/main
 
 pub use serde_json;
 use std::io::Write;
