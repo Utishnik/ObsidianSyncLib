@@ -1,4 +1,4 @@
-use more_debug_asserts::inner;
+use more_debug_asserts::inner::*;
 use obsidian_sync_lib::debug_eprintln;
 use core::fmt;
 
@@ -10,7 +10,7 @@ pub fn not_panic_assert_failed_impl(
     right: &dyn fmt::Debug,
     ty: AssertType,
     msg: Option<fmt::Arguments<'_>>,
-) -> ! {
+){
     let compare: &str = match ty {
         AssertType::Lt => "<",
         AssertType::Gt => ">",
@@ -23,9 +23,9 @@ pub fn not_panic_assert_failed_impl(
             compare, left, right, msg,
         );
     } else {
-        panic!(
-            "assertion failed: `(left {} right)`\n  left: `{:?}`,\n right: `{:?}`",
-            compare, left, right,
+        debug_eprintln!(
+            "assertion failed: `(left {} right)`\n  left: `{:?}`,\n right: `{:?}`: {}",
+            compare, left, right, "",
         );
     }
 }
