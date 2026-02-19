@@ -294,6 +294,39 @@ macro_rules! debug_assert_lt {
     };
 }
 
+///TODO DOC
+#[macro_export]
+macro_rules! assert_matches {
+    ($value:expr, $pattern:pat) => {
+        $crate::assert_matches!($value, $pattern,)
+    };
+    ($value:expr, $pattern:pat, ) => {
+        match $value {
+            $pattern => (),
+            ref value => {
+                $crate::__private::assert_failed_nomsg(
+                    value,
+                    &$crate::__core::stringify!($pattern),
+                    $crate::__private::AssertType::Matches,
+                );
+            }
+        }
+    };
+    ($value:expr, $pattern:pat, $($msg_args:tt)+) => {
+        match $value {
+            $pattern => (),
+            ref value => {
+                $crate::__private::assert_failed_msg(
+                    value,
+                    &$crate::__core::stringify!($pattern),
+                    $crate::__private::AssertType::Matches,
+                    $crate::__core::format_args!($($msg_args)+),
+                );
+            }
+        }
+    };
+}
+
 /// Same as [`assert_gt!`] in builds with debug assertions enabled, and a no-op
 /// otherwise.
 ///

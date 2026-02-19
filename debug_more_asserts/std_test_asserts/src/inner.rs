@@ -1,6 +1,6 @@
 use core::fmt;
 use more_debug_asserts::inner::*;
-use obsidian_sync_lib::{debug::debug_and_test_utils::Colors, debug_eprintln,debug_println};
+use obsidian_sync_lib::{debug::debug_and_test_utils::Colors, debug_eprintln, debug_println};
 //TODO нужно будет все ассерты перекопировать но с debug.rs подобным выводом и форматированием
 #[cold]
 #[track_caller]
@@ -16,6 +16,7 @@ pub fn not_panic_assert_failed_impl(
         AssertType::Gt => ">",
         AssertType::Le => "<=",
         AssertType::Ge => ">=",
+        AssertType::Matches => todo!(),
     };
     obsidian_sync_lib::debug::debug_and_test_utils::set_color_eprint(Colors::Red);
     if let Some(msg) = msg {
@@ -52,6 +53,7 @@ pub fn not_panic_assert_successfully_impl(
         AssertType::Gt => ">",
         AssertType::Le => "<=",
         AssertType::Ge => ">=",
+        AssertType::Matches => todo!(),
     };
     obsidian_sync_lib::debug::debug_and_test_utils::set_color_print(Colors::Green);
     if let Some(msg) = msg {
@@ -73,7 +75,6 @@ pub fn not_panic_assert_successfully_impl(
     }
     obsidian_sync_lib::debug::debug_and_test_utils::reset_color_print();
 }
-
 
 #[macro_export]
 macro_rules! more_test_assert_templ {
@@ -109,12 +110,12 @@ macro_rules! more_test_assert_templ {
 
                 if *left_val == *right_val
                 {
-                    println!();
-                    println!("{}══════════════════════════════════════════════════════════{}", RED, RESET);
-                    println!("{} ✗ ТЕСТ НЕ ПРОЙДЕН{}", RED, RESET);
+                    eprintln!();
+                    eprintln!("{}══════════════════════════════════════════════════════════{}", RED, RESET);
+                    eprintln!("{} ✗ ТЕСТ НЕ ПРОЙДЕН{}", RED, RESET);
                     not_panic_assert_failed_impl(left_val, right_val,$ty,$msg);
-                    println!("{} Получено:  {:?}{}", RED, left_val, RESET);
-                    println!("{}══════════════════════════════════════════════════════════{}\n", RED, RESET);
+                    eprintln!("{} Получено:  {:?}{}", RED, left_val, RESET);
+                    eprintln!("{}══════════════════════════════════════════════════════════{}\n", RED, RESET);
                     result_test=false;
                     //todo чекнуть почему при eprintln! может ломматься вывод
                 }
@@ -124,6 +125,7 @@ macro_rules! more_test_assert_templ {
                     println!("{}══════════════════════════════════════════════════════════{}", GREEN, RESET);
                     println!("{} ✔ ТЕСТ ПРОЙДЕН{}", GREEN, RESET);
                     println!("{} Результат не должен был равен: {:?}{}", YELLOW, right_val, RESET);
+                    not_panic_assert_successfully_impl(left_val, right_val,$ty,$msg);
                     println!("{} Получено:  {:?}{}", GREEN, left_val, RESET);
                     println!("{}══════════════════════════════════════════════════════════{}\n", GREEN, RESET);
                     result_test=true;

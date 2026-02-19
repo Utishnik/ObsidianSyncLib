@@ -13,6 +13,7 @@ pub enum AssertType {
     Gt,
     Le,
     Ge,
+    Matches,
     // TODO: `matches`? `contains`? https://chat.deepseek.com/share/ttdjpdcpk1hzwxzp43, rule match?
 }
 
@@ -51,6 +52,7 @@ fn assert_failed_impl(
         AssertType::Gt => ">",
         AssertType::Le => "<=",
         AssertType::Ge => ">=",
+        AssertType::Matches => todo!(),
     };
     if let Some(msg) = msg {
         panic!(
