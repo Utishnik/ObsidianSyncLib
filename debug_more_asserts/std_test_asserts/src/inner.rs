@@ -1,6 +1,6 @@
 use core::fmt;
 use more_debug_asserts::inner::*;
-use obsidian_sync_lib::debug_eprintln;
+use obsidian_sync_lib::{debug::debug_and_test_utils::Colors, debug_eprintln,debug_println};
 //TODO нужно будет все ассерты перекопировать но с debug.rs подобным выводом и форматированием
 #[cold]
 #[track_caller]
@@ -17,6 +17,7 @@ pub fn not_panic_assert_failed_impl(
         AssertType::Le => "<=",
         AssertType::Ge => ">=",
     };
+    obsidian_sync_lib::debug::debug_and_test_utils::set_color_eprint(Colors::Red);
     if let Some(msg) = msg {
         debug_eprintln!(
             "assertion failed: `(left {} right)`\n  left: `{:?}`,\n right: `{:?}`: {}",
@@ -34,11 +35,49 @@ pub fn not_panic_assert_failed_impl(
             "",
         );
     }
+    obsidian_sync_lib::debug::debug_and_test_utils::reset_color_eprint();
 }
+
+#[cold]
+#[track_caller]
+#[inline(never)]
+pub fn not_panic_assert_successfully_impl(
+    left: &dyn fmt::Debug,
+    right: &dyn fmt::Debug,
+    ty: AssertType,
+    msg: Option<fmt::Arguments<'_>>,
+) {
+    let compare: &str = match ty {
+        AssertType::Lt => "<",
+        AssertType::Gt => ">",
+        AssertType::Le => "<=",
+        AssertType::Ge => ">=",
+    };
+    obsidian_sync_lib::debug::debug_and_test_utils::set_color_print(Colors::Green);
+    if let Some(msg) = msg {
+        debug_println!(
+            "assertion successfully: `(left {} right)`\n  left: `{:?}`,\n right: `{:?}`: {}",
+            compare,
+            left,
+            right,
+            msg,
+        );
+    } else {
+        debug_println!(
+            "assertion successfully: `(left {} right)`\n  left: `{:?}`,\n right: `{:?}`: {}",
+            compare,
+            left,
+            right,
+            "",
+        );
+    }
+    obsidian_sync_lib::debug::debug_and_test_utils::reset_color_print();
+}
+
 
 #[macro_export]
 macro_rules! more_test_assert_templ {
-    ($left:expr,$right:expr,&type_tst:expr) => {
+    ($left: expr,$right: expr,&type_tst: expr,$ty: expr,$msg: expr) => {
         match (&$left, &$right)
         {
             (left_val, right_val) =>
@@ -53,7 +92,7 @@ macro_rules! more_test_assert_templ {
                 use $crate::debug::debug_and_test_utils::get_count_type_test;
                 use $crate::debug::debug_and_test_utils::add_test;//fix
                 use std::sync::atomic::Ordering;
-                let last_test_option: Option<Test> = get_last_test();
+                let last_test_option: Option<Test> = obsidian_sync_lib::debug::debug_and_test_utils::get_last_test();
                 let mut test: Test;
                 match last_test_option
                 {
@@ -73,8 +112,7 @@ macro_rules! more_test_assert_templ {
                     println!();
                     println!("{}══════════════════════════════════════════════════════════{}", RED, RESET);
                     println!("{} ✗ ТЕСТ НЕ ПРОЙДЕН{}", RED, RESET);
-                    not_panic_assert_failed_impl(left_val, right_val,...);//todo
-                    //println!("{} Результат не должен был равен: {:?}{}", YELLOW, right_val, RESET);//todo not_panic_assert_failed_impl
+                    not_panic_assert_failed_impl(left_val, right_val,$ty,$msg);
                     println!("{} Получено:  {:?}{}", RED, left_val, RESET);
                     println!("{}══════════════════════════════════════════════════════════{}\n", RED, RESET);
                     result_test=false;
@@ -91,8 +129,8 @@ macro_rules! more_test_assert_templ {
                     result_test=true;
                 }
                 test.result=result_test;
-                test.typetest=get_count_type_test();//fix
-                add_test(test);
+                test.typetest=obsidian_sync_lib::debug::debug_and_test_utils::get_count_type_test()
+                obsidian_sync_lib::debug::debug_and_test_utils::add_test(test);
             }
         }
     };
