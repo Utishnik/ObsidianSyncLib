@@ -56,8 +56,6 @@ opt-level = "z"
 lto = true                # полная LTO
 codegen-units = 1         # максимум оптимизации
 strip = "symbols"         # удаляет все символы
-panic = "abort"           # вместо unwinding
-# Убираем отладочную информацию
 debug = false
 debug-assertions = false
 
